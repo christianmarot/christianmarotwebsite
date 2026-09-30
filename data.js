@@ -22,6 +22,7 @@ const PROJECTS = [
     role: "Cinematographer",
     date: "2026",
     image: "images/wild-london-bbc-attenborough.jpg",
+    focus: "56%",   // which part of the poster shows when the tab is closed (0% = top, 100% = bottom)
     description: "Presented by David Attenborough and produced by Passion Planet. Broadcast on New Year’s Day 2026, with 6.6 million viewers over January — nominated for a Grierson at the British Documentary Awards 2026."
   },
   {
@@ -30,6 +31,7 @@ const PROJECTS = [
     role: "Cinematographer",
     date: "TBC",
     image: "images/animal-oddballs-daringly-different.jpg",
+    focus: "42%",   // which part of the poster shows when the tab is closed (0% = top, 100% = bottom)
     description: "Animal Oddballs — narrated by Ryan Reynolds and nominated for a Cinematography award at Jackson Wild, August 2026. Coming soon on National Geographic — Disney+."
   },
   {
@@ -38,6 +40,7 @@ const PROJECTS = [
     role: "Drone Operator / AC",
     date: "2026",
     image: "images/surviving-earth-nbc.jpg",
+    focus: "8%",   // which part of the poster shows when the tab is closed (0% = top, 100% = bottom)
     description: "Surviving Earth — an eight-part docuseries from the creators of the original ‘Walking with Dinosaurs’. Premiered on NBC, June 2026."
   },
   {
@@ -46,6 +49,7 @@ const PROJECTS = [
     role: "First AC",
     date: "2025",
     image: "images/nightmares-of-nature-netflix.jpg",
+    focus: "20%",   // which part of the poster shows when the tab is closed (0% = top, 100% = bottom)
     description: "Nightmares of Nature — a Blumhouse production for Netflix, narrated by Maya Hawke."
   }
 ];
@@ -75,6 +79,17 @@ const DOCUMENTARIES = [
 ];
 
 /* ---------- OTHER WORK (each opens its own page: work.html?s=<key>) ----------
+   Pages are built from "projects", each a row of blocks. Block types:
+     text        { type:"text", text:["para", …] }
+     titletext   { type:"titletext", title:"…", text:["para", …] }
+     feature     { type:"feature", video:"clips/…mp4", poster:"clips/…jpg", audio:true, once:true }
+     secondary   { type:"secondary", videos:[ {video, poster} ×4 ] }
+     hvideo      { type:"hvideo", video:"clips/…mp4" }  (horizontal 16:9)
+     hphoto      { type:"hphoto", image:"images/…jpg" } (horizontal)
+     fphoto      { type:"fphoto", image:"images/…jpg" } (featured vertical)
+     sphoto      { type:"sphoto", images:[ "…", ×4 ] }  (4 vertical)
+   audio:true = has a sound button; once:true = plays once (with sound if allowed), then shows Replay.
+   Pages without "projects" still use the simple "tiles" list.
    hero:  the full-screen video behind the page title (a Vimeo number),
           or leave it out to use the cover image instead.
    tiles: shown as 9:16 tiles. Each is one of
@@ -84,7 +99,45 @@ const OTHER_WORK = {
     title: "Restaurants", group: "Commercial",
     cover: "images/commercial-restaurant-radish-harvest.jpg",
     hero: VIDEOS.restaurants,
-    tiles: [ { image: "images/commercial-restaurant-radish-harvest.jpg" } ]
+    heroZoom: 1.07,          // enlarges the opening video slightly to hide thin black bars (17:9 exported as 16:9)
+    projects: [
+      {
+        client: "Simon Rogan", title: "Aulis Phuket",
+        blocks: [
+          { type: "feature", video: "", poster: "", audio: true, once: true, note: "Aulis promo — needs a smaller export (see chat)" },
+          { type: "titletext", title: "Aulis Phuket", text: [
+            "Aulis Phuket is a 15-seat chef’s table restaurant set on the white sands of Natai Beach, on Thailand’s Andaman coast. It opened in December 2023 as the first Thai venture from Simon Rogan, the chef behind the three-Michelin-star L’Enclume in the Lake District.",
+            "It brings his farm-to-fork approach to Southeast Asia. Guests sit directly in front of the open kitchen and watch the chefs cook and plate a multi-course tasting menu. The menu is led by what’s available locally, and more than 95% of the ingredients come from nearby farmers, fishermen and growers.",
+            "I was brought in to help tell the Aulis story. That meant capturing Simon Rogan’s philosophy, the relationships with local producers behind every plate, and the close, theatrical feel of the chef’s table. The films follow the journey from farm to fork, from the growers and their produce to the precision of the kitchen and the final dish. Shortly after the project was delivered, Aulis Phuket received its first Michelin star, less than a year after opening."
+          ] },
+          { type: "secondary", videos: [
+            { video: "clips/restaurants/aulis-michelin-star.mp4", poster: "clips/restaurants/aulis-michelin-star.jpg" },
+            { video: "clips/restaurants/aulis-fish.mp4",          poster: "clips/restaurants/aulis-fish.jpg" },
+            { video: "clips/restaurants/aulis-salad.mp4",         poster: "clips/restaurants/aulis-salad.jpg" },
+            { video: "clips/restaurants/aulis-fire.mp4",          poster: "clips/restaurants/aulis-fire.jpg" }
+          ] }
+        ]
+      },
+      {
+        client: "Simon Rogan", title: "ION Harbour",
+        blocks: [
+          { type: "feature", video: "clips/restaurants/ion-harbour-simon-rogan.mp4", poster: "clips/restaurants/ion-harbour-simon-rogan.jpg", audio: true, once: true },
+          { type: "titletext", title: "ION Harbour", text: [
+            "ION Harbour by Simon Rogan sits overlooking Malta’s Grand Harbour, Valletta. It opened in November 2020 and won its first Michelin star less than six months later. In April 2024 it became the first restaurant in Malta to hold two Michelin stars.",
+            "ION Harbour takes the farm-to-fork approach Rogan developed at L’Enclume in the Lake District and applies it to the Mediterranean. Its seasonal tasting menu depends on close relationships with Maltese farmers, fishermen and artisans, and it is shaped by whatever the island is producing at its best.",
+            "I travelled to Malta to make a series of short videos on the subject of seasonality, hyper-locality and sustainability for ION’s social media accounts. Over the course of a week, I followed Simon and his team as they visited the local producers who are at the heart of the menu. We filmed olive oil, honey, micro-herbs and vegetables at their source, then followed each ingredient into the kitchen. There we watched the team turn it into a dish, from preparation through to the final plate."
+          ] },
+          { type: "feature", video: "clips/restaurants/ion-farm-to-table.mp4", poster: "clips/restaurants/ion-farm-to-table.jpg" },
+          { type: "feature", video: "clips/restaurants/ion-nature.mp4",        poster: "clips/restaurants/ion-nature.jpg" },
+          { type: "secondary", videos: [
+            { video: "clips/restaurants/ion-carob.mp4",       poster: "clips/restaurants/ion-carob.jpg" },
+            { video: "clips/restaurants/ion-simon-malta.mp4", poster: "clips/restaurants/ion-simon-malta.jpg" },
+            { video: "clips/restaurants/ion-olive-oil.mp4",   poster: "clips/restaurants/ion-olive-oil.jpg" },
+            { video: "clips/restaurants/ion-microherbs.mp4",  poster: "clips/restaurants/ion-microherbs.jpg" }
+          ] }
+        ]
+      }
+    ]
   },
   hotels: {
     title: "Hotels", group: "Commercial",

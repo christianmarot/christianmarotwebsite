@@ -19,7 +19,7 @@
   <a class="logo" href="index.html" aria-label="Christian Marot — home"><img src="images/logo-cm.png" alt="Christian Marot logo"></a>
   <nav class="socials" aria-label="Social">
     <a href="https://www.instagram.com/christianmarot/">Instagram</a>
-    <a href="https://vimeo.com/user8490575">Vimeo</a>
+    <a href="https://vimeo.com/christianmarot">Vimeo</a>
     <a href="https://www.linkedin.com/in/christian-marot-9525902a/">LinkedIn</a>
     <a href="https://www.imdb.com/name/nm6849161/">IMDb</a>
   </nav>
@@ -39,23 +39,28 @@
         <a href="work.html?s=fineart"><span class="t">Fine Art</span><span class="m">Exhibitions · Projects</span></a>
       </div></div>
     </li>
-    <li><a href="index.html#diary"><span class="t">Shoot Diary</span><span class="m">Credits &amp; current work</span></a></li>
+    <li><a href="index.html#credits"><span class="t">Credits</span><span class="m">Released &amp; current work</span></a></li>
     <li><a href="index.html#contact"><span class="t">Contact</span><span class="m">CV · Enquiries</span></a></li>
   </ul>
-  <div class="m-socials"><a href="https://www.instagram.com/christianmarot/">Instagram</a><a href="https://vimeo.com/user8490575">Vimeo</a><a href="https://www.linkedin.com/in/christian-marot-9525902a/">LinkedIn</a><a href="https://www.imdb.com/name/nm6849161/">IMDb</a></div>
+  <div class="m-socials"><a href="https://www.instagram.com/christianmarot/">Instagram</a><a href="https://vimeo.com/christianmarot">Vimeo</a><a href="https://www.linkedin.com/in/christian-marot-9525902a/">LinkedIn</a><a href="https://www.imdb.com/name/nm6849161/">IMDb</a></div>
 </div>
 
-<div class="wk-title" aria-hidden="true"><div class="g" data-wk="group"></div><div class="n" data-wk="title"></div></div>
+<div class="wk-title" aria-hidden="true"><div class="sw g" id="wtG"><span></span></div><div class="sw n" id="wtN"><span></span></div></div>
 
 <section class="hero wk-hero" aria-label="Featured film">
   <div class="vbg" id="wkHeroBg"></div>
   <div class="fade"></div>
   <div class="title"><div class="g" data-wk="group"></div><h1 data-wk="title"></h1></div>
-  <a class="scroll-cue" href="#wkStage" style="position:absolute;right:var(--gut);bottom:52px;z-index:2"><span></span>Scroll</a>
+  <div class="pc" id="pc" hidden>
+    <button type="button" id="pcPlay" aria-label="Pause"><svg viewBox="0 0 24 24"><path id="pcPlayIcon" d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg></button>
+    <div class="bar" id="pcBar" role="slider" aria-label="Seek" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0"><i></i><b id="pcFill"></b><s id="pcKnob"></s></div>
+    <span class="tm" id="pcTime">0:00 / 0:00</span>
+    <button type="button" id="pcMute" aria-label="Turn sound on"><svg viewBox="0 0 24 24"><path id="pcMuteIcon" d="M4 9v6h4l5 4V5L8 9H4zm12.6 3 2.7-2.7-1.1-1.1-2.7 2.7-2.7-2.7-1.1 1.1 2.7 2.7-2.7 2.7 1.1 1.1 2.7-2.7 2.7 2.7 1.1-1.1z"/></svg></button>
+  </div>
 </section>
 
 <main class="wk-stage" id="wkStage">
-  <div class="wk-pin"><div class="wk-grid" id="wkGrid"></div></div>
+  <div class="wk-pin" id="wkPin"></div>
 </main>
 
 <nav class="wk-foot" aria-label="Other work">
@@ -69,6 +74,7 @@
   <div class="base" style="margin-top:40px"><span>© 2026 Christian Marot</span><a href="index.html">Home</a></div>
 </footer>
 
+<script src="https://player.vimeo.com/api/player.js"></script>
 <script src="main.js"></script>
 </body>
 </html>
