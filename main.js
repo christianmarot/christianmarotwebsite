@@ -104,8 +104,13 @@
   const photo = $('.bio .photo');
   if (!reduce && (wordEls.length || photo)) {
     const upd = () => {
-      const line = innerHeight * 0.55;   // words light once they pass a little above the middle of the screen
-      wordEls.forEach(w => w.classList.toggle('lit', w.getBoundingClientRect().top < line));
+      // words light one by one, left to right, as each line rises past a point just above the middle of the screen
+      const line = innerHeight * 0.55;
+      wordEls.forEach(w => {
+        const r = w.getBoundingClientRect(), pr = w.parentElement.getBoundingClientRect();
+        const lh = r.height * 1.3, along = (r.left - pr.left) / Math.max(1, pr.width);
+        w.classList.toggle('lit', r.top + along * lh * 1.6 < line);
+      });
       if (photo) {
         const r = photo.getBoundingClientRect();
         const p = clamp((r.top + r.height / 2 - innerHeight / 2) / innerHeight, -1, 1);
@@ -221,17 +226,17 @@
       });
     };
     const more = $('#boardMore'); let mode = 'dep', all = false; const LIMIT = 8;
-    const LABEL = { dep: 'Released', arr: 'In production · Coming soon · Under NDA', all: 'All projects' };
+    const LABEL = { dep: 'Released', arr: 'In production · Coming soon · Under NDA' };
     const render = () => {
-      const rows = DIARY.filter(r => mode === 'all' || (cls(r.status) === 'rel') === (mode === 'dep'));
+      const rows = DIARY.filter(r => (cls(r.status) === 'rel') === (mode === 'dep'));
       const shown = all ? rows : rows.slice(0, LIMIT);
       $('#boardLabel').textContent = LABEL[mode];
       const cell = t => `<span class="fl" data-t="${esc(t)}">${esc(t)}</span>`;
       rowsEl.innerHTML = shown.length ? shown.map(r => `<tr>
-          <td>${cell(r.dates)}</td><td class="pj">${cell(r.project)}</td>
-          <td class="hide-s">${cell(r.for)}</td><td class="hide-s">${cell(r.role)}</td>
+          <td class="dt">${cell(r.dates)}</td><td class="pj">${cell(r.project)}</td><td class="ds${!r.dest || r.dest === '—' ? ' none' : ''}">${cell(r.dest || '—')}</td>
+          <td class="fo">${cell(r.for)}</td><td class="ro">${cell(r.role)}</td>
           <td class="st ${cls(r.status)}"><span>${esc(r.status)}</span></td></tr>`).join('')
-        : `<tr><td colspan="5" class="empty">No ${mode === 'dep' ? 'departures' : 'arrivals'} listed.</td></tr>`;
+        : `<tr><td colspan="6" class="empty">No ${mode === 'dep' ? 'departures' : 'arrivals'} listed.</td></tr>`;
       flapRows();
       if (more) { more.hidden = rows.length <= LIMIT; more.textContent = all ? 'Show fewer ↑' : `Show all ${rows.length} ↓`; }
     };
@@ -256,6 +261,7 @@
   document.title = `${S.title} — Christian Marot, Cinematographer`;
   $$('[data-wk="group"]').forEach(e => e.textContent = S.group);
   $$('[data-wk="title"]').forEach(e => e.textContent = S.title);
+  const fv = $('#wkFv'); if (fv && S.hero && S.heroTitle) { fv.textContent = `Featured video: ${S.heroTitle}`; fv.hidden = false; }
   const keys = Object.keys(OTHER_WORK), ix = keys.indexOf(key);
   const nx = keys[(ix + 1) % keys.length], pv = keys[(ix - 1 + keys.length) % keys.length];
   $('#wkNext').href = `work.html?s=${nx}`; $('#wkNext').textContent = `${OTHER_WORK[nx].title} →`;

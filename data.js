@@ -29,7 +29,7 @@ const PROJECTS = [
     title: "Animal Oddballs",
     broadcaster: "National Geographic / Disney+",
     role: "Cinematographer",
-    date: "TBC",
+    date: "Coming Soon",
     image: "images/animal-oddballs-daringly-different.jpg",
     focus: "42%",   // which part of the poster shows when the tab is closed (0% = top, 100% = bottom)
     description: "Animal Oddballs — narrated by Ryan Reynolds and nominated for a Cinematography award at Jackson Wild, August 2026. Coming soon on National Geographic — Disney+."
@@ -72,9 +72,9 @@ const DOCUMENTARIES = [
     description: "Prince William’s star-studded awards ceremony honours five environmental solutions with £1 million each to further their work helping to restore and protect our planet. The broadcast spotlighted fifteen incredible global finalists across five distinct categories — including protecting nature, cleaning our air, reviving oceans, building a waste-free world, and fixing our climate. Interspersed with these inspiring documentary-style profiles, the programme features a special address from Sir David Attenborough alongside world-class musical performances by Billie Eilish, Annie Lennox & Ellie Goulding."
   },
   {
-    title: "Dinner to Save the World", for: "TBC", role: "Camera Operator", date: "TBC",
+    title: "Dinner to Save the World", for: "PBS", role: "Camera Operator / Focus Puller", date: "2026",
     image: "images/dinner-to-save-the-world.jpg",
-    description: "Project under NDA, more info coming soon."
+    description: "Dinner to Save the World (PBS), presented by M. Sanjayan and Sam Kass, looks at how the global food industry contributes to climate change — and how changing the way we farm, process and eat food can help build a more sustainable future."
   }
 ];
 
@@ -99,12 +99,13 @@ const OTHER_WORK = {
     title: "Restaurants", group: "Commercial",
     cover: "images/commercial-restaurant-radish-harvest.jpg",
     hero: VIDEOS.restaurants,
+    heroTitle: "Aulis Phuket Promo",
     heroZoom: 1.07,          // enlarges the opening video slightly to hide thin black bars (17:9 exported as 16:9)
     projects: [
       {
         client: "Simon Rogan", title: "Aulis Phuket",
         blocks: [
-          { type: "feature", video: "", poster: "", audio: true, once: true, note: "Aulis promo — needs a smaller export (see chat)" },
+          { type: "feature", video: "clips/restaurants/aulis-promo.mp4", poster: "clips/restaurants/aulis-promo.jpg", audio: true, once: true },
           { type: "titletext", title: "Aulis Phuket", text: [
             "Aulis Phuket is a 15-seat chef’s table restaurant set on the white sands of Natai Beach, on Thailand’s Andaman coast. It opened in December 2023 as the first Thai venture from Simon Rogan, the chef behind the three-Michelin-star L’Enclume in the Lake District.",
             "It brings his farm-to-fork approach to Southeast Asia. Guests sit directly in front of the open kitchen and watch the chefs cook and plate a multi-course tasting menu. The menu is led by what’s available locally, and more than 95% of the ingredients come from nearby farmers, fishermen and growers.",
@@ -143,6 +144,7 @@ const OTHER_WORK = {
     title: "Hotels", group: "Commercial",
     cover: "images/commercial-hotel-suite.jpg",
     hero: VIDEOS.hotels,
+    heroTitle: "Iniala Valletta",
     tiles: [ { image: "images/commercial-hotel-suite.jpg" } ]
   },
   property: {
@@ -154,6 +156,7 @@ const OTHER_WORK = {
     title: "Editorial", group: "The New York Times",
     cover: "images/editorial-fashion-hillside.jpg",
     hero: VIDEOS.editorial,
+    heroTitle: "The New York Times — Departures",
     tiles: [ { image: "images/editorial-fashion-hillside.jpg" } ]
   },
   fineart: {
@@ -163,35 +166,51 @@ const OTHER_WORK = {
   }
 };
 
-/* ---------- SHOOT DIARY (departures / arrivals board) ----------
+/* ---------- CREDITS (departures / arrivals board) ----------
    status: "Released"                                  → Departures
            "In production", "Under NDA", "Coming soon" → Arrivals
-   Newest first. After each shoot, copy a line and edit it.        */
-const LAST_UPDATED = "September 2026";
+   Newest first. After each shoot, copy a line and edit it.
+   NOTE: projects that are condensed on the CV (Day of the Camel, Dinner to Save
+   the World, Planet Pet …) are listed here shoot by shoot — keep them split.   */
+const LAST_UPDATED = "October 2026";
 const DIARY = [
-  { dates: "Nov 2025 – Mar 2026",  project: "Day of the Camel",         for: "The Edge",                               role: "Cinematographer",                 status: "Under NDA" },
-  { dates: "TBC",                  project: "Dinner to Save the World", for: "TBC",                                    role: "Camera Operator",                 status: "Under NDA" },
-  { dates: "Sept – Oct 2025",      project: "Animal Oddballs",          for: "Wildstar · Nat Geo / Disney+",           role: "Cinematographer",                 status: "Coming soon" },
-  { dates: "May 2025",             project: "Home",                     for: "BBC NHU · National Geographic",          role: "Cinematographer",                 status: "Coming soon" },
-  { dates: "Apr – Nov 2025",       project: "Wild London",              for: "Passion Planet · BBC",                   role: "Cinematographer",                 status: "Released" },
-  { dates: "Feb – Mar 2025",       project: "Animal Oddballs",          for: "Wildstar · Nat Geo / Disney+",           role: "Focus Puller / Time-lapse / Drone", status: "Coming soon" },
-  { dates: "Jan – Feb 2025",       project: "Animal Oddballs",          for: "Wildstar · Nat Geo / Disney+",           role: "Focus Puller / Second Camera",    status: "Coming soon" },
-  { dates: "Dec 2024",             project: "Nightmares of Nature",     for: "Plimsoll · Netflix",                     role: "First AC",                        status: "Released" },
-  { dates: "Oct – Nov 2024",       project: "Animal Oddballs",          for: "Wildstar · Nat Geo / Disney+",           role: "Focus Puller / Time-lapse / Drone", status: "Coming soon" },
-  { dates: "Sept – Oct 2024",      project: "Nightmares of Nature",     for: "Plimsoll · Netflix",                     role: "First AC",                        status: "Released" },
-  { dates: "Feb 2024",             project: "Sentient",                 for: "Wildstar · Nat Geo / Disney+",           role: "Cinematographer",                 status: "Coming soon" },
-  { dates: "Nov 2023",             project: "Human",                    for: "BBC",                                    role: "First AC / Drone Operator",       status: "Released" },
-  { dates: "Oct 2023",             project: "Sentient",                 for: "Wildstar · Nat Geo / Disney+",           role: "Second Camera / AC",              status: "Coming soon" },
-  { dates: "Sept – Oct 2023",      project: "Sentient",                 for: "Wildstar · Nat Geo / Disney+",           role: "Second Camera / Drone Operator",  status: "Coming soon" },
-  { dates: "Aug 2023",             project: "Sentient",                 for: "Wildstar · Nat Geo / Disney+",           role: "Cinematographer",                 status: "Coming soon" },
-  { dates: "Jul 2023",             project: "Underdogs",                for: "Wildstar · Nat Geo",                     role: "Second Camera / AC",              status: "Released" },
-  { dates: "Jun 2023",             project: "Sentient",                 for: "Wildstar · Nat Geo / Disney+",           role: "Cinematographer",                 status: "Coming soon" },
-  { dates: "May 2023",             project: "Surviving Earth",          for: "Loud Minds · NBC / Peacock",             role: "Drone Operator / AC",             status: "Released" },
-  { dates: "Apr 2023",             project: "Sentient",                 for: "Wildstar · Nat Geo / Disney+",           role: "Second Camera / AC",              status: "Coming soon" },
-  { dates: "Jan – Feb 2023",       project: "Surviving Earth",          for: "Loud Minds · NBC / Peacock",             role: "Drone Operator / AC",             status: "Released" },
-  { dates: "Oct 2022",             project: "Sentient",                 for: "Wildstar · Nat Geo / Disney+",           role: "AC",                              status: "Coming soon" },
-  { dates: "Aug – Sept 2022",      project: "Sentient",                 for: "Wildstar · Nat Geo / Disney+",           role: "Cinematographer",                 status: "Coming soon" },
-  { dates: "Mar 2022 –",           project: "The Danube Delta",         for: "Razorbill Films · NHK",                  role: "Shooting AP",                     status: "Released" },
-  { dates: "Mar 2021 – Feb 2022",  project: "Fallow Deer",              for: "Razorbill Films · NHK",                  role: "Shooting AP",                     status: "Released" },
-  { dates: "Apr – Jul 2021",       project: "The Earthshot Prize",      for: "Studio Silverback · BBC One",            role: "First AC",                        status: "Released" }
+  { dates: "12–19 Oct 2026",          project: "Day of the Camel",          dest: "Saudi Arabia",            for: "The Edge",                      role: "Cinematographer",                   status: "Under NDA" },
+  { dates: "19–24 Sept 2026",         project: "Planet Pet",                dest: "Switzerland",             for: "Wildstar · Nat Geo / Disney+",  role: "Focus Puller / Drone Operator",     status: "In production" },
+  { dates: "13–16 Sept 2026",         project: "Dinner to Save the World",  dest: "Dumfries, Scotland",      for: "PBS",                           role: "Camera Operator / Focus Puller",      status: "In production" },
+  { dates: "24 Aug – 6 Sept 2026",    project: "Planet Pet",                dest: "California, USA",         for: "Wildstar · Nat Geo / Disney+",  role: "Focus Puller / Drone Operator",     status: "In production" },
+  { dates: "13–18 Jul 2026",          project: "Planet Pet",                dest: "UK",                      for: "Wildstar · Nat Geo / Disney+",  role: "Focus Puller / Drone Operator",     status: "In production" },
+  { dates: "6–10 Jul 2026",           project: "Jodi Arias (Miniatures)",   dest: "London, UK",              for: "Dorothy Street Pictures · Netflix", role: "Focus Puller / 1st AC",        status: "In production" },
+  { dates: "1–4 Jul 2026",            project: "Dinner to Save the World",  dest: "Norway",                  for: "PBS",                           role: "Camera Operator / Focus Puller",      status: "In production" },
+  { dates: "28 Jun – 1 Jul 2026",     project: "Dinner to Save the World",  dest: "France",                  for: "PBS",                           role: "Camera Operator / Focus Puller",      status: "In production" },
+  { dates: "25–26 Jun 2026",          project: "Dinner to Save the World",  dest: "London, UK",              for: "PBS",                           role: "Camera Operator / Focus Puller",      status: "In production" },
+  { dates: "3–8 Jun 2026",            project: "Just a Fly",                dest: "London & Exeter, UK",                       for: "Razorbill Films · Short film",  role: "Focus Puller",                      status: "Coming soon" },
+  { dates: "25 May – 1 Jun 2026",     project: "Day of the Camel",          dest: "Saudi Arabia",            for: "The Edge",                      role: "Cinematographer",                   status: "Under NDA" },
+  { dates: "5–14 Mar 2026",           project: "Day of the Camel",          dest: "India",                   for: "The Edge",                      role: "Cinematographer",                   status: "Under NDA" },
+  { dates: "29 Jan – 11 Feb 2026",    project: "Day of the Camel",          dest: "Mongolia",                for: "The Edge",                      role: "Cinematographer",                   status: "Under NDA" },
+  { dates: "17–29 Jan 2026",          project: "Day of the Camel",          dest: "Kenya",                   for: "The Edge",                      role: "Cinematographer",                   status: "Under NDA" },
+  { dates: "15 Nov – 8 Dec 2025",     project: "Day of the Camel",          dest: "Saudi Arabia",            for: "The Edge",                      role: "Cinematographer",                   status: "Under NDA" },
+  { dates: "Sept – Oct 2025",         project: "Animal Oddballs",           dest: "Seychelles",              for: "Wildstar · Nat Geo / Disney+",  role: "Cinematographer",                   status: "Coming soon" },
+  { dates: "May 2025",                project: "Home: Asia",                dest: "Wadi Rum, Jordan",        for: "BBC NHU · National Geographic", role: "Cinematographer",                   status: "Coming soon" },
+  { dates: "Apr – Nov 2025",          project: "Wild London",               dest: "London, UK",              for: "Passion Planet · BBC",          role: "Cinematographer",                   status: "Released" },
+  { dates: "Feb – Mar 2025",          project: "Animal Oddballs",           dest: "Madagascar",              for: "Wildstar · Nat Geo / Disney+",  role: "Focus Puller / Time-lapse / Drone", status: "Coming soon" },
+  { dates: "Jan – Feb 2025",          project: "Animal Oddballs",           dest: "Rio de Janeiro, Brazil",  for: "Wildstar · Nat Geo / Disney+",  role: "Focus Puller / Second Camera",      status: "Coming soon" },
+  { dates: "Dec 2024",                project: "Nightmares of Nature",      dest: "Bristol, UK",                       for: "Plimsoll · Netflix",            role: "First AC",                          status: "Released" },
+  { dates: "Oct – Nov 2024",          project: "Animal Oddballs",           dest: "Kirindy, Madagascar",     for: "Wildstar · Nat Geo / Disney+",  role: "Focus Puller / Time-lapse / Drone", status: "Coming soon" },
+  { dates: "Sept – Oct 2024",         project: "Nightmares of Nature",      dest: "Costa Rica",              for: "Plimsoll · Netflix",            role: "First AC",                          status: "Released" },
+  { dates: "Feb 2024",                project: "Sentient",                  dest: "Hallingskarvet, Norway",  for: "Wildstar · Nat Geo / Disney+",  role: "Cinematographer",                   status: "Coming soon" },
+  { dates: "Nov 2023",                project: "Human",                     dest: "New Mexico, USA & Peru",  for: "BBC",                           role: "First AC / Drone Operator",         status: "Released" },
+  { dates: "Oct 2023",                project: "Sentient",                  dest: "Istanbul, Turkey",        for: "Wildstar · Nat Geo / Disney+",  role: "Second Camera / AC",                status: "Coming soon" },
+  { dates: "Sept – Oct 2023",         project: "Sentient",                  dest: "Atlanta & Los Angeles, USA", for: "Wildstar · Nat Geo / Disney+", role: "Second Camera / Drone Operator", status: "Coming soon" },
+  { dates: "Aug 2023",                project: "Sentient",                  dest: "Buñol, Spain",            for: "Wildstar · Nat Geo / Disney+",  role: "Cinematographer",                   status: "Coming soon" },
+  { dates: "Jul 2023",                project: "Underdogs",                 dest: "Papua New Guinea",        for: "Wildstar · Nat Geo",            role: "Second Camera / AC",                status: "Released" },
+  { dates: "Jun 2023",                project: "Sentient",                  dest: "UK",                      for: "Wildstar · Nat Geo / Disney+",  role: "Cinematographer",                   status: "Coming soon" },
+  { dates: "May 2023",                project: "Surviving Earth",           dest: "California & Utah, USA",  for: "Loud Minds · NBC / Peacock",    role: "Drone Operator / AC",               status: "Released" },
+  { dates: "Apr 2023",                project: "Sentient",                  dest: "Delhi, India",            for: "Wildstar · Nat Geo / Disney+",  role: "Second Camera / AC",                status: "Coming soon" },
+  { dates: "Apr 2023",                project: "Sentient",                  dest: "Chiang Mai, Thailand",    for: "Wildstar · Nat Geo / Disney+",  role: "Second Camera / AC",                status: "Coming soon" },
+  { dates: "Jan – Feb 2023",          project: "Surviving Earth",           dest: "New Caledonia",           for: "Loud Minds · NBC / Peacock",    role: "Drone Operator / AC",               status: "Released" },
+  { dates: "Oct 2022",                project: "Sentient",                  dest: "Kathmandu, Nepal",        for: "Wildstar · Nat Geo / Disney+",  role: "AC",                                status: "Coming soon" },
+  { dates: "Aug – Sept 2022",         project: "Sentient",                  dest: "High Andes, Peru",        for: "Wildstar · Nat Geo / Disney+",  role: "Cinematographer",                   status: "Coming soon" },
+  { dates: "Mar 2022 –",              project: "The Danube Delta",          dest: "Romania",                 for: "Razorbill Films · NHK",         role: "Shooting AP",                       status: "Released" },
+  { dates: "Mar 2021 – Feb 2022",     project: "Fallow Deer",               dest: "United Kingdom",                       for: "Razorbill Films · NHK",         role: "Shooting AP",                       status: "Released" },
+  { dates: "Apr – Jul 2021",          project: "The Earthshot Prize",       dest: "London, UK",                       for: "Studio Silverback · BBC One",   role: "First AC",                          status: "Released" }
 ];
