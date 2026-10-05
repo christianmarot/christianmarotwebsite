@@ -85,10 +85,12 @@
     fitName(); (document.fonts?.ready || Promise.resolve()).then(fitName);
     let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(fitName, 120); });
   }
-  const vbg = $('.hero .vbg'), fade = $('.hero .fade');
+  const vbg = $('.hero .vbg'), fade = $('.hero .fade'), heroBox = $('.hero');
   const heroFx = () => {
     if (!vbg || reduce) return;
-    const p = clamp(scrollY / (innerHeight * 0.85), 0, 1);
+    // only start blurring once the whole video has been seen (matters on short, landscape screens)
+    const start = Math.max(0, (heroBox ? heroBox.offsetHeight : innerHeight) - innerHeight);
+    const p = clamp((scrollY - start) / (innerHeight * 0.85), 0, 1);
     vbg.style.filter = `blur(${(p * 16).toFixed(1)}px) brightness(${(1 - p * 0.55).toFixed(2)})`;
     vbg.style.setProperty('--hs', (1 + p * 0.06).toFixed(4));
     if (fade) fade.style.opacity = p.toFixed(2);
@@ -236,7 +238,7 @@
           <td class="dt">${cell(r.dates)}</td><td class="pj">${cell(r.project)}</td><td class="ds${!r.dest || r.dest === '—' ? ' none' : ''}">${cell(r.dest || '—')}</td>
           <td class="fo">${cell(r.for)}</td><td class="ro">${cell(r.role)}</td>
           <td class="st ${cls(r.status)}"><span>${esc(r.status)}</span></td></tr>`).join('')
-        : `<tr><td colspan="6" class="empty">No ${mode === 'dep' ? 'departures' : 'arrivals'} listed.</td></tr>`;
+        : `<tr><td colspan="6" class="empty">Nothing ${mode === 'dep' ? 'outbound' : 'inbound'} listed.</td></tr>`;
       flapRows();
       if (more) { more.hidden = rows.length <= LIMIT; more.textContent = all ? 'Show fewer ↑' : `Show all ${rows.length} ↓`; }
     };
@@ -304,6 +306,14 @@
         // pause the film (and its sound) once you scroll into the page, resume when you come back
         new IntersectionObserver(es => { const v = es[0].intersectionRatio; if (v < 0.35) heroPlayer.pause(); else if (!paused || v > 0.9) heroPlayer.play().catch(() => {}); }, { threshold: [0, 0.35, 0.9] }).observe(heroEl);
       }
+      // titles + controls fade away after ~4.5s without mouse movement, and return on any movement
+      let idleT;
+      const wake = () => { heroEl.classList.remove('idle'); clearTimeout(idleT); idleT = setTimeout(() => { if (!heroEl.contains(document.activeElement) || document.activeElement === document.body) heroEl.classList.add('idle'); }, 4500); };
+      ['mousemove', 'pointerdown', 'touchstart', 'keydown', 'wheel'].forEach(ev => addEventListener(ev, wake, { passive: true }));
+      wake();
+      // phones held upright: tap the film to see it whole (16:9) instead of cropped; tap again to return
+      const portrait = matchMedia('(max-width: 760px) and (orientation: portrait)');
+      heroEl.addEventListener('click', e => { if (!portrait.matches || e.target.closest('.pc')) return; heroEl.classList.toggle('fit'); });
     } else hbg.innerHTML = `<img src="${esc(S.cover)}" alt="">`;
   }
 
@@ -329,7 +339,8 @@
     }
     return '';
   }).join('');
-  row.innerHTML = projects.map((p, i) => blocksHTML(p, i)).join('');
+  const sepHTML = (p, i) => `<div class="sep" aria-hidden="true"><span>${String(i + 1).padStart(2, '0')} — ${esc(p.title)}</span></div>`;
+  row.innerHTML = projects.map((p, i) => (i ? sepHTML(p, i) : '') + blocksHTML(p, i)).join('');
   const blks = $$('.blk', row), items = $$('.it', row);
 
   // sizes: featured 9:16 fills from under the menu to above the title; secondary = 2×2 of the same width
@@ -339,16 +350,23 @@
     const hdr = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hdr')) || 92;
     const top = hdr + 8, bottom = innerWidth < 760 ? 120 : 150;
     H = Math.max(260, innerHeight - top - bottom);
-    const fw = Math.round(H * 9 / 16), gap = 16, pgap = 120;
+    const fw = Math.round(H * 9 / 16), gap = 16;
     row.style.top = top + 'px'; row.style.gap = gap + 'px';
+    $$('.sep', row).forEach(s => s.style.height = H + 'px');
     blks.forEach((b, i) => {
-      const next = blks[i + 1]; b.style.marginRight = next && next.dataset.p !== b.dataset.p ? (pgap - gap) + 'px' : '';
       b.style.height = H + 'px';
       if (b.classList.contains('feat')) b.style.width = fw + 'px';
       else if (b.classList.contains('b2x2') || b.classList.contains('sph')) { const ch = (H - 12) / 2, cw = Math.round(ch * (b.classList.contains('b2x2') ? 9 / 16 : 4 / 5)); b.style.width = (cw * 2 + 12) + 'px'; b.style.gap = '12px'; }
       else if (b.classList.contains('hv') || b.classList.contains('hp')) b.style.width = Math.round(H * 16 / 9) + 'px';
       else if (b.classList.contains('fp')) b.style.width = Math.round(H * 4 / 5) + 'px';
-      else if (b.classList.contains('txt')) b.style.width = Math.min(520, Math.max(300, innerWidth * 0.34)) + 'px';
+      else if (b.classList.contains('txt')) {
+        // as narrow as possible while the text still fits the height of the video beside it
+        const pad = innerWidth < 760 ? 24 : 72, tr = b.style.transform; b.style.transform = '';
+        let w = Math.max(260, Math.min(360, innerWidth * 0.24));
+        b.style.width = (w + pad) + 'px';
+        while (b.scrollHeight > H + 2 && w < Math.min(620, innerWidth * 0.8)) { w += 20; b.style.width = (w + pad) + 'px'; }
+        b.style.transform = tr;
+      }
     });
     $$('.blk.feat .it, .blk.hv .it, .blk.hp .it, .blk.fp .it', row).forEach(it => it.style.height = '100%');
     panMax = Math.max(0, row.scrollWidth - innerWidth);
@@ -424,6 +442,56 @@
       }
     });
   }
+
+  /* ---------- Click a clip to watch it large, with sound ---------- */
+  const lb = document.createElement('div');
+  lb.className = 'lb'; lb.setAttribute('role', 'dialog'); lb.setAttribute('aria-modal', 'true'); lb.setAttribute('aria-label', 'Video');
+  lb.innerHTML = `<button type="button" class="lb-x" aria-label="Close">${svg('M6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12 19 6.4 17.6 5 12 10.6z')}</button>
+    <div class="lb-box"><video playsinline preload="auto"></video>
+      <div class="pc lb-pc"><button type="button" class="lb-play" aria-label="Pause">${svg(ICON.pause)}</button>
+        <div class="bar lb-bar" role="slider" aria-label="Seek" tabindex="0"><i></i><b></b><s></s></div>
+        <span class="tm lb-tm">0:00 / 0:00</span>
+        <button type="button" class="lb-mute" aria-label="Mute">${svg(ICON.sound)}</button></div></div>`;
+  document.body.appendChild(lb);
+  const lv = $('video', lb), lPlay = $('.lb-play', lb), lMute = $('.lb-mute', lb), lBar = $('.lb-bar', lb), lFill = $('b', lBar), lKnob = $('s', lBar), lTm = $('.lb-tm', lb);
+  let resume = [], lastFocus = null, lDrag = false;
+  const lShow = () => { const p = lv.duration ? lv.currentTime / lv.duration : 0; lFill.style.width = lKnob.style.left = (p * 100) + '%'; lTm.textContent = `${fmt(lv.currentTime)} / ${fmt(lv.duration)}`; };
+  lv.addEventListener('timeupdate', () => { if (!lDrag) lShow(); });
+  lv.addEventListener('loadedmetadata', () => { lb.classList.toggle('wide', lv.videoWidth > lv.videoHeight); lShow(); });
+  lv.addEventListener('play', () => $('path', lPlay).setAttribute('d', ICON.pause));
+  lv.addEventListener('pause', () => $('path', lPlay).setAttribute('d', ICON.play));
+  lv.addEventListener('ended', () => { lv.currentTime = 0; lv.play(); });
+  lPlay.onclick = () => lv.paused ? lv.play() : lv.pause();
+  lMute.onclick = () => { lv.muted = !lv.muted; $('path', lMute).setAttribute('d', lv.muted ? ICON.muted : ICON.sound); lMute.setAttribute('aria-label', lv.muted ? 'Turn sound on' : 'Mute'); };
+  const lSeek = x => { const r = lBar.getBoundingClientRect(); const t = clamp((x - r.left) / r.width, 0, 1) * (lv.duration || 0); lv.currentTime = t; lShow(); };
+  lBar.addEventListener('pointerdown', e => { lDrag = true; lBar.classList.add('drag'); lBar.setPointerCapture(e.pointerId); lSeek(e.clientX); });
+  lBar.addEventListener('pointermove', e => { if (lDrag) lSeek(e.clientX); });
+  lBar.addEventListener('pointerup', () => { lDrag = false; lBar.classList.remove('drag'); });
+  const openLB = it => {
+    const src = it.dataset.src; if (!src) return;
+    lastFocus = document.activeElement;
+    resume = vids.filter(x => !$('video', x).paused); resume.forEach(x => $('video', x).pause());
+    const t = $('video', it); lv.src = src; lv.poster = t.poster || '';
+    lv.currentTime = 0; lv.muted = false; $('path', lMute).setAttribute('d', ICON.sound);
+    document.body.classList.add('lb-open'); lb.classList.add('open');
+    lv.play().catch(() => { lv.muted = true; $('path', lMute).setAttribute('d', ICON.muted); lv.play().catch(() => {}); });
+    $('.lb-x', lb).focus();
+  };
+  const closeLB = () => {
+    if (!lb.classList.contains('open')) return;
+    lv.pause(); lb.classList.remove('open'); document.body.classList.remove('lb-open');
+    setTimeout(() => { if (!lb.classList.contains('open')) lv.removeAttribute('src'); }, 400);
+    resume.forEach(x => $('video', x).play().catch(() => {})); resume = [];
+    if (lastFocus) lastFocus.focus?.();
+  };
+  $('.lb-x', lb).onclick = closeLB;
+  lb.addEventListener('click', e => { if (!e.target.closest('.lb-box') || e.target === $('.lb-box', lb)) closeLB(); });
+  addEventListener('keydown', e => { if (e.key === 'Escape') closeLB(); });
+  vids.forEach(it => {
+    it.setAttribute('tabindex', '0'); it.setAttribute('role', 'button'); it.setAttribute('aria-label', 'Play this clip larger, with sound');
+    it.addEventListener('click', e => { if (e.target.closest('.snd, .replay')) return; openLB(it); });
+    it.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLB(it); } });
+  });
 
   addEventListener('scroll', frame, { passive: true });
   let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(layout, 100); });

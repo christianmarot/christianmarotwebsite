@@ -309,3 +309,29 @@ footer .base{margin-top:96px;padding-top:24px;border-top:1px solid var(--line);d
   .sec-head{margin-bottom:28px}
   footer{padding-top:90px}
 }
+
+/* ---- round 6 ---- */
+@media (orientation:landscape) and (max-height:520px){.hero{min-height:0}}
+.wk-hero .title,.wk-hero .pc{transition:opacity .8s ease}
+.wk-hero.idle .title,.wk-hero.idle .pc{opacity:0;pointer-events:none}
+.wk-hero.idle{cursor:none}
+.wk-hero.fit .vbg{background:#000}
+.wk-hero.fit .vbg iframe{width:100vw!important;height:56.25vw!important;min-height:0!important;min-width:0!important}
+.blk.txt{padding:4px 36px 0;justify-content:flex-start}
+.blk.txt p{font-size:15px;line-height:1.8}
+@media (max-width:760px){.blk.txt{padding:4px 12px 0}}
+.sep{flex:0 0 auto;width:1px;margin:0 44px;position:relative;background:linear-gradient(to bottom,transparent,#3a403c 12%,#3a403c 88%,transparent)}
+.sep span{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-90deg);white-space:nowrap;background:var(--ink);padding:0 14px;font-size:var(--caps);letter-spacing:.22em;text-transform:uppercase;color:var(--mid)}
+.it.vid{cursor:zoom-in}
+.it.vid:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.lb{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;background:rgba(8,10,9,.55);-webkit-backdrop-filter:blur(18px) grayscale(.7) brightness(.6);backdrop-filter:blur(18px) grayscale(.7) brightness(.6);opacity:0;visibility:hidden;transition:opacity .4s,visibility .4s}
+.lb.open{opacity:1;visibility:visible}
+.lb-box{position:relative;display:flex;flex-direction:column;align-items:center;gap:14px;transform:scale(.96);transition:transform .45s cubic-bezier(.2,.7,.2,1)}
+.lb.open .lb-box{transform:none}
+.lb video{display:block;height:min(80vh,calc(100vw * 16 / 9 - 40px));width:auto;max-width:92vw;background:#000;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.lb.wide video{width:min(88vw,calc(80vh * 16 / 9));height:auto}
+.lb .lb-pc{position:static;width:100%;max-width:520px;min-width:280px}
+.lb-x{position:absolute;top:20px;right:var(--gut);width:48px;height:48px;border-radius:50%;border:1px solid rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25)}
+.lb-x:hover{border-color:#fff}
+.lb-x svg{width:20px;height:20px;fill:#fff}
+body.lb-open{overflow:hidden}
