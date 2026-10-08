@@ -359,6 +359,15 @@ body.lb-open{overflow:hidden}
 .fm-btn{display:inline-flex;align-items:center;height:48px;margin-top:28px;padding:0 22px;border-radius:999px;border:1px solid rgba(238,235,228,.35);font-size:var(--caps);letter-spacing:.18em;text-transform:uppercase;transition:border-color .3s,background .3s}
 .fm-btn:hover{border-color:var(--paper);background:rgba(238,235,228,.06)}
 .fm-globe{position:relative;display:block;width:100%;aspect-ratio:1;max-height:82vh;justify-self:center}
-.fm-globe canvas{position:absolute;inset:0;width:100%;height:100%}
+.fm-globe canvas{position:absolute;left:-25%;top:-25%;width:150%;height:150%;pointer-events:none}
 .fm-globe.off{display:none}
 @media (max-width:900px){.fm{grid-template-columns:1fr;padding-block:72px;min-height:0}.fm-globe{order:-1;max-width:520px;margin-inline:auto}.fm p{font-size:15px}}
+
+/* showreel: our own play / pause symbol instead of Vimeo's bar */
+.reel-play{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;width:100%;cursor:pointer}
+.reel-play span{width:clamp(72px,8vw,104px);height:clamp(72px,8vw,104px);border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.6);background:rgba(0,0,0,.28);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);opacity:0;transform:scale(.88);transition:opacity .35s ease,transform .45s cubic-bezier(.2,.7,.2,1)}
+.reel-play svg{width:30%;height:30%;fill:#fff;margin-left:4%}
+.reel .frame.playing .reel-play svg{margin-left:0}
+.reel .frame:hover .reel-play span,.reel-play:focus-visible span{opacity:1;transform:none}
+.reel-play:focus-visible{outline:none}
+@media (hover:none){.reel .frame:not(.playing) .reel-play span{opacity:1;transform:none}}

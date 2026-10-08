@@ -28,8 +28,9 @@
   [cv, glc].forEach(c => { c.setAttribute('aria-hidden', 'true'); box.appendChild(c); });
   const ctx = cv.getContext('2d'), sky = typeof makeSky === 'function' ? makeSky(glc, null) : null;
   const P = d3.geoOrthographic().clipAngle(90).precision(.5), path = d3.geoPath(P, ctx);
-  let W = 0, H = 0, DPR = 1, GLS = 1;
-  const resize = () => { DPR = Math.min(devicePixelRatio || 1, 1.75); W = box.clientWidth; H = box.clientHeight; cv.width = W * DPR; cv.height = H * DPR; GLS = Math.min(DPR, W < 500 ? 1.5 : 1.25); glc.width = W * GLS; glc.height = H * GLS; };
+  let W = 0, H = 0, S = 0, DPR = 1, GLS = 1;
+  // the canvases reach well beyond the globe's box, so its halo can fade all the way out into the page
+  const resize = () => { DPR = Math.min(devicePixelRatio || 1, 1.75); W = cv.clientWidth; H = cv.clientHeight; S = Math.min(box.clientWidth, box.clientHeight); cv.width = W * DPR; cv.height = H * DPR; GLS = Math.min(DPR, W < 500 ? 1.5 : 1.25); glc.width = W * GLS; glc.height = H * GLS; };
   addEventListener('resize', resize); resize();
 
   const lat0 = 16, t0 = performance.now(); let lon0 = 22, last = t0, running = false, reveal = reduce ? 1 : 0;
@@ -39,13 +40,13 @@
     if (!running) return;
     const dt = Math.min(.05, (now - last) / 1000); last = now;
     if (!reduce) { lon0 += dt * 5; reveal = Math.min(1, reveal + dt / 2.4); }
-    const cx = W / 2, cy = H / 2, R = Math.min(W, H) * .46, sp0 = Math.sin(lat0 * RAD), cp0 = Math.cos(lat0 * RAD);
+    const cx = W / 2, cy = H / 2, R = S * .46, sp0 = Math.sin(lat0 * RAD), cp0 = Math.cos(lat0 * RAD);
     P.rotate([-lon0, -lat0]).scale(R).translate([cx, cy]);
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.clearRect(0, 0, W, H);
     // atmosphere + ocean
-    const glow = ctx.createRadialGradient(cx, cy, R * .96, cx, cy, R * 1.2);
-    glow.addColorStop(0, 'rgba(150,180,190,.20)'); glow.addColorStop(1, 'rgba(110,140,150,0)');
-    ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(cx, cy, R * 1.2, 0, 7); ctx.fill();
+    const glow = ctx.createRadialGradient(cx, cy, R * .96, cx, cy, R * 1.5);
+    glow.addColorStop(0, 'rgba(150,180,190,.22)'); glow.addColorStop(.18, 'rgba(130,160,170,.11)'); glow.addColorStop(.5, 'rgba(110,140,150,.035)'); glow.addColorStop(1, 'rgba(110,140,150,0)');
+    ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(cx, cy, R * 1.5, 0, 7); ctx.fill();
     const sea = ctx.createRadialGradient(cx - R * .35, cy - R * .4, R * .1, cx, cy, R);
     sea.addColorStop(0, '#18201d'); sea.addColorStop(.7, '#111614'); sea.addColorStop(1, '#0b0e0d');
     ctx.fillStyle = sea; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.fill();

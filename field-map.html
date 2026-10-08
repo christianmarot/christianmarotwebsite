@@ -33,7 +33,7 @@ a{color:inherit}
 .bar{position:fixed;inset:0 0 auto 0;z-index:40;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:calc(18px + env(safe-area-inset-top,0px)) var(--gut) 18px;font-size:var(--caps);letter-spacing:.2em;text-transform:uppercase;color:var(--mid);pointer-events:none}
 .bar b{font-weight:500;color:var(--paper)}
 .bar a{pointer-events:auto;text-decoration:none}
-.bar a.proto{transition:color .3s,border-color .3s}.bar a.proto:hover{color:var(--paper);border-color:var(--paper)}
+.bar a.proto{color:var(--paper);background:rgba(7,8,8,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-color:rgba(238,235,228,.3);text-shadow:none;transition:color .3s,border-color .3s,background .3s}.bar a.proto:hover{border-color:var(--paper);background:rgba(7,8,8,.75)}
 .bar .proto{font-family:var(--mono);letter-spacing:.12em;color:var(--dim);border:1px solid var(--line);border-radius:999px;padding:5px 10px}
 
 .track{position:relative;height:1100vh}
@@ -294,12 +294,12 @@ a{color:inherit}
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
-<script src="data.js?v=20261009c"></script>
-<script src="fieldmap/geo.js?v=20261009c"></script>
-<script src="fieldmap/geo50.js?v=20261009c"></script>
-<script src="fieldmap/earth.js?v=20261009c"></script>
-<script src="fieldmap/sky.js?v=20261009c"></script>
-<script src="fieldmap/map.js?v=20261009c"></script>
+<script src="data.js?v=20261009e"></script>
+<script src="fieldmap/geo.js?v=20261009e"></script>
+<script src="fieldmap/geo50.js?v=20261009e"></script>
+<script src="fieldmap/earth.js?v=20261009e"></script>
+<script src="fieldmap/sky.js?v=20261009e"></script>
+<script src="fieldmap/map.js?v=20261009e"></script>
 
 </body>
 </html>

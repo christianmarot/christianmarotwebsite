@@ -42,9 +42,28 @@
   $$('[data-bg]').forEach(el => { const f = iframe(VIDEOS[el.dataset.bg], true, 'Showreel (background)'); f.loading = 'eager'; f.tabIndex = -1; f.setAttribute('aria-hidden', 'true'); el.appendChild(f); });
   const io = new IntersectionObserver(es => es.forEach(e => {
     if (!e.isIntersecting) return;
-    e.target.appendChild(iframe(VIDEOS[e.target.dataset.embed], false, e.target.dataset.title));
+    if (e.target.hasAttribute('data-custom')) customReel(e.target);
+    else e.target.appendChild(iframe(VIDEOS[e.target.dataset.embed], false, e.target.dataset.title));
     io.unobserve(e.target);
   }), { rootMargin: '400px' });
+  // showreel: Vimeo's own bar hidden; a play / pause symbol of ours appears when you hover over the film
+  function customReel(el) {
+    const frame = el.parentElement, btn = $('.reel-play', frame), icon = $('path', btn);
+    const f = document.createElement('iframe');
+    f.src = `https://player.vimeo.com/video/${VIDEOS[el.dataset.embed]}?controls=0&title=0&byline=0&portrait=0&dnt=1&playsinline=1&autopause=1`;
+    f.title = el.dataset.title || 'Showreel'; f.allow = 'autoplay; fullscreen; picture-in-picture'; f.tabIndex = -1;
+    el.appendChild(f);
+    const start = () => {
+      const pl = new Vimeo.Player(f); let playing = false;
+      const set = on => { playing = on; frame.classList.toggle('playing', on); icon.setAttribute('d', on ? ICON.pause : ICON.play); btn.setAttribute('aria-label', on ? 'Pause the showreel' : 'Play the showreel'); };
+      pl.on('play', () => set(true)); pl.on('pause', () => set(false)); pl.on('ended', () => set(false));
+      btn.addEventListener('click', () => { if (playing) pl.pause(); else { pl.setVolume(1).catch(() => {}); pl.play().catch(() => {}); } });
+      // pause it if you scroll away while it's playing
+      new IntersectionObserver(es => { if (!es[0].isIntersecting && playing) pl.pause(); }, { threshold: .15 }).observe(frame);
+    };
+    if (window.Vimeo && Vimeo.Player) start();
+    else { const s = document.createElement('script'); s.src = 'https://player.vimeo.com/api/player.js'; s.onload = start; s.onerror = () => { btn.hidden = true; f.src = f.src.replace('controls=0&', ''); }; document.head.appendChild(s); }
+  }
   $$('[data-embed]').forEach(el => io.observe(el));
 
   /* ---------- Showreel: the film sits still underneath and is uncovered as the page above slides away ---------- */
@@ -275,7 +294,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261009c';
+    const FMV = '20261009e';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();
