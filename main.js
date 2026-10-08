@@ -317,63 +317,86 @@
     bo.observe(rowsEl);
   }
 
-  /* ---------- A little weather on the home page: a few soft clouds that drift by and part around the cursor ---------- */
+  /* ---------- A little weather: soft clouds that drift through a few sections (and the menu), parting around the cursor ---------- */
   const drifts = $$('[data-clouds]');
   if (drifts.length && !reduce) {
-    // paint a few cloud images once, from layered noise (top-down, like the Field Map's weather)
-    const paintCloud = seed => {
-      const w = 320, h = 190, c = document.createElement('canvas'); c.width = w; c.height = h;
-      const g = c.getContext('2d'), img = g.createImageData(w, h);
+    // Each cloud image is painted once, in the background, from swirled layered noise and lit from the
+    // upper left: bright tops, soft grey undersides, wispy edges (top-down, like the Field Map's weather).
+    const idle = f => (window.requestIdleCallback ? requestIdleCallback(f, { timeout: 2500 }) : setTimeout(f, 400));
+    const paintCloud = (seed, w, h) => {
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      const g = c.getContext('2d'), img = g.createImageData(w, h), D = img.data;
       const hash = (x, y) => { const s = Math.sin(x * 127.1 + y * 311.7 + seed * 74.7) * 43758.5453; return s - Math.floor(s); };
-      const noise = (x, y) => { const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi, u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf);
+      const noise = (x, y) => { const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi;
+        const u = xf * xf * xf * (xf * (xf * 6 - 15) + 10), v = yf * yf * yf * (yf * (yf * 6 - 15) + 10);
         const a = hash(xi, yi), b = hash(xi + 1, yi), c2 = hash(xi, yi + 1), d = hash(xi + 1, yi + 1);
         return a + (b - a) * u + (c2 - a) * v + (a - b - c2 + d) * u * v; };
-      const fbm = (x, y) => { let s = 0, a = .5; for (let o = 0; o < 5; o++) { s += a * noise(x, y); x *= 2.03; y *= 2.03; a *= .5; } return s; };
-      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-        const nx = (x / w - .5) * 2, ny = (y / h - .5) * 2, mask = Math.max(0, 1 - (nx * nx * .9 + ny * ny * 1.15));
-        const n = fbm(x / 52, y / 52), d = n * (.3 + 1.05 * Math.sqrt(mask));
-        const a = Math.min(1, Math.max(0, (d - .42) / .3));
-        const lit = Math.min(1, Math.max(0, .8 + (n - fbm(x / 52 + .35, y / 52 + .5)) * 3));
-        const i = (y * w + x) * 4, col = 175 + 80 * lit;
-        img.data[i] = col; img.data[i + 1] = col; img.data[i + 2] = col + 4; img.data[i + 3] = a * a * 255;
-      }
-      g.putImageData(img, 0, 0); return c;
+      const fbm = (x, y, o) => { let s = 0, a = .5, n = 0; for (let k = 0; k < o; k++) { s += a * noise(x, y); n += a; x = x * 2.02 + 17.3; y = y * 2.02 + 9.1; a *= .5; } return s / n; };
+      const sc = w / 7;                                         // feature size
+      const row = y => { for (let x = 0; x < w; x++) {
+        const px = x / sc, py = y / sc;
+        const wx = fbm(px * .6 + 3.1, py * .6 + 7.7, 3), wy = fbm(px * .6 + 9.4, py * .6 + 1.3, 3);   // swirl
+        const qx = px + (wx - .5) * 1.0, qy = py + (wy - .5) * 1.0;
+        const n = fbm(qx, qy, 7), nl = fbm(qx - .12, qy - .16, 5);                                  // density + a step towards the light
+        const ex = (x / w - .5) * 2, ey = (y / h - .5) * 2, m = Math.max(0, 1 - (ex * ex + ey * ey * 1.25));
+        const dens = n * (.25 + 1.1 * Math.pow(m, .7));
+        let a = (dens - .38) / .28; a = a < 0 ? 0 : a > 1 ? 1 : a; a = a * a * (3 - 2 * a);
+        let lit = .62 + (n - nl) * 4.2 + (dens - .5) * .5; lit = lit < 0 ? 0 : lit > 1 ? 1 : lit;
+        const i4 = (y * w + x) * 4, base = 150 + 104 * lit;
+        D[i4] = base; D[i4 + 1] = base + 2; D[i4 + 2] = base + 6; D[i4 + 3] = a * 255;
+      } };
+      // a few rows at a time, only while the browser is idle, so scrolling never stutters
+      return new Promise(ok => {
+        let y = 0;
+        const slice = dl => {
+          const until = performance.now() + Math.min(12, dl && dl.timeRemaining ? Math.max(4, dl.timeRemaining()) : 10);
+          while (y < h && performance.now() < until) row(y++);
+          if (y < h) idle(slice);
+          else { g.putImageData(img, 0, 0); c.toBlob(b => ok(b ? URL.createObjectURL(b) : c.toDataURL()), 'image/png'); }
+        };
+        idle(slice);
+      });
     };
     const mouse = { x: -1e4, y: -1e4 };
     addEventListener('pointermove', e => { mouse.x = e.clientX; mouse.y = e.clientY; }, { passive: true });
-    const later = window.requestIdleCallback || (f => setTimeout(f, 300));
-    later(() => {
-      const sprites = [0, 1, 2].map(i => paintCloud(3 + i * 11));
+    // paint one image per idle moment so nothing ever janks
+    const sprites = [];
+    const SW = innerWidth < 760 ? 480 : 640;   // smaller canvases on phones
+    const paintNext = async () => { sprites.push(await paintCloud(3 + sprites.length * 11, SW, Math.round(SW * .6))); if (sprites.length < 3) paintNext(); else start(); };
+    addEventListener('load', paintNext);
+    const menuOpen = () => document.body.classList.contains('menu-open');
+    function start() {
       drifts.forEach((box, bi) => {
-        const n = +box.dataset.clouds || 2;
+        const n = +box.dataset.clouds || 2, alpha = +box.dataset.alpha || 1, inMenu = !!box.closest('.menu');
         const clouds = Array.from({ length: n }, (_, i) => {
-          const el = document.createElement('canvas'); el.width = 320; el.height = 190;
-          el.getContext('2d').drawImage(sprites[(i + bi) % 3], 0, 0); box.appendChild(el);
-          return { el, x: (i + .3) / n + (bi * .17), y: .15 + ((i * 37 + bi * 19) % 70) / 100, s: 1.4 + ((i * 13 + bi * 7) % 9) / 9, v: .006 + ((i * 7) % 5) / 900, a: (.2 + ((i * 11) % 6) / 70) * (+box.dataset.alpha || 1), px: 0, py: 0, fade: 1 };
+          const el = new Image(); el.src = sprites[(i + bi) % 3]; el.alt = ''; el.decoding = 'async'; box.appendChild(el);
+          return { el, x: (i + .25) / n + bi * .17, y: .12 + ((i * 37 + bi * 19) % 76) / 100, s: 1.1 + ((i * 13 + bi * 7) % 9) / 12,
+                   v: .005 + ((i * 7 + bi) % 5) / 1100, a: (.15 + ((i * 11) % 5) / 90) * alpha, px: 0, py: 0, fade: 1, flip: (i + bi) % 2 };
         });
         let on = false, last = performance.now();
         const tick = now => {
-          if (!on) return;
+          if (!on || (inMenu && !menuOpen())) { on = false; return; }
           const dt = Math.min(.05, (now - last) / 1000); last = now;
           const r = box.getBoundingClientRect();
           clouds.forEach(c => {
-            c.x += c.v * dt; if (c.x > 1.25) c.x = -.35;            // drift slowly left to right, wrap round
-            const w = 320 * c.s * Math.max(.7, r.width / 1400), cx = r.left + c.x * r.width, cy = r.top + c.y * r.height;
-            // the cursor parts them: push away and thin out, then they ease back
-            const dx = cx - mouse.x, dy = cy - mouse.y, dist = Math.hypot(dx, dy), reach = w * .75;
-            const f = dist < reach ? (1 - dist / reach) : 0;
-            c.px += ((dist ? dx / dist : 0) * f * 90 - c.px) * Math.min(1, dt * 3);
-            c.py += ((dist ? dy / dist : 0) * f * 60 - c.py) * Math.min(1, dt * 3);
-            c.fade += ((1 - f * .7) - c.fade) * Math.min(1, dt * 4);
+            c.x += c.v * dt; if (c.x > 1.3) c.x = -.4;               // drift slowly across, wrap round
+            const w = Math.min(760, 520 * c.s * Math.max(.75, r.width / 1500)), cx = r.left + c.x * r.width, cy = r.top + c.y * r.height;
+            const dx = cx - mouse.x, dy = cy - mouse.y, dist = Math.hypot(dx, dy), reach = w * .6;
+            const f = dist < reach ? (1 - dist / reach) : 0;           // the cursor parts them, then they ease back
+            c.px += ((dist ? dx / dist : 0) * f * 110 - c.px) * Math.min(1, dt * 2.5);
+            c.py += ((dist ? dy / dist : 0) * f * 70 - c.py) * Math.min(1, dt * 2.5);
+            c.fade += ((1 - f * .75) - c.fade) * Math.min(1, dt * 3);
             c.el.style.width = w + 'px';
-            c.el.style.transform = `translate(${(c.x * r.width - w / 2 + c.px).toFixed(1)}px, ${(c.y * r.height - w * .3 + c.py).toFixed(1)}px)`;
+            c.el.style.transform = `translate(${(c.x * r.width - w / 2 + c.px).toFixed(1)}px, ${(c.y * r.height - w * .3 + c.py).toFixed(1)}px)${c.flip ? ' scaleX(-1)' : ''}`;
             c.el.style.opacity = (c.a * c.fade).toFixed(3);
           });
           requestAnimationFrame(tick);
         };
-        new IntersectionObserver(es => { on = es[0].isIntersecting; if (on) { last = performance.now(); requestAnimationFrame(tick); } }).observe(box);
+        const go = () => { if (on) return; on = true; last = performance.now(); requestAnimationFrame(tick); };
+        if (inMenu) new MutationObserver(() => { if (menuOpen()) go(); }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+        else new IntersectionObserver(es => { if (es[0].isIntersecting) go(); else on = false; }).observe(box);
       });
-    });
+    }
   }
 
   /* ---------- Field Map: numbers from the credits board; the yellow one counts up like an arcade score ---------- */
@@ -405,7 +428,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261009i';
+    const FMV = '20261009k';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();

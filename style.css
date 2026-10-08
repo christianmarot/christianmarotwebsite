@@ -385,5 +385,7 @@ body.lb-open{overflow:hidden}
 
 /* a little weather drifting across the home page */
 .drift{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
-.drift canvas{position:absolute;left:0;top:0;height:auto;opacity:0;filter:blur(.5px);will-change:transform,opacity}
+.drift img{position:absolute;left:0;top:0;max-width:none;height:auto;opacity:0;will-change:transform,opacity;user-select:none}
+#index{position:relative}#index>*:not(.drift){position:relative;z-index:1}
+.menu>*:not(.drift){position:relative;z-index:1}
 @media (prefers-reduced-motion:reduce){.drift{display:none}}
