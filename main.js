@@ -377,54 +377,97 @@
         idle(slice);
       }
     });
-    const mouse = { x: -1e4, y: -1e4 };
-    addEventListener('pointermove', e => { mouse.x = e.clientX; mouse.y = e.clientY; }, { passive: true });
-    // paint one image per idle moment so nothing ever janks
+    // where the cursor (or a finger) is, and where it was a moment ago — the clouds tear along that path
+    const mouse = { x: -1e4, y: -1e4, n: 0 };   // n counts moves, so each section knows when there's been a new one
+    const track = (x, y) => { mouse.x = x; mouse.y = y; mouse.n++; };
+    addEventListener('pointermove', e => track(e.clientX, e.clientY), { passive: true });
+    addEventListener('touchmove', e => { const t = e.touches[0]; if (t) track(t.clientX, t.clientY); }, { passive: true });
+    // paint one image at a time on the background thread
     const sprites = [];
-    const SW = innerWidth < 760 ? 480 : 640;   // smaller canvases on phones
-    const paintNext = async () => { sprites.push(await paintCloud(3 + sprites.length * 11, SW, Math.round(SW * .6))); if (sprites.length < 3) paintNext(); else start(); };
+    const SW = innerWidth < 760 ? 480 : 640, SH = Math.round(SW * .6);   // smaller canvases on phones
+    const paintNext = async () => { sprites.push(await paintCloud(3 + sprites.length * 11, SW, SH)); if (sprites.length < 3) paintNext(); else start(); };
     addEventListener('load', paintNext);
     const menuOpen = () => document.body.classList.contains('menu-open');
-    function start() {
+    // a ragged brush: a cluster of soft blobs, so the gaps it tears have frayed, wispy edges rather than clean holes
+    const brush = (() => {
+      const b = document.createElement('canvas'); b.width = b.height = 96; const g = b.getContext('2d');
+      let sd = 5; const r = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+      // a solid core that cuts clean through…
+      const core = g.createRadialGradient(48, 48, 0, 48, 48, 26); core.addColorStop(0, 'rgba(0,0,0,1)'); core.addColorStop(.6, 'rgba(0,0,0,.85)'); core.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = core; g.beginPath(); g.arc(48, 48, 26, 0, 7); g.fill();
+      // …ringed by smaller torn-off bits, so the edge frays into wisps
+      for (let i = 0; i < 22; i++) {
+        const a = r() * 6.28, d = 18 + r() * 26, x = 48 + Math.cos(a) * d, y = 48 + Math.sin(a) * d, rad = 3 + r() * 9;
+        const gr = g.createRadialGradient(x, y, 0, x, y, rad); gr.addColorStop(0, `rgba(0,0,0,${.5 + r() * .5})`); gr.addColorStop(1, 'rgba(0,0,0,0)');
+        g.fillStyle = gr; g.beginPath(); g.arc(x, y, rad, 0, 7); g.fill();
+      }
+      return b;
+    })();
+    async function start() {
+      const imgs = await Promise.all(sprites.map(u => new Promise(ok => { const im = new Image(); im.onload = () => ok(im); im.onerror = () => ok(null); im.src = u; })));
+      if (imgs.some(x => !x)) return;
+      const MW = SW / 2, MH = SH / 2;   // the tear mask works at half size; it's soft anyway
       drifts.forEach((box, bi) => {
         const n = +box.dataset.clouds || 2, alpha = +box.dataset.alpha || 1, inMenu = !!box.closest('.menu');
         // evenly spaced around one loop that runs from just off the left edge to just off the right, all at the
         // same pace — so as one leaves on the right another is already coming in on the left, and they never bunch
         const L0 = -.45, SPAN = 1.9, V = .0065 + bi * .0007;
         let seed = 7 + bi * 31; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-        // two depths: nearer clouds are bigger, brighter and quicker; farther ones smaller, fainter and slower.
-        // Each depth is evenly spaced on its own, so the sky never empties — and every cloud also surges and
-        // lags a little on its own rhythm, so no two move quite alike
-        const reshape = c => { const near = c.layer === 0;
-          c.y = .08 + rnd() * .84; c.s = near ? 1.35 + rnd() * .5 : .85 + rnd() * .35; c.a = (near ? .15 + rnd() * .06 : .1 + rnd() * .05) * alpha;
-          c.flip = rnd() < .5; c.el.src = sprites[Math.floor(rnd() * sprites.length)]; c.ph = rnd() * 6.28; c.om = .05 + rnd() * .07; c.amp = .02 + rnd() * .03; };
-        const per = [Math.ceil(n / 2), Math.floor(n / 2)];
+        const draw = c => {   // the cloud, minus whatever has been torn out of it
+          c.g.globalCompositeOperation = 'copy'; c.g.drawImage(c.img, 0, 0);
+          if (c.torn) { c.g.globalCompositeOperation = 'destination-out'; c.g.drawImage(c.mask, 0, 0, SW, SH); c.g.drawImage(c.mask, 0, 0, SW, SH); }   // twice: cuts clean through the middle, frays at the edges
+          c.g.globalCompositeOperation = 'source-over';
+        };
+        const reshape = c => {
+          c.y = .08 + rnd() * .84; c.s = 1 + rnd() * .8; c.a = (.14 + rnd() * .07) * alpha; c.flip = rnd() < .5;
+          c.img = imgs[Math.floor(rnd() * imgs.length)]; c.mg.clearRect(0, 0, MW, MH); c.torn = 0; draw(c);
+        };
         const clouds = Array.from({ length: n }, (_, i) => {
-          const el = new Image(); el.alt = ''; el.decoding = 'async'; box.appendChild(el);
-          const layer = i % 2, j = Math.floor(i / 2), m = per[layer] || 1;
-          const c = { el, layer, sp: layer === 0 ? 1.3 : .7, x: L0 + (j + .5 * layer + rnd() * .2) * SPAN / m, px: 0, py: 0, fade: 1, t: 0 }; reshape(c); return c;
+          const el = document.createElement('canvas'); el.width = SW; el.height = SH; box.appendChild(el);
+          const mask = document.createElement('canvas'); mask.width = MW; mask.height = MH;
+          const c = { el, g: el.getContext('2d'), mask, mg: mask.getContext('2d'), x: L0 + (i + rnd() * .3) * SPAN / n, torn: 0, rect: null };
+          reshape(c); return c;
         });
-        let on = false, last = performance.now();
+        let on = false, last = performance.now(), seen = 0, lx = mouse.x, ly = mouse.y;
         const tick = now => {
           if (!on || (inMenu && !menuOpen())) { on = false; return; }
           const dt = Math.min(.05, (now - last) / 1000); last = now;
           const r = box.getBoundingClientRect();
+          const moving = mouse.n !== seen, px = lx, py = ly;   // the path since this section last looked
+          seen = mouse.n; lx = mouse.x; ly = mouse.y;
           clouds.forEach(c => {
-            c.t += dt; c.x += V * c.sp * (1 + Math.sin(c.t * c.om + c.ph) * c.amp * 12) * dt;   // own pace, gently surging and easing
-            if (c.x > L0 + SPAN) { c.x -= SPAN; reshape(c); }                                 // re-enter on the left as a new cloud
-            const w = Math.min(760, 520 * c.s * Math.max(.75, r.width / 1500)), cx = r.left + c.x * r.width, cy = r.top + c.y * r.height;
-            const dx = cx - mouse.x, dy = cy - mouse.y, dist = Math.hypot(dx, dy), reach = w * .6;
-            const f = dist < reach ? (1 - dist / reach) : 0;           // the cursor parts them, then they ease back
-            c.px += ((dist ? dx / dist : 0) * f * 110 - c.px) * Math.min(1, dt * 2.5);
-            c.py += ((dist ? dy / dist : 0) * f * 70 - c.py) * Math.min(1, dt * 2.5);
-            c.fade += ((1 - f * .75) - c.fade) * Math.min(1, dt * 3);
+            c.x += V * dt; if (c.x > L0 + SPAN) { c.x -= SPAN; reshape(c); }   // drift slowly across; re-enter on the left as a new cloud
+            const w = Math.min(760, 520 * c.s * Math.max(.75, r.width / 1500)), h = w * SH / SW;
+            const left = r.left + c.x * r.width - w / 2, top = r.top + c.y * r.height - w * .3;
+            // the cursor tears through: stamp the ragged brush along its path into this cloud's mask
+            if (moving) {
+              const k = MW / w, seg = Math.hypot(mouse.x - px, mouse.y - py), steps = Math.min(24, Math.ceil(seg / 10));
+              const inside = (x, y) => x > left - 60 && x < left + w + 60 && y > top - 60 && y < top + h + 60;
+              if (inside(mouse.x, mouse.y) || inside(px, py)) {
+                const size = 44 + Math.min(56, seg * .7);               // faster sweeps tear a little wider
+                for (let s = 0; s <= steps; s++) {
+                  const t = steps ? s / steps : 1, sx = px + (mouse.x - px) * t, sy = py + (mouse.y - py) * t;
+                  let u = (sx - left) * k, v = (sy - top) * k; if (c.flip) u = MW - u;
+                  const sz = size * k * (.75 + Math.random() * .5);
+                  c.mg.save(); c.mg.translate(u + (Math.random() - .5) * sz * .35, v + (Math.random() - .5) * sz * .35); c.mg.rotate(Math.random() * 6.28);
+                  c.mg.drawImage(brush, -sz / 2, -sz / 2, sz, sz); c.mg.restore();
+                }
+                c.torn = 1; c.healAt = now;
+              }
+            }
+            // and it slowly closes up again
+            if (c.torn) {
+              c.mg.globalCompositeOperation = 'destination-out'; c.mg.fillStyle = `rgba(0,0,0,${Math.min(1, dt * .45)})`; c.mg.fillRect(0, 0, MW, MH); c.mg.globalCompositeOperation = 'source-over';
+              if (now - c.healAt > 9000) { c.mg.clearRect(0, 0, MW, MH); c.torn = 0; }
+              draw(c);
+            }
             c.el.style.width = w + 'px';
-            c.el.style.transform = `translate(${(c.x * r.width - w / 2 + c.px).toFixed(1)}px, ${(c.y * r.height - w * .3 + c.py).toFixed(1)}px)${c.flip ? ' scaleX(-1)' : ''}`;
-            c.el.style.opacity = (c.a * c.fade).toFixed(3);
+            c.el.style.transform = `translate(${(left - r.left).toFixed(1)}px, ${(top - r.top).toFixed(1)}px)${c.flip ? ' scaleX(-1)' : ''}`;
+            c.el.style.opacity = c.a.toFixed(3);
           });
           requestAnimationFrame(tick);
         };
-        const go = () => { if (on) return; on = true; last = performance.now(); requestAnimationFrame(tick); };
+        const go = () => { if (on) return; on = true; last = performance.now(); seen = mouse.n || -1; lx = mouse.x; ly = mouse.y; requestAnimationFrame(tick); };
         if (inMenu) new MutationObserver(() => { if (menuOpen()) go(); }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
         else new IntersectionObserver(es => { if (es[0].isIntersecting) go(); else on = false; }).observe(box);
       });
@@ -460,7 +503,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261009o';
+    const FMV = '20261009r';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();
