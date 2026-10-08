@@ -326,17 +326,17 @@
     fmS.textContent = nShoots; fmC.textContent = nC;
     fmC.style.minWidth = String(nC).length + 'ch';
     if (!reduce) {
-      fmC.textContent = '00'.slice(0, String(nC).length);
+      fmC.textContent = 1;
+      // reels up from 1, one number at a time: quick at first, easing off as it nears the total
       const run = () => {
-        const t0 = performance.now(), dur = 1500, w = String(nC).length;
-        fmC.classList.add('counting');
-        const tick = now => {
-          const t = clamp((now - t0) / dur, 0, 1), v = Math.max(1, Math.round((1 - Math.pow(1 - t, 3)) * nC));
-          // most frames show the count; now and then a frame flickers random digits, like an old scoreboard
-          fmC.textContent = t < 1 && Math.random() < .3 ? String(Math.floor(Math.random() * Math.pow(10, w))).padStart(w, '0') : String(v);
-          if (t < 1) requestAnimationFrame(tick); else { fmC.textContent = nC; fmC.classList.remove('counting'); }
+        let v = 1; fmC.textContent = v; fmC.classList.add('counting');
+        const step = () => {
+          if (v >= nC) { fmC.classList.remove('counting'); return; }
+          v++; fmC.textContent = v;
+          const f = v / nC;                       // 0 → 1 through the count
+          setTimeout(step, 40 + 380 * Math.pow(f, 4));
         };
-        requestAnimationFrame(tick);
+        setTimeout(step, 60);
       };
       const co = new IntersectionObserver(es => { if (es[0].isIntersecting) { co.disconnect(); setTimeout(run, 250); } }, { threshold: .6 });
       co.observe(fmC.closest('h2'));
@@ -346,7 +346,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261009f';
+    const FMV = '20261009g';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();
