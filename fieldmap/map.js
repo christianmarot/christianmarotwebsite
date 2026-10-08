@@ -66,8 +66,8 @@
     return hi ? `${nm[lo % 12]} ${Math.floor(lo / 12)} – ${nm[hi % 12]} ${Math.floor(hi / 12)}` : '';
   };
   $('#nRange').textContent = boardRange(ROWS);
-  $('#nShoots').textContent = cap(words(ROWS.length));
-  $('#nCountries').textContent = words(allCountries.size);
+  $('#nShoots').textContent = ROWS.length;
+  $('#nCountries').textContent = allCountries.size;
 
   /* ================= Geography ================= */
   const land110 = topojson.merge(TOPO110, TOPO110.objects.countries.geometries);

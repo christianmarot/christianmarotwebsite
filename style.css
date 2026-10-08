@@ -363,11 +363,22 @@ body.lb-open{overflow:hidden}
 .fm-globe.off{display:none}
 @media (max-width:900px){.fm{grid-template-columns:1fr;padding-block:72px;min-height:0}.fm-globe{order:-1;max-width:520px;margin-inline:auto}.fm p{font-size:15px}}
 
-/* showreel: our own play / pause symbol instead of Vimeo's bar */
+/* showreel: a white disc with the play arrow cut out (the film shows through), our own controls, full screen */
 .reel-play{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;width:100%;cursor:pointer}
-.reel-play span{width:clamp(72px,8vw,104px);height:clamp(72px,8vw,104px);border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.6);background:rgba(0,0,0,.28);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);opacity:0;transform:scale(.88);transition:opacity .35s ease,transform .45s cubic-bezier(.2,.7,.2,1)}
-.reel-play svg{width:30%;height:30%;fill:#fff;margin-left:4%}
-.reel .frame.playing .reel-play svg{margin-left:0}
-.reel .frame:hover .reel-play span,.reel-play:focus-visible span{opacity:1;transform:none}
+.reel-play svg{width:clamp(76px,8.5vw,112px);height:auto;fill:rgba(255,255,255,.94);filter:drop-shadow(0 8px 30px rgba(0,0,0,.45)) drop-shadow(0 2px 6px rgba(0,0,0,.3));opacity:0;transform:scale(.86);transition:opacity .35s ease,transform .5s cubic-bezier(.2,.7,.2,1)}
+.reel .frame:not(.playing):hover .reel-play svg,.reel-play:focus-visible svg{opacity:1;transform:none}
 .reel-play:focus-visible{outline:none}
-@media (hover:none){.reel .frame:not(.playing) .reel-play span{opacity:1;transform:none}}
+@media (hover:none){.reel .frame:not(.playing) .reel-play svg{opacity:1;transform:none}}
+.reel-pc{left:clamp(16px,2.4vw,32px);right:clamp(16px,2.4vw,32px);bottom:clamp(14px,2vw,26px);width:auto;z-index:3;opacity:0;pointer-events:none;transition:opacity .45s ease}
+.reel .frame.started .reel-pc{opacity:1;pointer-events:auto}
+.reel .frame.playing.idle .reel-pc{opacity:0;pointer-events:none}
+.reel .frame.playing.idle{cursor:none}
+.reel-pc .tm{min-width:92px}
+.reel .frame:fullscreen{width:100vw;height:100vh;aspect-ratio:auto;max-height:none}
+.reel .frame:-webkit-full-screen{width:100vw;height:100vh}
+/* the showreel holds still for a moment before the page carries on */
+.reel-pin{height:calc(56.25vw + 55vh)}
+.reel-pin .frame{position:sticky;top:max(0px,calc((100vh - 56.25vw) / 2))}
+@media (max-width:760px){.reel-pin{height:calc(56.25vw + 30vh)}.reel-pc .tm{display:none}.reel-pc{gap:8px}.reel-pc button{width:38px;height:38px}}
+.fm-n{display:inline-block;text-align:right;font-variant-numeric:tabular-nums;transition:text-shadow .4s}
+.fm-n.counting{text-shadow:0 0 18px rgba(240,195,90,.45)}

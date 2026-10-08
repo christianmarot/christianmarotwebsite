@@ -47,33 +47,59 @@
     io.unobserve(e.target);
   }), { rootMargin: '400px' });
   // showreel: Vimeo's own bar hidden; a play / pause symbol of ours appears when you hover over the film
+  // showreel: Vimeo's own bar hidden. Ours: a hollow play button, then a scrub bar, sound and full screen
   function customReel(el) {
-    const frame = el.parentElement, btn = $('.reel-play', frame), icon = $('path', btn);
+    const frame = el.closest('.frame'), btn = $('.reel-play', frame), pc = $('.reel-pc', frame);
     const f = document.createElement('iframe');
     f.src = `https://player.vimeo.com/video/${VIDEOS[el.dataset.embed]}?controls=0&title=0&byline=0&portrait=0&dnt=1&playsinline=1&autopause=1`;
     f.title = el.dataset.title || 'Showreel'; f.allow = 'autoplay; fullscreen; picture-in-picture'; f.tabIndex = -1;
     el.appendChild(f);
     const start = () => {
-      const pl = new Vimeo.Player(f); let playing = false;
-      const set = on => { playing = on; frame.classList.toggle('playing', on); icon.setAttribute('d', on ? ICON.pause : ICON.play); btn.setAttribute('aria-label', on ? 'Pause the showreel' : 'Play the showreel'); };
+      const pl = new Vimeo.Player(f); let playing = false, dur = 0, muted = false, dragging = false, idleT;
+      const playI = $('.rp-play path', pc), muteI = $('.rp-mute path', pc), bar = $('.bar', pc), fill = $('b', bar), knob = $('s', bar), tm = $('.tm', pc);
+      const show = t => { const p = dur ? t / dur : 0; fill.style.width = knob.style.left = (p * 100) + '%'; tm.textContent = `${fmt(t)} / ${fmt(dur)}`; bar.setAttribute('aria-valuenow', Math.round(p * 100)); };
+      const wake = () => { frame.classList.remove('idle'); clearTimeout(idleT); if (playing) idleT = setTimeout(() => frame.classList.add('idle'), 2600); };
+      const set = on => { playing = on; frame.classList.toggle('playing', on); frame.classList.add('started'); playI.setAttribute('d', on ? ICON.pause : ICON.play); $('.rp-play', pc).setAttribute('aria-label', on ? 'Pause' : 'Play'); btn.setAttribute('aria-label', on ? 'Pause the showreel' : 'Play the showreel'); wake(); };
+      pl.getDuration().then(d => { dur = d; show(0); }).catch(() => {});
+      pl.on('timeupdate', d => { dur = d.duration || dur; if (!dragging) show(d.seconds); });
       pl.on('play', () => set(true)); pl.on('pause', () => set(false)); pl.on('ended', () => set(false));
-      btn.addEventListener('click', () => { if (playing) pl.pause(); else { pl.setVolume(1).catch(() => {}); pl.play().catch(() => {}); } });
+      const toggle = () => { if (playing) pl.pause(); else { if (!muted) pl.setVolume(1).catch(() => {}); pl.play().catch(() => {}); } };
+      btn.addEventListener('click', toggle); $('.rp-play', pc).addEventListener('click', toggle);
+      $('.rp-mute', pc).addEventListener('click', () => { muted = !muted; pl.setMuted(muted).catch(() => {}); if (!muted) pl.setVolume(1).catch(() => {}); muteI.setAttribute('d', muted ? ICON.muted : ICON.sound); $('.rp-mute', pc).setAttribute('aria-label', muted ? 'Turn sound on' : 'Mute'); });
+      const seekTo = x => { const r = bar.getBoundingClientRect(), t = clamp((x - r.left) / r.width, 0, 1) * dur; show(t); return t; };
+      bar.addEventListener('pointerdown', e => { dragging = true; bar.classList.add('drag'); bar.setPointerCapture(e.pointerId); seekTo(e.clientX); });
+      bar.addEventListener('pointermove', e => { if (dragging) seekTo(e.clientX); });
+      bar.addEventListener('pointerup', e => { if (!dragging) return; dragging = false; bar.classList.remove('drag'); pl.setCurrentTime(seekTo(e.clientX)).catch(() => {}); });
+      bar.addEventListener('keydown', e => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') pl.getCurrentTime().then(t => pl.setCurrentTime(clamp(t + (e.key === 'ArrowRight' ? 5 : -5), 0, dur))); });
+      // full screen: the whole frame (so our controls come too); phones without that fall back to Vimeo's own
+      $('.rp-fs', pc).addEventListener('click', () => {
+        const d = document;
+        if (d.fullscreenElement || d.webkitFullscreenElement) (d.exitFullscreen || d.webkitExitFullscreen).call(d);
+        else if (frame.requestFullscreen) frame.requestFullscreen().catch(() => pl.requestFullscreen().catch(() => {}));
+        else if (frame.webkitRequestFullscreen) frame.webkitRequestFullscreen();
+        else pl.requestFullscreen().catch(() => {});
+      });
+      ['mousemove', 'pointerdown', 'keydown'].forEach(ev => frame.addEventListener(ev, wake, { passive: true }));
       // pause it if you scroll away while it's playing
       new IntersectionObserver(es => { if (!es[0].isIntersecting && playing) pl.pause(); }, { threshold: .15 }).observe(frame);
     };
     if (window.Vimeo && Vimeo.Player) start();
-    else { const s = document.createElement('script'); s.src = 'https://player.vimeo.com/api/player.js'; s.onload = start; s.onerror = () => { btn.hidden = true; f.src = f.src.replace('controls=0&', ''); }; document.head.appendChild(s); }
+    else { const sc = document.createElement('script'); sc.src = 'https://player.vimeo.com/api/player.js'; sc.onload = start; sc.onerror = () => { btn.hidden = pc.hidden = true; f.src = f.src.replace('controls=0&', ''); }; document.head.appendChild(sc); }
   }
   $$('[data-embed]').forEach(el => io.observe(el));
 
   /* ---------- Showreel: the film sits still underneath and is uncovered as the page above slides away ---------- */
   const reelF = $('.reel .frame'), reelIn = $('.reel .frame-in');
   if (reelF && reelIn && !reduce) {
+    reelF.addEventListener('fullscreenchange', () => { reelIn.style.transform = reelIn.style.filter = ''; });
     const reelFx = () => {
       const r = reelF.getBoundingClientRect(), T = Math.max(0, (innerHeight - r.height) / 2);
       const d = clamp(r.top - T, 0, innerHeight), p = d / Math.max(1, innerHeight - T);
-      reelIn.style.transform = d ? `translateY(${(-d).toFixed(1)}px) scale(${(1 + 0.1 * p).toFixed(4)})` : '';
-      reelIn.style.filter = d ? `brightness(${(1 - 0.45 * p).toFixed(3)})` : '';
+      // …it then holds in place for a moment (sticky, see .reel-pin), and once the page moves on it slowly
+      // blurs and darkens as Projects takes over the screen, like the landing film
+      const out = clamp((T - r.top - r.height * .3) / (r.height * .7 + innerHeight * .25), 0, 1);
+      reelIn.style.transform = d ? `translateY(${(-d).toFixed(1)}px) scale(${(1 + 0.1 * p).toFixed(4)})` : out ? `scale(${(1 + .04 * out).toFixed(4)})` : '';
+      reelIn.style.filter = d ? `brightness(${(1 - 0.45 * p).toFixed(3)})` : out ? `blur(${(out * 12).toFixed(1)}px) brightness(${(1 - .6 * out).toFixed(3)})` : '';
     };
     addEventListener('scroll', reelFx, { passive: true }); addEventListener('resize', reelFx); reelFx();
   }
@@ -291,10 +317,36 @@
     bo.observe(rowsEl);
   }
 
+  /* ---------- Field Map: numbers from the credits board; the yellow one counts up like an arcade score ---------- */
+  const fmS = $('#fmShoots'), fmC = $('#fmCountries');
+  if (fmS && has('DIARY') && has('PLACES')) {
+    const nShoots = DIARY.length, set = new Set();
+    DIARY.forEach(r => (PLACES[r.dest] || []).forEach(p => set.add(p[1])));
+    const nC = set.size || +fmC.textContent;
+    fmS.textContent = nShoots; fmC.textContent = nC;
+    fmC.style.minWidth = String(nC).length + 'ch';
+    if (!reduce) {
+      fmC.textContent = '00'.slice(0, String(nC).length);
+      const run = () => {
+        const t0 = performance.now(), dur = 1500, w = String(nC).length;
+        fmC.classList.add('counting');
+        const tick = now => {
+          const t = clamp((now - t0) / dur, 0, 1), v = Math.max(1, Math.round((1 - Math.pow(1 - t, 3)) * nC));
+          // most frames show the count; now and then a frame flickers random digits, like an old scoreboard
+          fmC.textContent = t < 1 && Math.random() < .3 ? String(Math.floor(Math.random() * Math.pow(10, w))).padStart(w, '0') : String(v);
+          if (t < 1) requestAnimationFrame(tick); else { fmC.textContent = nC; fmC.classList.remove('counting'); }
+        };
+        requestAnimationFrame(tick);
+      };
+      const co = new IntersectionObserver(es => { if (es[0].isIntersecting) { co.disconnect(); setTimeout(run, 250); } }, { threshold: .6 });
+      co.observe(fmC.closest('h2'));
+    }
+  }
+
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261009e';
+    const FMV = '20261009f';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();

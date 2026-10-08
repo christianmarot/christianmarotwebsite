@@ -17,8 +17,6 @@
   };
   const rg = document.getElementById('fmRange'); if (rg) rg.textContent = boardRange(DIARY);
   const ns = document.getElementById('fmShoots'), nc = document.getElementById('fmCountries');
-  if (ns) ns.textContent = words(DIARY.length).replace(/^./, c => c.toUpperCase());
-  if (nc) nc.textContent = words(countries.size);
 
   const land = topojson.merge(TOPO110, TOPO110.objects.countries.geometries), grat = d3.geoGraticule10();
   const ND = DOTS.length / 2, dLon = new Float32Array(ND), dCos = new Float32Array(ND), dSin = new Float32Array(ND);
