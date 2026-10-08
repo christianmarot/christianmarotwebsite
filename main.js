@@ -47,6 +47,18 @@
   }), { rootMargin: '400px' });
   $$('[data-embed]').forEach(el => io.observe(el));
 
+  /* ---------- Showreel: the film sits still underneath and is uncovered as the page above slides away ---------- */
+  const reelF = $('.reel .frame'), reelIn = $('.reel .frame-in');
+  if (reelF && reelIn && !reduce) {
+    const reelFx = () => {
+      const r = reelF.getBoundingClientRect(), T = Math.max(0, (innerHeight - r.height) / 2);
+      const d = clamp(r.top - T, 0, innerHeight), p = d / Math.max(1, innerHeight - T);
+      reelIn.style.transform = d ? `translateY(${(-d).toFixed(1)}px) scale(${(1 + 0.1 * p).toFixed(4)})` : '';
+      reelIn.style.filter = d ? `brightness(${(1 - 0.45 * p).toFixed(3)})` : '';
+    };
+    addEventListener('scroll', reelFx, { passive: true }); addEventListener('resize', reelFx); reelFx();
+  }
+
   /* ---------- Highlight lists + "Other Work" dropdowns ---------- */
   $$('[data-hl]').forEach(list => {
     const items = [...list.children]; let hovering = false;
@@ -212,7 +224,7 @@
   const rowsEl = $('#boardRows');
   if (rowsEl && has('DIARY')) {
     $('#updated').textContent = LAST_UPDATED;
-    const cls = s => /nda/i.test(s) ? 'nda' : /released/i.test(s) ? 'rel' : 'prod';
+    const cls = s => /nda/i.test(s) ? 'nda' : /released/i.test(s) ? 'rel' : /production/i.test(s) ? 'prod' : 'soon';   // colours: released green, in production blue, coming soon yellow, NDA red
     const CH = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789·/–';
     let run = 0;
     // Each row "reads out" in turn, top to bottom; letters settle left to right like a split-flap board.
@@ -258,6 +270,22 @@
     // play the read-out once when the board first scrolls into view
     const bo = new IntersectionObserver(es => { if (es[0].isIntersecting) { flapRows(); bo.disconnect(); } }, { threshold: 0.3 });
     bo.observe(rowsEl);
+  }
+
+  /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
+  const fmBox = $('#fmGlobe');
+  if (fmBox) {
+    const FMV = '20261009b';
+    const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
+    const lo = new IntersectionObserver(async es => {
+      if (!es[0].isIntersecting) return; lo.disconnect();
+      try {
+        if (!window.d3) await load('https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js');
+        if (!window.topojson) await load('https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js');
+        for (const f of ['geo', 'sky', 'teaser']) await load(`fieldmap/${f}.js?v=${FMV}`);
+      } catch (e) { fmBox.classList.add('off'); }
+    }, { rootMargin: '900px' });
+    lo.observe(fmBox);
   }
 
   /* =====================================================================
