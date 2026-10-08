@@ -389,3 +389,6 @@ body.lb-open{overflow:hidden}
 #index{position:relative}#index>*:not(.drift){position:relative;z-index:1}
 .menu>*:not(.drift){position:relative;z-index:1}
 @media (prefers-reduced-motion:reduce){.drift{display:none}}
+/* on the Field Map screen the clouds drift in front of the globe (faintly), behind the words */
+.fm .fm-drift{z-index:2}
+.fm .fm-text{z-index:3}

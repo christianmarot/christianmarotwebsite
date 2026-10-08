@@ -323,10 +323,9 @@
     // Each cloud image is painted once, in the background, from swirled layered noise and lit from the
     // upper left: bright tops, soft grey undersides, wispy edges (top-down, like the Field Map's weather).
     const idle = f => (window.requestIdleCallback ? requestIdleCallback(f, { timeout: 2500 }) : setTimeout(f, 400));
-    const paintCloud = (seed, w, h) => {
-      const c = document.createElement('canvas'); c.width = w; c.height = h;
-      const g = c.getContext('2d'), img = g.createImageData(w, h), D = img.data;
-      const hash = (x, y) => { const s = Math.sin(x * 127.1 + y * 311.7 + seed * 74.7) * 43758.5453; return s - Math.floor(s); };
+    // The pixels are worked out on a background thread (a Web Worker), so the page never waits on them
+    const WORKER = `onmessage = e => { const { seed, w, h } = e.data, D = new Uint8ClampedArray(w * h * 4);
+    const hash = (x, y) => { const s = Math.sin(x * 127.1 + y * 311.7 + seed * 74.7) * 43758.5453; return s - Math.floor(s); };
       const noise = (x, y) => { const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi;
         const u = xf * xf * xf * (xf * (xf * 6 - 15) + 10), v = yf * yf * yf * (yf * (yf * 6 - 15) + 10);
         const a = hash(xi, yi), b = hash(xi + 1, yi), c2 = hash(xi, yi + 1), d = hash(xi + 1, yi + 1);
@@ -345,18 +344,39 @@
         const i4 = (y * w + x) * 4, base = 150 + 104 * lit;
         D[i4] = base; D[i4 + 1] = base + 2; D[i4 + 2] = base + 6; D[i4 + 3] = a * 255;
       } };
-      // a few rows at a time, only while the browser is idle, so scrolling never stutters
-      return new Promise(ok => {
-        let y = 0;
-        const slice = dl => {
-          const until = performance.now() + Math.min(12, dl && dl.timeRemaining ? Math.max(4, dl.timeRemaining()) : 10);
-          while (y < h && performance.now() < until) row(y++);
-          if (y < h) idle(slice);
-          else { g.putImageData(img, 0, 0); c.toBlob(b => ok(b ? URL.createObjectURL(b) : c.toDataURL()), 'image/png'); }
-        };
+      for (let y = 0; y < h; y++) row(y);
+      postMessage({ D, w, h }, [D.buffer]); };`;
+    let worker = null;
+    try { worker = new Worker(URL.createObjectURL(new Blob([WORKER], { type: 'text/javascript' }))); } catch (_) {}
+    const toURL = (D, w, h) => new Promise(ok => { const c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').putImageData(new ImageData(D, w, h), 0, 0); c.toBlob(b => ok(b ? URL.createObjectURL(b) : c.toDataURL()), 'image/png'); });
+    const paintCloud = (seed, w, h) => new Promise(ok => {
+      if (worker) { worker.onmessage = e => ok(toURL(e.data.D, e.data.w, e.data.h)); worker.postMessage({ seed, w, h }); }
+      else { // no workers: paint in small idle slices instead
+        const D = new Uint8ClampedArray(w * h * 4);
+      const hash = (x, y) => { const s = Math.sin(x * 127.1 + y * 311.7 + seed * 74.7) * 43758.5453; return s - Math.floor(s); };
+        const noise = (x, y) => { const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi;
+          const u = xf * xf * xf * (xf * (xf * 6 - 15) + 10), v = yf * yf * yf * (yf * (yf * 6 - 15) + 10);
+          const a = hash(xi, yi), b = hash(xi + 1, yi), c2 = hash(xi, yi + 1), d = hash(xi + 1, yi + 1);
+          return a + (b - a) * u + (c2 - a) * v + (a - b - c2 + d) * u * v; };
+        const fbm = (x, y, o) => { let s = 0, a = .5, n = 0; for (let k = 0; k < o; k++) { s += a * noise(x, y); n += a; x = x * 2.02 + 17.3; y = y * 2.02 + 9.1; a *= .5; } return s / n; };
+        const sc = w / 7;                                         // feature size
+        const row = y => { for (let x = 0; x < w; x++) {
+          const px = x / sc, py = y / sc;
+          const wx = fbm(px * .6 + 3.1, py * .6 + 7.7, 3), wy = fbm(px * .6 + 9.4, py * .6 + 1.3, 3);   // swirl
+          const qx = px + (wx - .5) * 1.0, qy = py + (wy - .5) * 1.0;
+          const n = fbm(qx, qy, 7), nl = fbm(qx - .12, qy - .16, 5);                                  // density + a step towards the light
+          const ex = (x / w - .5) * 2, ey = (y / h - .5) * 2, m = Math.max(0, 1 - (ex * ex + ey * ey * 1.25));
+          const dens = n * (.25 + 1.1 * Math.pow(m, .7));
+          let a = (dens - .38) / .28; a = a < 0 ? 0 : a > 1 ? 1 : a; a = a * a * (3 - 2 * a);
+          let lit = .62 + (n - nl) * 4.2 + (dens - .5) * .5; lit = lit < 0 ? 0 : lit > 1 ? 1 : lit;
+          const i4 = (y * w + x) * 4, base = 150 + 104 * lit;
+          D[i4] = base; D[i4 + 1] = base + 2; D[i4 + 2] = base + 6; D[i4 + 3] = a * 255;
+        } };
+          let y = 0;
+        const slice = () => { const until = performance.now() + 8; while (y < h && performance.now() < until) row(y++); if (y < h) idle(slice); else ok(toURL(D, w, h)); };
         idle(slice);
-      });
-    };
+      }
+    });
     const mouse = { x: -1e4, y: -1e4 };
     addEventListener('pointermove', e => { mouse.x = e.clientX; mouse.y = e.clientY; }, { passive: true });
     // paint one image per idle moment so nothing ever janks
@@ -368,10 +388,14 @@
     function start() {
       drifts.forEach((box, bi) => {
         const n = +box.dataset.clouds || 2, alpha = +box.dataset.alpha || 1, inMenu = !!box.closest('.menu');
+        // evenly spaced around one loop that runs from just off the left edge to just off the right, all at the
+        // same pace — so as one leaves on the right another is already coming in on the left, and they never bunch
+        const L0 = -.45, SPAN = 1.9, V = .0065 + bi * .0007;
+        let seed = 7 + bi * 31; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+        const reshape = c => { c.y = .08 + rnd() * .84; c.s = 1 + rnd() * .8; c.a = (.14 + rnd() * .07) * alpha; c.flip = rnd() < .5; c.el.src = sprites[Math.floor(rnd() * sprites.length)]; };
         const clouds = Array.from({ length: n }, (_, i) => {
-          const el = new Image(); el.src = sprites[(i + bi) % 3]; el.alt = ''; el.decoding = 'async'; box.appendChild(el);
-          return { el, x: (i + .25) / n + bi * .17, y: .12 + ((i * 37 + bi * 19) % 76) / 100, s: 1.1 + ((i * 13 + bi * 7) % 9) / 12,
-                   v: .005 + ((i * 7 + bi) % 5) / 1100, a: (.15 + ((i * 11) % 5) / 90) * alpha, px: 0, py: 0, fade: 1, flip: (i + bi) % 2 };
+          const el = new Image(); el.alt = ''; el.decoding = 'async'; box.appendChild(el);
+          const c = { el, x: L0 + (i + rnd() * .3) * SPAN / n, px: 0, py: 0, fade: 1 }; reshape(c); return c;
         });
         let on = false, last = performance.now();
         const tick = now => {
@@ -379,7 +403,7 @@
           const dt = Math.min(.05, (now - last) / 1000); last = now;
           const r = box.getBoundingClientRect();
           clouds.forEach(c => {
-            c.x += c.v * dt; if (c.x > 1.3) c.x = -.4;               // drift slowly across, wrap round
+            c.x += V * dt; if (c.x > L0 + SPAN) { c.x -= SPAN; reshape(c); }   // drift slowly across; re-enter on the left as a new cloud
             const w = Math.min(760, 520 * c.s * Math.max(.75, r.width / 1500)), cx = r.left + c.x * r.width, cy = r.top + c.y * r.height;
             const dx = cx - mouse.x, dy = cy - mouse.y, dist = Math.hypot(dx, dy), reach = w * .6;
             const f = dist < reach ? (1 - dist / reach) : 0;           // the cursor parts them, then they ease back
@@ -428,7 +452,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261009k';
+    const FMV = '20261009n';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();
