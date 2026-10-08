@@ -62,9 +62,9 @@ const DOCUMENTARIES = [
     description: "Paleoanthropologist Ella Al-Shamahi reveals humanity’s incredible story across 300,000 years of human evolution and how – thanks to new discoveries – we’re learning that the story is stranger and more surprising than we ever imagined. When Homo sapiens emerged in Africa we were not alone: there were at least six other human species alive at the time. Human examines how we went from being just one of many types of human to the dominant form of life on the planet."
   },
   {
-    title: "Day of the Camel", for: "TBC", role: "Cinematographer", date: "TBC",
+    title: "Day of the Camel", for: "The Edge", role: "Cinematographer", date: "Coming Soon",
     image: "images/day-of-the-camel.jpg",
-    description: "Project under NDA, more info coming soon."
+    description: "Filming over five months, Day of the Camel is a feature documentary exploring the connection between humans and camels across the world, from Kenya to Mongolia, and Saudi Arabia to India. My role on the project was almost exclusively shooting on long lens (CN20), cross-shooting every scene, picking up moments of emotion and connection, and covering some high-octane races and camel events. Aside from the CN20, the entire project was shot on anamorphics, including the aerials. Other kit included RED Raptors, DJI RS4 gimbal, DJI 4D, Inspire 3 and a Mavic 4 Pro."
   },
   {
     title: "The Earthshot Prize", for: "BBC", role: "1st AC", date: "2021",
@@ -172,7 +172,7 @@ const OTHER_WORK = {
    the World, Planet Pet …) are listed here shoot by shoot — keep them split.   */
 const LAST_UPDATED = "October 2026";
 const DIARY = [
-  { dates: "Oct 2026",          project: "Day of the Camel",          dest: "Saudi Arabia",            for: "The Edge",                      role: "Cinematographer",                   status: "Under NDA" },
+  { dates: "Oct 2026",          project: "Day of the Camel",          dest: "Saudi Arabia",            for: "The Edge",                      role: "Cinematographer",                   status: "Coming soon" },
   { dates: "Sept 2026",         project: "Planet Pet",                dest: "Switzerland",             for: "Wildstar · Nat Geo / Disney+",  role: "Focus Puller / Drone Operator",     status: "In production" },
   { dates: "Sept 2026",         project: "Dinner to Save the World",  dest: "Dumfries, Scotland",      for: "PBS",                           role: "Camera Operator / Focus Puller",      status: "In production" },
   { dates: "Aug – Sept 2026",    project: "Planet Pet",                dest: "California, USA",         for: "Wildstar · Nat Geo / Disney+",  role: "Focus Puller / Drone Operator",     status: "In production" },
@@ -182,11 +182,11 @@ const DIARY = [
   { dates: "Jun – Jul 2026",     project: "Dinner to Save the World",  dest: "France",                  for: "PBS",                           role: "Camera Operator / Focus Puller",      status: "In production" },
   { dates: "Jun 2026",          project: "Dinner to Save the World",  dest: "London, UK",              for: "PBS",                           role: "Camera Operator / Focus Puller",      status: "In production" },
   { dates: "Jun 2026",            project: "Just a Fly",                dest: "London & Exeter, UK",                       for: "Razorbill Films · Short film",  role: "Focus Puller",                      status: "Coming soon" },
-  { dates: "May – Jun 2026",     project: "Day of the Camel",          dest: "Saudi Arabia",            for: "The Edge",                      role: "Cinematographer",                   status: "Under NDA" },
-  { dates: "Mar 2026",           project: "Day of the Camel",          dest: "India",                   for: "The Edge",                      role: "Cinematographer",                   status: "Under NDA" },
-  { dates: "Jan – Feb 2026",    project: "Day of the Camel",          dest: "Mongolia",                for: "The Edge",                      role: "Cinematographer",                   status: "Under NDA" },
-  { dates: "Jan 2026",          project: "Day of the Camel",          dest: "Kenya",                   for: "The Edge",                      role: "Cinematographer",                   status: "Under NDA" },
-  { dates: "Nov – Dec 2025",     project: "Day of the Camel",          dest: "Saudi Arabia",            for: "The Edge",                      role: "Cinematographer",                   status: "Under NDA" },
+  { dates: "May – Jun 2026",     project: "Day of the Camel",          dest: "Saudi Arabia",            for: "The Edge",                      role: "Cinematographer",                   status: "Coming soon" },
+  { dates: "Mar 2026",           project: "Day of the Camel",          dest: "India",                   for: "The Edge",                      role: "Cinematographer",                   status: "Coming soon" },
+  { dates: "Jan – Feb 2026",    project: "Day of the Camel",          dest: "Mongolia",                for: "The Edge",                      role: "Cinematographer",                   status: "Coming soon" },
+  { dates: "Jan 2026",          project: "Day of the Camel",          dest: "Kenya",                   for: "The Edge",                      role: "Cinematographer",                   status: "Coming soon" },
+  { dates: "Nov – Dec 2025",     project: "Day of the Camel",          dest: "Saudi Arabia",            for: "The Edge",                      role: "Cinematographer",                   status: "Coming soon" },
   { dates: "Sept – Oct 2025",         project: "Animal Oddballs",           dest: "Seychelles",              for: "Wildstar · Nat Geo / Disney+",  role: "Cinematographer",                   status: "Coming soon" },
   { dates: "May 2025",                project: "Home: Asia",                dest: "Wadi Rum, Jordan",        for: "BBC NHU · National Geographic", role: "Cinematographer",                   status: "Coming soon" },
   { dates: "Apr – Nov 2025",          project: "Wild London",               dest: "London, UK",              for: "Passion Planet · BBC",          role: "Cinematographer",                   status: "Released" },
@@ -260,8 +260,9 @@ const HOME = ["London", "United Kingdom", -0.12, 51.51];
    Key: "Project — Destination" exactly as in DIARY (for one shoot), or just "Project" (for every shoot of it).
    Shoots marked "Under NDA" never show a description. */
 const CV_NOTES = {
+  "Day of the Camel": "Filming over five months, Day of the Camel is a feature documentary exploring the connection between humans and camels across the world, from Kenya to Mongolia, and Saudi Arabia to India. My role on the project was almost exclusively shooting on long lens (CN20), cross-shooting every scene, picking up moments of emotion and connection, and covering some high-octane races and camel events. Aside from the CN20, the entire project was shot on anamorphics, including the aerials. Other kit included RED Raptors, DJI RS4 gimbal, DJI 4D, Inspire 3 and a Mavic 4 Pro.",
   "Planet Pet": "Planet Pet takes a deep dive into the bodies and minds of the animals closest to us: our pets. Filmed across the UK, California and Switzerland. Kit included RED V Raptor, Sigma Primes, Ronin 4D & Typoch Simera Primes, Inspire 3 & Mavic 4 Pro.",
-  "Jodi Arias (Miniatures)": "Focus pulling for Simon De Glanville on a Netflix true crime documentary about Jodi Arias, produced by Dorothy Street Pictures. Based out of 69 Drop Studios, we spent a week filming a miniature set of the crime scene using a RED Raptor on a 6-axis motion-control rig with Contax Primes & Laowa Probe2Probes.",
+  "Jodi Arias (Miniatures)": "Focus pulling for Simon De Glanville on a Netflix true crime documentary produced by Dorothy Street Pictures, about the murderer Jodi Arias. Based out of 69 Drop Studios, we spent a week filming a miniature set of the crime scene using a RED Raptor on a 6-axis motion-control rig with Contax Primes & Laowa Probe2Probes.",
   "Dinner to Save the World": "Dinner to Save the World (PBS), presented by M. Sanjayan and Sam Kass, looks at how the global food industry contributes to climate change. The series shows how changing the way we farm, process and eat food can help build a more sustainable future. Between June and September 2026 we filmed in the UK, France, Norway & Scotland with a Sony FX6, Ronin 4D, Typoch Simera Primes & Angenieux EZ Zooms.",
   "Just a Fly": "Focus pulling for Ruben Woodin Dechamps on the short film ‘Just a Fly’, produced by Iian Mitchell. Just a Fly questions the sentience of flies — should they be treated any differently to any other being? Many of the interviews and scenes were shot as a fly POV. Kit included RED Raptor and specialist fisheye lenses: Century Optics (S16) 3.5mm, Laowa 8-15mm PL Fisheye & the Laowa Probe 24mm T14.",
   "Animal Oddballs — Seychelles": "Operating 2nd Unit, filming White Terns on an uninhabited island in the Seychelles for ‘Animal Oddballs’ with Ryan Reynolds. Filming the behaviour brought creative challenges, including high-speed ‘egg drops’ with a camera falling at the same pace as the eggs — a Raptor with a Probe2b, on an RS4 gimbal, on a Teris Mini Jib. The shoot also needed aerials (Inspire 3) and remote cameras (FR7s) mounted in trees to monitor nests. On the ground my unit shot polished slider shots of the nest locations and built a montage sequence using Disney’s ‘Up’ as a reference.",
