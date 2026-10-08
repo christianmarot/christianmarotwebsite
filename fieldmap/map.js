@@ -314,11 +314,11 @@
   over.addEventListener('pointerdown', e => {
     const rect0 = over.getBoundingClientRect();
     if (blowable) beginHold(e.clientX - rect0.left, e.clientY - rect0.top);
-    if (!exploring) { if (blowable) over.setPointerCapture(e.pointerId); return; }
+    if (!exploring) { if (blowable) try { over.setPointerCapture(e.pointerId); } catch (_) {} return; }
     ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (ptrs.size === 1) { dragging = { x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY, t: performance.now(), moved: 0, touch: e.pointerType === 'touch' }; user.vx = user.vy = 0; }
     if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; dragging = { pinch: Math.hypot(a.x - b.x, a.y - b.y), k: user.tk }; }
-    over.setPointerCapture(e.pointerId);
+    try { over.setPointerCapture(e.pointerId); } catch (_) {}
   });
   over.addEventListener('pointermove', e => {
     const rect = over.getBoundingClientRect(), x = e.clientX - rect.left, y = e.clientY - rect.top;
@@ -336,7 +336,7 @@
     if (dragging.moved > 4) { stage.classList.add('dragging'); if (!wind.hold) clearTimeout(holdT); }
     if (wind.hold) return;
     const f = DEG / cam.R;
-    const dl = -dx * f, db = dragging.touch ? 0 : dy * f;
+    const dl = -dx * f, db = dy * f;
     user.lon = user.tl = lonWrap(user.lon + dl); user.lat = user.tb = clamp(user.lat + db, -70, 78);
     const now = performance.now(), dt = Math.max(8, now - dragging.t); dragging.t = now;
     user.vx = lerp(user.vx, dl / dt * 16, .5); user.vy = lerp(user.vy, db / dt * 16, .5);
@@ -625,6 +625,7 @@
     $$('.rail button').forEach((b, i) => b.classList.toggle('on', i === ({ a: 0, b: 1, c: 2, x: 3 })[mode]));
     show($('.rail'), mode !== 'x');
     show(blowBtn, blowable);
+    stage.classList.toggle('explore', mode === 'x');   // in explore, a finger turns the globe every way (the page stops scrolling under it)
     if (mode !== 'x' && !pop.hidden) closePop();
     if (mode === 'b') {
       setCard(curStop);

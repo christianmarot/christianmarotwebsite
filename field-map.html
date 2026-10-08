@@ -41,6 +41,7 @@ a{color:inherit}
 #globe,#gl,#over{position:absolute;inset:0;width:100%;height:100%;display:block}
 #globe,#gl{pointer-events:none}
 #over{touch-action:pan-y}
+.stage.explore #over{touch-action:none}
 .stage.dragging #over{cursor:grabbing}
 .fog{position:absolute;inset:0;pointer-events:none;background:radial-gradient(120% 90% at 50% 50%,transparent 55%,rgba(5,7,6,.65));}
 
@@ -258,7 +259,7 @@ a{color:inherit}
 
       <div class="ov xp-top off" id="xpTop">
         <div class="eyebrow">Explore · drag the globe, tap a pin</div>
-        <h2>Where the work has been</h2>
+        <h2>Explore the field map</h2>
         <div class="chips" id="chips" role="group" aria-label="Filter by status"></div>
         <div><button class="btn listbtn" type="button" id="listBtn" aria-expanded="false">All locations</button></div>
       </div>
@@ -294,12 +295,12 @@ a{color:inherit}
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
-<script src="data.js?v=20261009g"></script>
-<script src="fieldmap/geo.js?v=20261009g"></script>
-<script src="fieldmap/geo50.js?v=20261009g"></script>
-<script src="fieldmap/earth.js?v=20261009g"></script>
-<script src="fieldmap/sky.js?v=20261009g"></script>
-<script src="fieldmap/map.js?v=20261009g"></script>
+<script src="data.js?v=20261009i"></script>
+<script src="fieldmap/geo.js?v=20261009i"></script>
+<script src="fieldmap/geo50.js?v=20261009i"></script>
+<script src="fieldmap/earth.js?v=20261009i"></script>
+<script src="fieldmap/sky.js?v=20261009i"></script>
+<script src="fieldmap/map.js?v=20261009i"></script>
 
 </body>
 </html>

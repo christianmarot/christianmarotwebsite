@@ -317,6 +317,65 @@
     bo.observe(rowsEl);
   }
 
+  /* ---------- A little weather on the home page: a few soft clouds that drift by and part around the cursor ---------- */
+  const drifts = $$('[data-clouds]');
+  if (drifts.length && !reduce) {
+    // paint a few cloud images once, from layered noise (top-down, like the Field Map's weather)
+    const paintCloud = seed => {
+      const w = 320, h = 190, c = document.createElement('canvas'); c.width = w; c.height = h;
+      const g = c.getContext('2d'), img = g.createImageData(w, h);
+      const hash = (x, y) => { const s = Math.sin(x * 127.1 + y * 311.7 + seed * 74.7) * 43758.5453; return s - Math.floor(s); };
+      const noise = (x, y) => { const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi, u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf);
+        const a = hash(xi, yi), b = hash(xi + 1, yi), c2 = hash(xi, yi + 1), d = hash(xi + 1, yi + 1);
+        return a + (b - a) * u + (c2 - a) * v + (a - b - c2 + d) * u * v; };
+      const fbm = (x, y) => { let s = 0, a = .5; for (let o = 0; o < 5; o++) { s += a * noise(x, y); x *= 2.03; y *= 2.03; a *= .5; } return s; };
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+        const nx = (x / w - .5) * 2, ny = (y / h - .5) * 2, mask = Math.max(0, 1 - (nx * nx * .9 + ny * ny * 1.15));
+        const n = fbm(x / 52, y / 52), d = n * (.3 + 1.05 * Math.sqrt(mask));
+        const a = Math.min(1, Math.max(0, (d - .42) / .3));
+        const lit = Math.min(1, Math.max(0, .8 + (n - fbm(x / 52 + .35, y / 52 + .5)) * 3));
+        const i = (y * w + x) * 4, col = 175 + 80 * lit;
+        img.data[i] = col; img.data[i + 1] = col; img.data[i + 2] = col + 4; img.data[i + 3] = a * a * 255;
+      }
+      g.putImageData(img, 0, 0); return c;
+    };
+    const mouse = { x: -1e4, y: -1e4 };
+    addEventListener('pointermove', e => { mouse.x = e.clientX; mouse.y = e.clientY; }, { passive: true });
+    const later = window.requestIdleCallback || (f => setTimeout(f, 300));
+    later(() => {
+      const sprites = [0, 1, 2].map(i => paintCloud(3 + i * 11));
+      drifts.forEach((box, bi) => {
+        const n = +box.dataset.clouds || 2;
+        const clouds = Array.from({ length: n }, (_, i) => {
+          const el = document.createElement('canvas'); el.width = 320; el.height = 190;
+          el.getContext('2d').drawImage(sprites[(i + bi) % 3], 0, 0); box.appendChild(el);
+          return { el, x: (i + .3) / n + (bi * .17), y: .15 + ((i * 37 + bi * 19) % 70) / 100, s: 1.4 + ((i * 13 + bi * 7) % 9) / 9, v: .006 + ((i * 7) % 5) / 900, a: (.2 + ((i * 11) % 6) / 70) * (+box.dataset.alpha || 1), px: 0, py: 0, fade: 1 };
+        });
+        let on = false, last = performance.now();
+        const tick = now => {
+          if (!on) return;
+          const dt = Math.min(.05, (now - last) / 1000); last = now;
+          const r = box.getBoundingClientRect();
+          clouds.forEach(c => {
+            c.x += c.v * dt; if (c.x > 1.25) c.x = -.35;            // drift slowly left to right, wrap round
+            const w = 320 * c.s * Math.max(.7, r.width / 1400), cx = r.left + c.x * r.width, cy = r.top + c.y * r.height;
+            // the cursor parts them: push away and thin out, then they ease back
+            const dx = cx - mouse.x, dy = cy - mouse.y, dist = Math.hypot(dx, dy), reach = w * .75;
+            const f = dist < reach ? (1 - dist / reach) : 0;
+            c.px += ((dist ? dx / dist : 0) * f * 90 - c.px) * Math.min(1, dt * 3);
+            c.py += ((dist ? dy / dist : 0) * f * 60 - c.py) * Math.min(1, dt * 3);
+            c.fade += ((1 - f * .7) - c.fade) * Math.min(1, dt * 4);
+            c.el.style.width = w + 'px';
+            c.el.style.transform = `translate(${(c.x * r.width - w / 2 + c.px).toFixed(1)}px, ${(c.y * r.height - w * .3 + c.py).toFixed(1)}px)`;
+            c.el.style.opacity = (c.a * c.fade).toFixed(3);
+          });
+          requestAnimationFrame(tick);
+        };
+        new IntersectionObserver(es => { on = es[0].isIntersecting; if (on) { last = performance.now(); requestAnimationFrame(tick); } }).observe(box);
+      });
+    });
+  }
+
   /* ---------- Field Map: numbers from the credits board; the yellow one counts up like an arcade score ---------- */
   const fmS = $('#fmShoots'), fmC = $('#fmCountries');
   if (fmS && has('DIARY') && has('PLACES')) {
@@ -346,7 +405,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261009g';
+    const FMV = '20261009i';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();
