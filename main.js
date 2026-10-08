@@ -392,10 +392,17 @@
         // same pace — so as one leaves on the right another is already coming in on the left, and they never bunch
         const L0 = -.45, SPAN = 1.9, V = .0065 + bi * .0007;
         let seed = 7 + bi * 31; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-        const reshape = c => { c.y = .08 + rnd() * .84; c.s = 1 + rnd() * .8; c.a = (.14 + rnd() * .07) * alpha; c.flip = rnd() < .5; c.el.src = sprites[Math.floor(rnd() * sprites.length)]; };
+        // two depths: nearer clouds are bigger, brighter and quicker; farther ones smaller, fainter and slower.
+        // Each depth is evenly spaced on its own, so the sky never empties — and every cloud also surges and
+        // lags a little on its own rhythm, so no two move quite alike
+        const reshape = c => { const near = c.layer === 0;
+          c.y = .08 + rnd() * .84; c.s = near ? 1.35 + rnd() * .5 : .85 + rnd() * .35; c.a = (near ? .15 + rnd() * .06 : .1 + rnd() * .05) * alpha;
+          c.flip = rnd() < .5; c.el.src = sprites[Math.floor(rnd() * sprites.length)]; c.ph = rnd() * 6.28; c.om = .05 + rnd() * .07; c.amp = .02 + rnd() * .03; };
+        const per = [Math.ceil(n / 2), Math.floor(n / 2)];
         const clouds = Array.from({ length: n }, (_, i) => {
           const el = new Image(); el.alt = ''; el.decoding = 'async'; box.appendChild(el);
-          const c = { el, x: L0 + (i + rnd() * .3) * SPAN / n, px: 0, py: 0, fade: 1 }; reshape(c); return c;
+          const layer = i % 2, j = Math.floor(i / 2), m = per[layer] || 1;
+          const c = { el, layer, sp: layer === 0 ? 1.3 : .7, x: L0 + (j + .5 * layer + rnd() * .2) * SPAN / m, px: 0, py: 0, fade: 1, t: 0 }; reshape(c); return c;
         });
         let on = false, last = performance.now();
         const tick = now => {
@@ -403,7 +410,8 @@
           const dt = Math.min(.05, (now - last) / 1000); last = now;
           const r = box.getBoundingClientRect();
           clouds.forEach(c => {
-            c.x += V * dt; if (c.x > L0 + SPAN) { c.x -= SPAN; reshape(c); }   // drift slowly across; re-enter on the left as a new cloud
+            c.t += dt; c.x += V * c.sp * (1 + Math.sin(c.t * c.om + c.ph) * c.amp * 12) * dt;   // own pace, gently surging and easing
+            if (c.x > L0 + SPAN) { c.x -= SPAN; reshape(c); }                                 // re-enter on the left as a new cloud
             const w = Math.min(760, 520 * c.s * Math.max(.75, r.width / 1500)), cx = r.left + c.x * r.width, cy = r.top + c.y * r.height;
             const dx = cx - mouse.x, dy = cy - mouse.y, dist = Math.hypot(dx, dy), reach = w * .6;
             const f = dist < reach ? (1 - dist / reach) : 0;           // the cursor parts them, then they ease back
@@ -452,7 +460,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261009n';
+    const FMV = '20261009o';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();
