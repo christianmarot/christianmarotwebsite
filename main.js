@@ -338,7 +338,7 @@
   const blocksHTML = (p, pi) => p.blocks.map(b => {
     const pa = `data-p="${pi}"`;
     switch (b.type) {
-      case 'feature': return `<div class="blk feat" ${pa}>${mkVideo(b)}</div>`;
+      case 'feature': return `<div class="blk feat big" ${pa}>${mkVideo(b)}</div>`;
       case 'secondary': return `<div class="blk b2x2" ${pa}>${(b.videos || []).slice(0, 4).map(v => mkVideo(v)).join('')}</div>`;
       case 'hvideo': return `<div class="blk hv" ${pa}>${mkVideo(b)}</div>`;
       case 'hphoto': return `<div class="blk hp" ${pa}><div class="it"><img src="${esc(b.image)}" alt="" loading="lazy"></div></div>`;
@@ -358,9 +358,8 @@
   let H = 0, panMax = 0, gatherLen = 0, rowTop = 200; const LEAD = 0.75;
   const stage = $('#wkStage');
   const layout = () => {
-    // project title sits at the top, under the menu bar; the blocks fill the space below it
     const hdr = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hdr')) || 92;
-    const top = hdr + wt.offsetHeight + (innerWidth < 760 ? 18 : 26), bottom = innerWidth < 760 ? 28 : 44;
+    const top = hdr + 8, bottom = innerWidth < 760 ? 120 : 150;
     H = Math.max(260, innerHeight - top - bottom);
     const fw = Math.round(H * 9 / 16), gap = 16;
     rowTop = top;     row.style.top = top + 'px'; row.style.gap = gap + 'px';
@@ -395,13 +394,24 @@
   };
 
   // scattered → grid, then sideways
-  // text and project labels rise straight up from below; clips arrive scattered from above and below
+  // entrances, by block:
+  //   text + project labels  → rise straight up from below
+  //   featured 9:16          → from below, starting small and growing to full size as it lands
+  //   4-tile                 → top pair drops in from behind the film above, bottom pair rises from below
+  //   anything else          → scattered above and below
+  // every clip also drifts in from the side with a slight tilt
+  const rnd = (i, k) => { const v = Math.sin(i * k) * 43758.5453; return v - Math.floor(v); };   // 0…1, fixed per item
   const seeds = items.map((el, i) => {
     if (el.classList.contains('txt') || el.classList.contains('sep')) return { x: 0, y: 1.25, r: 0, s: 0 };
-    // clips: some drop in from behind the film above, some rise from below
-    const x = Math.sin(i * 12.9898) * 43758.5453 % 1, y = Math.abs(Math.sin(i * 78.233) * 12543.123 % 1);
-    const up = i % 3 !== 1;   // two in three come from above
-    return { x, y: (up ? -1 : 1) * (0.4 + y * 0.8), r: Math.sin(i * 3.7) * 8, s: 0.22 };
+    const side = (rnd(i, 12.9898) * 2 - 1) * 1.3, tilt = (rnd(i, 3.7) * 2 - 1) * 9, lift = 0.5 + rnd(i, 78.233) * 0.55;
+    const blk = el.parentElement;
+    if (blk.classList.contains('big'))
+      return { x: side * 0.5, y: lift + 0.15, r: tilt * 0.6, s: 0.5 };
+    if (blk.classList.contains('b2x2') || blk.classList.contains('sph')) {
+      const top = [...blk.children].indexOf(el) < 2;
+      return { x: side, y: (top ? -1 : 1) * lift, r: tilt, s: 0.2 };
+    }
+    return { x: side, y: (i % 2 ? -1 : 1) * lift, r: tilt, s: 0.25 };
   });
   const wt = $('.wk-title'), wtG = $('#wtG'), wtN = $('#wtN');
   let curP = -1;
@@ -428,8 +438,7 @@
       el.style.transform = k < 0.001 ? '' : `translate(${(sd.x * sx * k).toFixed(1)}px, ${(sd.y * innerHeight * k).toFixed(1)}px) rotate(${(sd.r * k).toFixed(2)}deg) scale(${(1 - sd.s * k).toFixed(3)})`;
     });
     row.style.transform = `translateX(${(-pan * panMax).toFixed(1)}px)`;
-    // the project title only appears once the film (and its own title) has scrolled clear of the top
-    inStage = r.top < rowTop && r.bottom > innerHeight * 0.7;
+    inStage = r.top < innerHeight * 0.5 && r.bottom > innerHeight * 0.7;
     wt.style.opacity = inStage ? 1 : 0;
     // title = the project taking up most of the screen
     const cover = projects.map(() => 0);

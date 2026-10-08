@@ -346,5 +346,3 @@ body.lb-open{overflow:hidden}
 .sep::after{background:linear-gradient(to top,transparent,#3a403c 30%)}
 .sep span{position:static;transform:rotate(180deg);writing-mode:vertical-rl;background:none;padding:18px 0}
 @media (max-width:760px){.sep{margin:0 16px 0 0}.blk.txt{padding:0 4px 0 10px;gap:14px}.blk.txt p{line-height:1.6}}
-/* project title moves to the top, under the menu bar */
-.wk-title{top:calc(var(--hdr) + 4px);bottom:auto}
