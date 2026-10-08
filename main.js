@@ -107,11 +107,18 @@
   if (!reduce && (wordEls.length || photo)) {
     const upd = () => {
       // words light one by one, left to right, as each line rises past a point just above the middle of the screen
+      // (always in reading order: a word only lights once every word before it in the paragraph is lit)
       const line = innerHeight * 0.55;
+      let para = null, pr = null, L = 0, stop = false;
       wordEls.forEach(w => {
-        const r = w.getBoundingClientRect(), pr = w.parentElement.getBoundingClientRect();
-        const lh = r.height * 1.3, along = (r.left - pr.left) / Math.max(1, pr.width);
-        w.classList.toggle('lit', r.top + along * lh * 1.6 < line);
+        if (w.parentElement !== para) {
+          para = w.parentElement; pr = para.getBoundingClientRect(); stop = false;
+          L = parseFloat(getComputedStyle(para).lineHeight) || w.offsetHeight * 1.5;
+        }
+        const r = w.getBoundingClientRect(), along = (r.left - pr.left) / Math.max(1, pr.width);
+        const on = !stop && r.top + along * L * 0.9 < line;
+        if (!on) stop = true;
+        w.classList.toggle('lit', on);
       });
       if (photo) {
         const r = photo.getBoundingClientRect();
@@ -306,10 +313,13 @@
         // pause the film (and its sound) once you scroll into the page, resume when you come back
         new IntersectionObserver(es => { const v = es[0].intersectionRatio; if (v < 0.35) heroPlayer.pause(); else if (!paused || v > 0.9) heroPlayer.play().catch(() => {}); }, { threshold: [0, 0.35, 0.9] }).observe(heroEl);
       }
-      // titles + controls fade away after ~4.5s without mouse movement, and return on any movement
+      // titles + controls fade away after ~2.25s without mouse movement, and return on any movement
       let idleT;
-      const wake = () => { heroEl.classList.remove('idle'); clearTimeout(idleT); idleT = setTimeout(() => { if (!heroEl.contains(document.activeElement) || document.activeElement === document.body) heroEl.classList.add('idle'); }, 4500); };
-      ['mousemove', 'pointerdown', 'touchstart', 'keydown', 'wheel'].forEach(ev => addEventListener(ev, wake, { passive: true }));
+      // (scrolling counts as activity, so coming back up to the film shows the titles again, then they fade;
+      //  a button only holds them on screen while it has keyboard focus, not after a mouse click or tap)
+      const holding = () => { const a = document.activeElement; return a && a !== document.body && heroEl.contains(a) && a.matches(':focus-visible'); };
+      const wake = () => { heroEl.classList.remove('idle'); clearTimeout(idleT); idleT = setTimeout(() => { if (!holding()) heroEl.classList.add('idle'); }, 2250); };
+      ['mousemove', 'pointerdown', 'touchstart', 'keydown', 'wheel', 'scroll'].forEach(ev => addEventListener(ev, wake, { passive: true }));
       wake();
       // phones held upright: tap the film to see it whole (16:9) instead of cropped; tap again to return
       const portrait = matchMedia('(max-width: 760px) and (orientation: portrait)');
@@ -340,11 +350,12 @@
     return '';
   }).join('');
   const sepHTML = (p, i) => `<div class="sep" aria-hidden="true"><span>${String(i + 1).padStart(2, '0')} — ${esc(p.title)}</span></div>`;
-  row.innerHTML = projects.map((p, i) => (i ? sepHTML(p, i) : '') + blocksHTML(p, i)).join('');
-  const blks = $$('.blk', row), items = $$('.it', row);
+  row.innerHTML = projects.map((p, i) => (projects.length > 1 ? sepHTML(p, i) : '') + blocksHTML(p, i)).join('');
+  const blks = $$('.blk', row), items = $$('.it, .sep', row);
+  const firstTxt = $('.blk.txt', row);
 
   // sizes: featured 9:16 fills from under the menu to above the title; secondary = 2×2 of the same width
-  let H = 0, panMax = 0;
+  let H = 0, panMax = 0, gatherLen = 0; const LEAD = 0.75;
   const stage = $('#wkStage');
   const layout = () => {
     const hdr = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hdr')) || 92;
@@ -362,20 +373,33 @@
       else if (b.classList.contains('txt')) {
         // as narrow as possible while the text still fits the height of the video beside it
         const pad = innerWidth < 760 ? 24 : 72, tr = b.style.transform; b.style.transform = '';
-        let w = Math.max(260, Math.min(360, innerWidth * 0.24));
+        const ps = $$('p', b); let fs = 15; ps.forEach(q => q.style.fontSize = '');
+        let w, wMax = Math.min(620, innerWidth * 0.82);
+        if (innerWidth < 760) {
+          // phones: fill the screen width; the opening block must sit fully on screen beside its divider
+          const gut = parseFloat(getComputedStyle(row).paddingLeft) || 24;
+          w = wMax = (b === firstTxt ? innerWidth - gut - b.offsetLeft : innerWidth - gut * 2) - pad;
+        } else w = Math.max(260, Math.min(360, innerWidth * 0.24));
         b.style.width = (w + pad) + 'px';
-        while (b.scrollHeight > H + 2 && w < Math.min(620, innerWidth * 0.8)) { w += 20; b.style.width = (w + pad) + 'px'; }
+        while (b.scrollHeight > H + 2 && w < wMax) { w += 20; b.style.width = (w + pad) + 'px'; }
+        while (b.scrollHeight > H + 2 && fs > 12) { fs -= 0.5; ps.forEach(q => q.style.fontSize = fs + 'px'); }
         b.style.transform = tr;
       }
     });
     $$('.blk.feat .it, .blk.hv .it, .blk.hp .it, .blk.fp .it', row).forEach(it => it.style.height = '100%');
     panMax = Math.max(0, row.scrollWidth - innerWidth);
-    stage.style.height = (innerHeight * 1.2 + panMax * 1.15 + innerHeight * 0.6) + 'px';
+    gatherLen = innerHeight * (innerWidth < 760 ? 1.6 : 1.3);
+    stage.style.height = (gatherLen - innerHeight * LEAD + panMax * 1.15 + innerHeight * 1.3) + 'px';
     frame();
   };
 
   // scattered → grid, then sideways
-  const seeds = items.map((_, i) => ({ x: (Math.sin(i * 12.9898) * 43758.5453 % 1), y: (Math.sin(i * 78.233) * 12543.123 % 1), r: Math.sin(i * 3.7) * 8 }));
+  // text and project labels rise straight up from under the film; clips arrive scattered, mostly from below
+  const seeds = items.map((el, i) => {
+    if (el.classList.contains('txt') || el.classList.contains('sep')) return { x: 0, y: 1.25, r: 0, s: 0 };
+    const x = Math.sin(i * 12.9898) * 43758.5453 % 1, y = Math.abs(Math.sin(i * 78.233) * 12543.123 % 1);
+    return { x, y: 0.35 + y * 0.9, r: Math.sin(i * 3.7) * 8, s: 0.22 };
+  });
   const wt = $('.wk-title'), wtG = $('#wtG'), wtN = $('#wtN');
   let curP = -1;
   const swap = (box, text) => {
@@ -392,13 +416,13 @@
   function frame() {
     heroFx();
     const r = stage.getBoundingClientRect(), scrolled = -r.top;
-    const gatherLen = innerHeight * 1.2;
-    const g = reduce ? 1 : clamp((scrolled + innerHeight * 0.35) / gatherLen, 0, 1);
+    const g = reduce ? 1 : clamp((scrolled + innerHeight * LEAD) / gatherLen, 0, 1);
     const e = 1 - Math.pow(1 - g, 3), k = 1 - e;
-    const pan = reduce ? 0 : clamp((scrolled - gatherLen + innerHeight * 0.35) / (panMax * 1.15 || 1), 0, 1);
+    const pan = reduce ? 0 : clamp((scrolled - gatherLen + innerHeight * LEAD) / (panMax * 1.15 || 1), 0, 1);
+    const sx = Math.max(innerWidth, 640) * 0.4;
     items.forEach((el, i) => {
       const sd = seeds[i];
-      el.style.transform = k < 0.001 ? '' : `translate(${(sd.x * innerWidth * 0.4 * k).toFixed(1)}px, ${(sd.y * innerHeight * 0.45 * k).toFixed(1)}px) rotate(${(sd.r * k).toFixed(2)}deg) scale(${(1 - 0.22 * k).toFixed(3)})`;
+      el.style.transform = k < 0.001 ? '' : `translate(${(sd.x * sx * k).toFixed(1)}px, ${(sd.y * innerHeight * k).toFixed(1)}px) rotate(${(sd.r * k).toFixed(2)}deg) scale(${(1 - sd.s * k).toFixed(3)})`;
     });
     row.style.transform = `translateX(${(-pan * panMax).toFixed(1)}px)`;
     inStage = r.top < innerHeight * 0.5 && r.bottom > innerHeight * 0.7;

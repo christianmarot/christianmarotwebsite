@@ -105,16 +105,16 @@ const OTHER_WORK = {
       {
         client: "Simon Rogan", title: "Aulis Phuket",
         blocks: [
-          { type: "titletext", title: "Aulis Phuket", text: [
+          { type: "text", text: [
             "Aulis Phuket is a 15-seat chef’s table restaurant set on the white sands of Natai Beach, on Thailand’s Andaman coast. It opened in December 2023 as the first Thai venture from Simon Rogan, the chef behind the three-Michelin-star L’Enclume in the Lake District.",
             "It brings his farm-to-fork approach to Southeast Asia. Guests sit directly in front of the open kitchen and watch the chefs cook and plate a multi-course tasting menu. The menu is led by what’s available locally, and more than 95% of the ingredients come from nearby farmers, fishermen and growers.",
-            "I was brought in to help tell the Aulis story. That meant capturing Simon Rogan’s philosophy, the relationships with local producers behind every plate, and the close, theatrical feel of the chef’s table. The films follow the journey from farm to fork, from the growers and their produce to the precision of the kitchen and the final dish. Shortly after the project was delivered, Aulis Phuket received its first Michelin star, less than a year after opening."
+            "I was brought in as Cinematographer to help tell the Aulis story. That meant capturing Simon Rogan’s philosophy, the relationships with local producers behind every plate, and the close, theatrical feel of the chef’s table. Through a series of short Instagram reels and a master promotional video, the films follow the journey from farm to fork, from the growers and their produce to the precision of the kitchen and the final dish. Shortly after the project was delivered, Aulis Phuket received its first Michelin star, less than a year after opening."
           ] },
           { type: "feature", video: "clips/restaurants/aulis-promo.mp4", poster: "clips/restaurants/aulis-promo.jpg", audio: true, once: true },
           { type: "secondary", videos: [
             { video: "clips/restaurants/aulis-michelin-star.mp4", poster: "clips/restaurants/aulis-michelin-star.jpg" },
-            { video: "clips/restaurants/aulis-fish.mp4",          poster: "clips/restaurants/aulis-fish.jpg" },
             { video: "clips/restaurants/aulis-salad.mp4",         poster: "clips/restaurants/aulis-salad.jpg" },
+            { video: "clips/restaurants/aulis-fish.mp4",          poster: "clips/restaurants/aulis-fish.jpg" },
             { video: "clips/restaurants/aulis-fire.mp4",          poster: "clips/restaurants/aulis-fire.jpg" }
           ] }
         ]
@@ -122,18 +122,17 @@ const OTHER_WORK = {
       {
         client: "Simon Rogan", title: "ION Harbour",
         blocks: [
-          { type: "titletext", title: "ION Harbour", text: [
+          { type: "text", text: [
             "ION Harbour by Simon Rogan sits overlooking Malta’s Grand Harbour, Valletta. It opened in November 2020 and won its first Michelin star less than six months later. In April 2024 it became the first restaurant in Malta to hold two Michelin stars.",
             "ION Harbour takes the farm-to-fork approach Rogan developed at L’Enclume in the Lake District and applies it to the Mediterranean. Its seasonal tasting menu depends on close relationships with Maltese farmers, fishermen and artisans, and it is shaped by whatever the island is producing at its best.",
             "I travelled to Malta to make a series of short videos on the subject of seasonality, hyper-locality and sustainability for ION’s social media accounts. Over the course of a week, I followed Simon and his team as they visited the local producers who are at the heart of the menu. We filmed olive oil, honey, micro-herbs and vegetables at their source, then followed each ingredient into the kitchen. There we watched the team turn it into a dish, from preparation through to the final plate."
           ] },
           { type: "feature", video: "clips/restaurants/ion-harbour-simon-rogan.mp4", poster: "clips/restaurants/ion-harbour-simon-rogan.jpg", audio: true, once: true },
-          { type: "feature", video: "clips/restaurants/ion-farm-to-table.mp4", poster: "clips/restaurants/ion-farm-to-table.jpg" },
           { type: "feature", video: "clips/restaurants/ion-nature.mp4",        poster: "clips/restaurants/ion-nature.jpg" },
           { type: "secondary", videos: [
             { video: "clips/restaurants/ion-carob.mp4",       poster: "clips/restaurants/ion-carob.jpg" },
             { video: "clips/restaurants/ion-simon-malta.mp4", poster: "clips/restaurants/ion-simon-malta.jpg" },
-            { video: "clips/restaurants/ion-olive-oil.mp4",   poster: "clips/restaurants/ion-olive-oil.jpg" },
+            { video: "clips/restaurants/ion-farm-to-table.mp4", poster: "clips/restaurants/ion-farm-to-table.jpg" },
             { video: "clips/restaurants/ion-microherbs.mp4",  poster: "clips/restaurants/ion-microherbs.jpg" }
           ] }
         ]
