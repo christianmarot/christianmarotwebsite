@@ -377,104 +377,46 @@
         idle(slice);
       }
     });
-    // where the cursor (or a finger) is, and where it was a moment ago — the clouds tear along that path
-    const mouse = { x: -1e4, y: -1e4, n: 0 };   // n counts moves, so each section knows when there's been a new one
-    const track = (x, y) => { mouse.x = x; mouse.y = y; mouse.n++; };
-    addEventListener('pointermove', e => track(e.clientX, e.clientY), { passive: true });
-    addEventListener('touchmove', e => { const t = e.touches[0]; if (t) track(t.clientX, t.clientY); }, { passive: true });
+    const mouse = { x: -1e4, y: -1e4 };
+    addEventListener('pointermove', e => { mouse.x = e.clientX; mouse.y = e.clientY; }, { passive: true });
     // paint one image at a time on the background thread
     const sprites = [];
-    const SW = innerWidth < 760 ? 480 : 640, SH = Math.round(SW * .6);   // smaller canvases on phones
-    const paintNext = async () => { sprites.push(await paintCloud(3 + sprites.length * 11, SW, SH)); if (sprites.length < 3) paintNext(); else start(); };
+    const SW = innerWidth < 760 ? 480 : 640;   // smaller canvases on phones
+    const paintNext = async () => { sprites.push(await paintCloud(3 + sprites.length * 11, SW, Math.round(SW * .6))); if (sprites.length < 3) paintNext(); else start(); };
     addEventListener('load', paintNext);
     const menuOpen = () => document.body.classList.contains('menu-open');
-    // a ragged brush: a cluster of soft blobs, so the gaps it tears have frayed, wispy edges rather than clean holes
-    const brush = (() => {   // one very soft, feathered dab — many light dabs build up a gentle thinning, never a hard edge
-      const b = document.createElement('canvas'); b.width = b.height = 128; const g = b.getContext('2d');
-      const gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
-      gr.addColorStop(0, 'rgba(0,0,0,.30)'); gr.addColorStop(.35, 'rgba(0,0,0,.22)'); gr.addColorStop(.7, 'rgba(0,0,0,.07)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
-      g.fillStyle = gr; g.fillRect(0, 0, 128, 128); return b;
-    })();
-    async function start() {
-      const imgs = await Promise.all(sprites.map(u => new Promise(ok => { const im = new Image(); im.onload = () => ok(im); im.onerror = () => ok(null); im.src = u; })));
-      if (imgs.some(x => !x)) return;
-      const MW = SW / 2, MH = SH / 2;   // the tear mask works at half size; it's soft anyway
+    function start() {
       drifts.forEach((box, bi) => {
         const n = +box.dataset.clouds || 2, alpha = +box.dataset.alpha || 1, inMenu = !!box.closest('.menu');
         // evenly spaced around one loop that runs from just off the left edge to just off the right, all at the
         // same pace — so as one leaves on the right another is already coming in on the left, and they never bunch
         const L0 = -.45, SPAN = 1.9, V = .0065 + bi * .0007;
         let seed = 7 + bi * 31; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-        const wisp = document.createElement('canvas'); wisp.width = SW; wisp.height = SH; const wg = wisp.getContext('2d');
-        const draw = c => {   // the cloud, with the vapour along the cursor's path thinned and drawn out
-          const g = c.g;
-          g.globalCompositeOperation = 'copy'; g.filter = 'none'; g.drawImage(c.img, 0, 0);
-          if (c.torn) {
-            // the vapour that's being parted…
-            wg.globalCompositeOperation = 'copy'; wg.drawImage(c.img, 0, 0);
-            wg.globalCompositeOperation = 'destination-in'; wg.filter = 'blur(6px)'; wg.drawImage(c.mask, 0, 0, SW, SH); wg.filter = 'none';
-            // …thinned out of the cloud with soft, blurred edges…
-            g.globalCompositeOperation = 'destination-out'; g.filter = 'blur(6px)'; g.drawImage(c.mask, 0, 0, SW, SH); g.drawImage(c.mask, 0, 0, SW, SH); g.drawImage(c.mask, 0, 0, SW, SH); g.filter = 'none';
-            // …and a faint wisp of it drawn along the way the cursor went, smeared like vapour
-            g.globalCompositeOperation = 'source-over'; g.globalAlpha = .3; g.filter = 'blur(3px)';
-            g.drawImage(wisp, c.dx * .35, c.dy * .35); g.globalAlpha = .15; g.drawImage(wisp, c.dx * .7, c.dy * .7);
-            g.globalAlpha = 1; g.filter = 'none';
-          }
-          g.globalCompositeOperation = 'source-over';
-        };
-        const reshape = c => {
-          c.y = .08 + rnd() * .84; c.s = 1 + rnd() * .8; c.a = (.14 + rnd() * .07) * alpha; c.flip = rnd() < .5;
-          c.img = imgs[Math.floor(rnd() * imgs.length)]; c.mg.clearRect(0, 0, MW, MH); c.torn = 0; draw(c);
-        };
+        const reshape = c => { c.y = .08 + rnd() * .84; c.s = 1 + rnd() * .8; c.a = (.14 + rnd() * .07) * alpha; c.flip = rnd() < .5; c.el.src = sprites[Math.floor(rnd() * sprites.length)]; };
         const clouds = Array.from({ length: n }, (_, i) => {
-          const el = document.createElement('canvas'); el.width = SW; el.height = SH; box.appendChild(el);
-          const mask = document.createElement('canvas'); mask.width = MW; mask.height = MH;
-          const c = { el, g: el.getContext('2d'), mask, mg: mask.getContext('2d'), x: L0 + (i + rnd() * .3) * SPAN / n, torn: 0, dx: 0, dy: 0 };
-          reshape(c); return c;
+          const el = new Image(); el.alt = ''; el.decoding = 'async'; box.appendChild(el);
+          const c = { el, x: L0 + (i + rnd() * .3) * SPAN / n, px: 0, py: 0, fade: 1 }; reshape(c); return c;
         });
-        let on = false, last = performance.now(), seen = 0, lx = mouse.x, ly = mouse.y;
+        let on = false, last = performance.now();
         const tick = now => {
           if (!on || (inMenu && !menuOpen())) { on = false; return; }
           const dt = Math.min(.05, (now - last) / 1000); last = now;
           const r = box.getBoundingClientRect();
-          const moving = mouse.n !== seen, px = lx, py = ly;   // the path since this section last looked
-          seen = mouse.n; lx = mouse.x; ly = mouse.y;
           clouds.forEach(c => {
             c.x += V * dt; if (c.x > L0 + SPAN) { c.x -= SPAN; reshape(c); }   // drift slowly across; re-enter on the left as a new cloud
-            const w = Math.min(760, 520 * c.s * Math.max(.75, r.width / 1500)), h = w * SH / SW;
-            const left = r.left + c.x * r.width - w / 2, top = r.top + c.y * r.height - w * .3;
-            // the cursor tears through: stamp the ragged brush along its path into this cloud's mask
-            if (moving) {
-              const k = MW / w, seg = Math.hypot(mouse.x - px, mouse.y - py), steps = Math.min(40, Math.ceil(seg / 5));
-              const inside = (x, y) => x > left - 60 && x < left + w + 60 && y > top - 60 && y < top + h + 60;
-              if (inside(mouse.x, mouse.y) || inside(px, py)) {
-                const size = 64 + Math.min(46, seg * .6);               // faster sweeps part a slightly wider path
-                for (let s = 0; s <= steps; s++) {
-                  const t = steps ? s / steps : 1, sx = px + (mouse.x - px) * t, sy = py + (mouse.y - py) * t;
-                  let u = (sx - left) * k, v = (sy - top) * k; if (c.flip) u = MW - u;
-                  const sz = size * k * (.85 + Math.random() * .3);
-                  c.mg.save(); c.mg.translate(u + (Math.random() - .5) * sz * .12, v + (Math.random() - .5) * sz * .12); c.mg.rotate(Math.random() * 6.28);
-                  c.mg.drawImage(brush, -sz / 2, -sz / 2, sz, sz); c.mg.restore();
-                }
-                c.torn = 1; c.healAt = now;
-                const sdx = (mouse.x - px) * (SW / w) * (c.flip ? -1 : 1), sdy = (mouse.y - py) * (SW / w);   // drag, in the cloud's own pixels
-                c.dx = Math.max(-60, Math.min(60, c.dx * .7 + sdx * .9)); c.dy = Math.max(-40, Math.min(40, c.dy * .7 + sdy * .9));
-              }
-            }
-            // and it slowly closes up again
-            if (c.torn) {
-              c.mg.globalCompositeOperation = 'destination-out'; c.mg.fillStyle = `rgba(0,0,0,${Math.min(1, dt * .45)})`; c.mg.fillRect(0, 0, MW, MH); c.mg.globalCompositeOperation = 'source-over';
-              c.dx *= Math.exp(-dt * 1.2); c.dy *= Math.exp(-dt * 1.2);
-              if (now - c.healAt > 9000) { c.mg.clearRect(0, 0, MW, MH); c.torn = 0; c.dx = c.dy = 0; }
-              draw(c);
-            }
+            const w = Math.min(760, 520 * c.s * Math.max(.75, r.width / 1500)), cx = r.left + c.x * r.width, cy = r.top + c.y * r.height;
+            const dx = cx - mouse.x, dy = cy - mouse.y, dist = Math.hypot(dx, dy), reach = w * .6;
+            const f = dist < reach ? (1 - dist / reach) : 0;           // the cursor parts them, then they ease back
+            c.px += ((dist ? dx / dist : 0) * f * 110 - c.px) * Math.min(1, dt * 2.5);
+            c.py += ((dist ? dy / dist : 0) * f * 70 - c.py) * Math.min(1, dt * 2.5);
+            c.fade += ((1 - f * .75) - c.fade) * Math.min(1, dt * 3);
             c.el.style.width = w + 'px';
-            c.el.style.transform = `translate(${(left - r.left).toFixed(1)}px, ${(top - r.top).toFixed(1)}px)${c.flip ? ' scaleX(-1)' : ''}`;
-            c.el.style.opacity = c.a.toFixed(3);
+            c.el.style.transform = `translate(${(c.x * r.width - w / 2 + c.px).toFixed(1)}px, ${(c.y * r.height - w * .3 + c.py).toFixed(1)}px)${c.flip ? ' scaleX(-1)' : ''}`;
+            c.el.style.opacity = (c.a * c.fade).toFixed(3);
           });
           requestAnimationFrame(tick);
         };
-        const go = () => { if (on) return; on = true; last = performance.now(); seen = mouse.n || -1; lx = mouse.x; ly = mouse.y; requestAnimationFrame(tick); };
+        const go = () => { if (on) return; on = true; last = performance.now(); requestAnimationFrame(tick); };
         if (inMenu) new MutationObserver(() => { if (menuOpen()) go(); }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
         else new IntersectionObserver(es => { if (es[0].isIntersecting) go(); else on = false; }).observe(box);
       });
@@ -510,7 +452,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261009s';
+    const FMV = '20261009t';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();
