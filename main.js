@@ -355,14 +355,15 @@
   const firstTxt = $('.blk.txt', row);
 
   // sizes: featured 9:16 fills from under the menu to above the title; secondary = 2×2 of the same width
-  let H = 0, panMax = 0, gatherLen = 0; const LEAD = 0.75;
+  let H = 0, panMax = 0, gatherLen = 0, rowTop = 200; const LEAD = 0.75;
   const stage = $('#wkStage');
   const layout = () => {
+    // project title sits at the top, under the menu bar; the blocks fill the space below it
     const hdr = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hdr')) || 92;
-    const top = hdr + 8, bottom = innerWidth < 760 ? 120 : 150;
+    const top = hdr + wt.offsetHeight + (innerWidth < 760 ? 18 : 26), bottom = innerWidth < 760 ? 28 : 44;
     H = Math.max(260, innerHeight - top - bottom);
     const fw = Math.round(H * 9 / 16), gap = 16;
-    row.style.top = top + 'px'; row.style.gap = gap + 'px';
+    rowTop = top;     row.style.top = top + 'px'; row.style.gap = gap + 'px';
     $$('.sep', row).forEach(s => s.style.height = H + 'px');
     blks.forEach((b, i) => {
       b.style.height = H + 'px';
@@ -394,11 +395,13 @@
   };
 
   // scattered → grid, then sideways
-  // text and project labels rise straight up from under the film; clips arrive scattered, mostly from below
+  // text and project labels rise straight up from below; clips arrive scattered from above and below
   const seeds = items.map((el, i) => {
     if (el.classList.contains('txt') || el.classList.contains('sep')) return { x: 0, y: 1.25, r: 0, s: 0 };
+    // clips: some drop in from behind the film above, some rise from below
     const x = Math.sin(i * 12.9898) * 43758.5453 % 1, y = Math.abs(Math.sin(i * 78.233) * 12543.123 % 1);
-    return { x, y: 0.35 + y * 0.9, r: Math.sin(i * 3.7) * 8, s: 0.22 };
+    const up = i % 3 !== 1;   // two in three come from above
+    return { x, y: (up ? -1 : 1) * (0.4 + y * 0.8), r: Math.sin(i * 3.7) * 8, s: 0.22 };
   });
   const wt = $('.wk-title'), wtG = $('#wtG'), wtN = $('#wtN');
   let curP = -1;
@@ -425,7 +428,8 @@
       el.style.transform = k < 0.001 ? '' : `translate(${(sd.x * sx * k).toFixed(1)}px, ${(sd.y * innerHeight * k).toFixed(1)}px) rotate(${(sd.r * k).toFixed(2)}deg) scale(${(1 - sd.s * k).toFixed(3)})`;
     });
     row.style.transform = `translateX(${(-pan * panMax).toFixed(1)}px)`;
-    inStage = r.top < innerHeight * 0.5 && r.bottom > innerHeight * 0.7;
+    // the project title only appears once the film (and its own title) has scrolled clear of the top
+    inStage = r.top < rowTop && r.bottom > innerHeight * 0.7;
     wt.style.opacity = inStage ? 1 : 0;
     // title = the project taking up most of the screen
     const cover = projects.map(() => 0);
@@ -519,6 +523,6 @@
 
   addEventListener('scroll', frame, { passive: true });
   let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(layout, 100); });
-  layout();
   setProject(0);
+  layout();
 })();

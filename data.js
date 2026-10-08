@@ -128,11 +128,10 @@ const OTHER_WORK = {
             "I travelled to Malta to make a series of short videos on the subject of seasonality, hyper-locality and sustainability for ION’s social media accounts. Over the course of a week, I followed Simon and his team as they visited the local producers who are at the heart of the menu. We filmed olive oil, honey, micro-herbs and vegetables at their source, then followed each ingredient into the kitchen. There we watched the team turn it into a dish, from preparation through to the final plate."
           ] },
           { type: "feature", video: "clips/restaurants/ion-harbour-simon-rogan.mp4", poster: "clips/restaurants/ion-harbour-simon-rogan.jpg", audio: true, once: true },
-          { type: "feature", video: "clips/restaurants/ion-nature.mp4",        poster: "clips/restaurants/ion-nature.jpg" },
           { type: "secondary", videos: [
             { video: "clips/restaurants/ion-carob.mp4",       poster: "clips/restaurants/ion-carob.jpg" },
             { video: "clips/restaurants/ion-simon-malta.mp4", poster: "clips/restaurants/ion-simon-malta.jpg" },
-            { video: "clips/restaurants/ion-farm-to-table.mp4", poster: "clips/restaurants/ion-farm-to-table.jpg" },
+            { video: "clips/restaurants/ion-nature.mp4",      poster: "clips/restaurants/ion-nature.jpg" },
             { video: "clips/restaurants/ion-microherbs.mp4",  poster: "clips/restaurants/ion-microherbs.jpg" }
           ] }
         ]
