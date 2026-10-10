@@ -46,6 +46,7 @@
     const seen = new Set(); let km = 0;
     stops.forEach((s, i) => { s.locs.forEach(l => seen.add(l.country)); km += s.km; s.cum = { shoots: i + 1, countries: seen.size, km }; });
   }
+  pins.forEach(pn => { pn.first = stops.findIndex(s => s.locs.some(l => l.pin === pn)); });   // the first shoot that went there
   const allCountries = new Set(pins.map(p => p.country));
 
   // flight lines: home → every place, one per stop
@@ -135,14 +136,14 @@
   const screen = (lon, lat, lift = 0) => { const [x, y, z] = xyz(lon, lat), m = cam.R * (1 + lift); return { x: cam.cx + x * m, y: cam.cy - y * m, z, vis: z >= 0 || (x * x + y * y) * (1 + lift) * (1 + lift) > 1 }; };
 
   /* ================= Scroll timeline ================= */
-  const CH = [0, .06, .56, .82];            // board · journey · clouds · explore
+  const CH = [0, .1, .38, .92];             // intro · shoots (the burst) · clouds · explore
   const J0 = CH[1], J1 = CH[2], C1 = CH[3];
   let progress = 0;
   const readScroll = () => { const r = track.getBoundingClientRect(); progress = clamp(-r.top / Math.max(1, r.height - innerHeight), 0, 1); };
   addEventListener('scroll', readScroll, { passive: true }); readScroll();
   const goTo = (i, instant) => {
     const r = track.getBoundingClientRect(), top = scrollY + r.top, span = r.height - innerHeight;
-    const at = [0, CH[1] + .004, CH[2] + .1, CH[3] + .01][i];
+    const at = [0, J0 + .01, J1 + (C1 - J1) * .38, C1 + .01][i];
     scrollTo({ top: top + span * at, behavior: instant || reduce ? 'instant' : 'smooth' });
   };
   // an eased scroll of our own, so the break-through always takes the same unhurried time
@@ -154,14 +155,43 @@
     requestAnimationFrame(stepG);
   };
   addEventListener('wheel', () => glideId++, { passive: true }); addEventListener('touchstart', () => glideId++, { passive: true });
-  // skip the timeline: glide straight to the clouds
-  $('#skipTl').addEventListener('click', () => glide(2, reduce ? 1 : 1600, CH[2] + .1));
   $$('[data-go]').forEach(b => b.addEventListener('click', () => goTo(+b.dataset.go, b.closest('.intro'))));
 
   /* ================= Explore camera (user-driven) ================= */
   const XP = { lon: 12, lat: 40, k: 3.4 };
+  // the burst: the globe turns from the Atlantic (London, the Americas) round to the Indian Ocean while every route fires
+  const B0 = { lon: -38, lat: 27, k: 1.06 }, B1 = { lon: 52, lat: 20, k: 1.2 };
+  const BSPREAD = 1.6, BDUR = .85;                   // seconds: the last route sets off 1.6 s after the first, each takes 0.85 s
   const user = { lon: XP.lon, lat: XP.lat, k: XP.k, tl: XP.lon, tb: XP.lat, tk: XP.k, vx: 0, vy: 0, fresh: true };
   const flyTo = (lon, lat, k) => { user.tl = lon; user.tb = clamp(lat, -70, 78); if (k) user.tk = clamp(k, .9, 7); user.vx = user.vy = 0; };
+
+  /* ================= The journey, replayed inside explore ================= */
+  // plays the credits board in order, shoot to shoot, in about 25 seconds; pause, scrub or close at any time
+  const SPS = .66;                                   // seconds per shoot
+  const replay = { on: false, t: 0, paused: false, from: null, lay: 0 };
+  const rpCtl = $('#rpCtl'), rpPlay = $('#rpPlay'), playJ = $('#playJ');
+  const setRpBtn = () => {
+    const st = replay.t >= N ? 'again' : replay.paused ? 'play' : 'pause';
+    rpPlay.dataset.s = st; rpPlay.querySelector('b').textContent = { again: 'Play again', play: 'Play', pause: 'Pause' }[st];
+  };
+  const startReplay = () => {
+    closePop(); toggleList(false);
+    Object.assign(replay, { on: true, t: 0, paused: false, from: { lon: cam.lon, lat: cam.lat, k: cam.k } });
+    cardIdx = -1; setRpBtn(); rpPlay.focus({ preventScroll: true });
+  };
+  const endReplay = () => {
+    if (!replay.on) return; replay.on = false;
+    // carry on exploring from wherever the journey left the camera
+    user.lon = user.tl = lonWrap(cam.lon); user.lat = user.tb = clamp(cam.lat, -70, 78); user.k = user.tk = clamp(cam.k, .9, 7); user.vx = user.vy = 0;
+    $('#tip').hidden = true;
+  };
+  playJ.addEventListener('click', startReplay);
+  rpPlay.addEventListener('click', () => {
+    if (replay.t >= N) { replay.from = { lon: cam.lon, lat: cam.lat, k: cam.k }; replay.t = 0; replay.paused = false; cardIdx = -1; } else replay.paused = !replay.paused;
+    setRpBtn();
+  });
+  $('#rpX').addEventListener('click', () => { endReplay(); playJ.focus({ preventScroll: true }); });
+  addEventListener('keydown', e => { if (e.key === 'Escape' && replay.on) endReplay(); });
 
   /* ================= HUD ================= */
   const ov = { intro: $('#intro'), tl: $('#timeline'), card: $('#card'), stats: $('#stats'), dive: $('#dive'), xp: $('#xpTop'), idx: $('#index'), zoom: $('#zoom') };
@@ -177,7 +207,7 @@
     const mk = document.createElement('i'); mk.className = 'mk'; tl.appendChild(mk); tl._mk = mk;
     // drag (or click) along the timeline to jump between shoots
     tl.setAttribute('aria-valuemax', N);
-    const toStop = i => { const tr = track.getBoundingClientRect(), pp = J0 + (clamp(i, 0, N - 1) + .5) / N * (J1 - J0); glideId++; scrollTo(0, scrollY + tr.top + (tr.height - innerHeight) * pp); };
+    const toStop = i => { replay.t = clamp(i, 0, N - 1) + .55; if (replay.t >= N) replay.t = N - .01; setRpBtn(); };
     const at = x => { const r = tl.getBoundingClientRect(); return Math.round(clamp((x - r.left) / r.width, 0, 1) * (N - 1)); };
     const tip = $('#tip');
     const tipAt = (x, i) => { const r = tl.getBoundingClientRect(), sr = stage.getBoundingClientRect(), st = stops[i]; tip.textContent = `${st.r.dates} · ${st.r.project}`; tip.style.left = clamp(r.left - sr.left + (i / (N - 1)) * r.width, 90, W - 90) + 'px'; tip.style.top = (r.bottom - sr.top + 42) + 'px'; tip.hidden = false; };
@@ -511,7 +541,7 @@
   const STILL = new URLSearchParams(location.search).has('still');
   const perf = { ema: 1 / 60, n: 0, max: GLS };
   let blowable = false;
-  let last = performance.now(), t0 = last, spin = 22, running = true, satMix = 0, satPref = true;
+  let burst0 = -1, last = performance.now(), t0 = last, spin = 22, running = true, satMix = 0, satPref = true;
   const vSw = $('#vSw'), vSatL = $('#vSatL'), vLineL = $('#vLineL');
   const setView = sat => { satPref = sat; vSw.setAttribute('aria-checked', !sat); vSatL.classList.toggle('on', sat); vLineL.classList.toggle('on', !sat); };
   if (!sky) { $('#viewsw').hidden = true; satPref = false; }
@@ -528,40 +558,47 @@
     const base = mobile ? Math.min(W * .47, H * .3) : Math.min(W, H) * .39;
     const layout = ph => mobile ? [W / 2, H * [.40, .40, .5, .56][ph]] : [W * [.64, .6, .5, .5][ph], H * [.5, .52, .5, .52][ph]];
 
-    let mode, reveal = 1, skyA, curStop = -1, arcState = null, dive = 0;
+    let mode, reveal = 1, skyA, curStop = -1, arcState = null, dive = 0, bt = Infinity;
     const U = { cloud: 0, cover: .6, dive: 0, diveZ: 0, part: 0 };
     const curPins = new Set();
-    exploring = p >= C1 - .002;
-    if (p < J0) {                                   // ---- 1 · the board
-      mode = 'a'; const a = ease(p / J0);
+    if (p < C1 - .002 && replay.on) endReplay();
+    exploring = p >= C1 - .002 && !replay.on;
+    if (p >= J0 && p < C1) { if (burst0 < 0) burst0 = now; bt = reduce ? Infinity : (now - burst0) / 1000; }
+    if (p < J0) {                                   // ---- 1 · the intro: the globe turns
+      mode = 'a'; burst0 = -1; const a = ease(p / J0);
       if (!reduce) spin += dt * 5;
-      const s0 = stops[0];
-      cam.lon = lerp(lonWrap(spin), s0.lon, a); cam.lat = lerp(16, s0.lat, a); cam.k = lerp(1, s0.k, a);
+      cam.lon = lerp(lonWrap(spin), B0.lon, a); cam.lat = lerp(16, B0.lat, a); cam.k = lerp(1, B0.k, a);
       const [x0, y0] = layout(0), [x1, y1] = layout(1); cam.cx = lerp(x0, x1, a); cam.cy = lerp(y0, y1, a);
       reveal = reduce ? 1 : easeOut(clamp((now - t0) / 2600, 0, 1));
       skyA = .3 * reveal; U.cloud = .5 * reveal; U.cover = .55;
-    } else if (p < J1) {                            // ---- 2 · the journey, oldest shoot first
-      mode = 'b'; const s = (p - J0) / (J1 - J0) * N, i = Math.min(N - 1, Math.floor(s)), t = i === N - 1 ? Math.min(1, s - i) : s - i;
-      const prev = stops[Math.max(0, i - 1)], cur = stops[i];
-      const tr = ease(clamp(t / .5, 0, 1)), hop = d3.geoDistance([prev.lon, prev.lat], [cur.lon, cur.lat]);
-      const c = d3.geoInterpolate([prev.lon, prev.lat], [cur.lon, cur.lat])(tr);
-      cam.lon = c[0]; cam.lat = c[1]; cam.k = lerp(prev.k, cur.k, tr) - Math.sin(Math.PI * tr) * .38 * Math.min(1, hop / 2.2);
-      [cam.cx, cam.cy] = layout(1);
-      curStop = i; arcState = { i, prog: clamp((t - .28) / .5, 0, 1) };
-      cur.locs.forEach(l => curPins.add(l.pin));
-      skyA = .34; U.cloud = .55; U.cover = .55;
+    } else if (p < J1) {                            // ---- 2 · every route fires out from London at once
+      mode = 'b'; const a = ease((p - J0) / (J1 - J0));
+      const c = d3.geoInterpolate([B0.lon, B0.lat], [B1.lon, B1.lat])(a);
+      cam.lon = c[0]; cam.lat = c[1]; cam.k = lerp(B0.k, B1.k, a); [cam.cx, cam.cy] = layout(1);
+      skyA = .34; U.cloud = .5; U.cover = .55;
     } else if (p < C1) {                            // ---- 3 · down through the clouds
       // first the long zoom in over the line-drawn globe; the weather only closes in once you're near,
       // white-out, then the clouds part over the satellite view and you keep sinking
-      mode = 'c'; dive = (p - J1) / (C1 - J1); const L = stops[N - 1];
+      mode = 'c'; dive = (p - J1) / (C1 - J1); const L = B1;
       const a1 = ease(clamp(dive / .58, 0, 1)), a2 = easeOut(clamp((dive - .6) / .4, 0, 1));
       const c = d3.geoInterpolate([L.lon, L.lat], [XP.lon, XP.lat])(a1);
       cam.lon = c[0]; cam.lat = c[1]; cam.k = lerp(lerp(L.k, 2.7, a1), XP.k, a2);
       const [x1, y1] = layout(1), [x3, y3] = layout(3); cam.cx = lerp(x1, x3, a1); cam.cy = lerp(y1, y3, a1);
       skyA = .5 + .4 * smooth(.2, .6, dive);
-      U.cloud = lerp(.55, .95, smooth(.18, .5, dive)); U.cover = lerp(.55, .5, smooth(.2, .55, dive)) + .06 * smooth(.7, 1, dive);
+      U.cloud = lerp(.5, .95, smooth(.18, .5, dive)); U.cover = lerp(.55, .5, smooth(.2, .55, dive)) + .06 * smooth(.7, 1, dive);
       U.dive = smooth(.36, .6, dive) * (1 - smooth(.93, 1, dive)); U.diveZ = dive; U.part = smooth(.64, .97, dive);
-      user.lon = user.tl = XP.lon; user.lat = user.tb = XP.lat; user.k = user.tk = XP.k; user.fresh = true;
+      user.lon = user.tl = XP.lon; user.lat = user.tb = XP.lat; user.k = user.tk = XP.k; user.fresh = true; user.sx = 0;
+    } else if (replay.on) {                         // ---- 4b · explore, replaying the journey shoot by shoot
+      mode = 'x';
+      if (!replay.paused && !ov.tl.classList.contains('drag') && replay.t < N) { replay.t = Math.min(N, replay.t + dt / SPS); if (replay.t >= N) setRpBtn(); }
+      const s = replay.t, i = Math.min(N - 1, Math.floor(s)), t = i === N - 1 ? Math.min(1, s - i) : s - i;
+      const prev = i === 0 ? replay.from : stops[i - 1], cur = stops[i];
+      const tr = ease(clamp(t / .5, 0, 1)), hop = d3.geoDistance([prev.lon, prev.lat], [cur.lon, cur.lat]);
+      const c = d3.geoInterpolate([prev.lon, prev.lat], [cur.lon, cur.lat])(tr);
+      cam.lon = c[0]; cam.lat = c[1]; cam.k = lerp(prev.k, cur.k, tr) - Math.sin(Math.PI * tr) * .38 * Math.min(1, hop / 2.2);
+      curStop = i; arcState = { i, prog: clamp((t - .28) / .5, 0, 1) };
+      cur.locs.forEach(l => curPins.add(l.pin));
+      skyA = .5; U.cloud = .6; U.cover = .55;
     } else {                                        // ---- 4 · explore
       mode = 'x'; user.fresh = false;
       if (!dragging) {
@@ -570,13 +607,19 @@
         let dl = lonWrap(user.tl - user.lon); user.lon = lonWrap(user.lon + dl * f); user.lat += (user.tb - user.lat) * f;
         user.k *= Math.pow(user.tk / user.k, f);
       }
-      cam.lon = user.lon; cam.lat = user.lat; cam.k = user.k; [cam.cx, cam.cy] = layout(3);
-      user.sx = lerp(user.sx || 0, openPin && !mobile ? -W * .17 : 0, 1 - Math.exp(-dt * 5)); cam.cx += user.sx;
+      cam.lon = user.lon; cam.lat = user.lat; cam.k = user.k;
       skyA = .9 * (1 - smooth(4, 7, cam.k) * .6);
       U.cloud = .9 * (1 - smooth(4.5, 7, cam.k) * .45); U.cover = .56;
     }
+    const jr = mode === 'x' && replay.on;
+    if (mode === 'x') {   // explore sits centre stage; the replay slides the globe over, as the journey did
+      replay.lay += ((jr ? 1 : 0) - replay.lay) * (1 - Math.exp(-dt * 4));
+      const [x1, y1] = layout(1), [x3, y3] = layout(3);
+      user.sx = lerp(user.sx || 0, openPin && !mobile ? -W * .17 : 0, 1 - Math.exp(-dt * 5));
+      cam.cx = lerp(x3, x1, replay.lay) + user.sx; cam.cy = lerp(y3, y1, replay.lay);
+    } else replay.lay = 0;
     cam.R = base * cam.k; setCam();
-    blowable = !!sky && ((mode === 'c' && dive > .4) || mode === 'x');
+    blowable = !!sky && ((mode === 'c' && dive > .4) || (mode === 'x' && !jr));
     if (mode !== 'c' && mode !== 'x') wind.broke = false;
     if (mode === 'c' && !wind.broke && dive > .42 && dive < .8 && wind.clear > .55) { wind.broke = true; glide(3, 1900); }
     if (!blowable && wind.hold) endHold();
@@ -586,11 +629,13 @@
     if (satMix < .002) satMix = 0; if (satMix > .998) satMix = 1;
 
     // which pins have appeared
-    const reached = mode === 'a' ? -1 : mode === 'b' ? curStop - (arcState.prog >= .98 ? 0 : 1) : N - 1;
+    // (in the burst, each shoot's route sets off a little after the one before; its pins pop up as the routes land)
+    const reached = mode === 'a' ? -1 : jr ? curStop - (arcState.prog >= .98 ? 0 : 1)
+      : mode === 'x' ? N - 1 : clamp(Math.floor((bt - BDUR * .98) / BSPREAD * (N - 1)), -1, N - 1);
+    const live = jr || mode === 'b' || mode === 'c';
     pins.forEach(pn => {
-      const first = stops.findIndex(s => s.locs.some(l => l.pin === pn));
-      const should = first <= reached || (mode === 'b' && first === curStop && arcState.prog >= .98);
-      if (should && pn.appear < 0) pn.appear = mode === 'b' ? now : now - 2000; else if (!should) pn.appear = -1;
+      const should = pn.first <= reached;
+      if (should && pn.appear < 0) pn.appear = live ? now : now - 2000; else if (!should) pn.appear = -1;
     });
 
     // ---- paint
@@ -606,33 +651,34 @@
     octx.lineCap = 'round';
     arcs.forEach(a => {
       let prog = 0, hot = false;
-      if (mode === 'b') { if (a.si < arcState.i) prog = 1; else if (a.si === arcState.i) { prog = ease(arcState.prog); hot = true; } }
-      else if (mode !== 'a') prog = 1;
+      if (jr) { if (a.si < arcState.i) prog = 1; else if (a.si === arcState.i) { prog = ease(arcState.prog); hot = true; } }
+      else if (mode === 'b' || mode === 'c') { const q = clamp((bt - a.si / (N - 1) * BSPREAD) / BDUR, 0, 1); prog = ease(q); hot = q > 0 && q < 1; }
+      else if (mode === 'x') prog = 1;
       if (!prog) return;
-      const on = mode !== 'x' || pinOn(a.pin);
-      octx.strokeStyle = AMBER + (hot ? .95 : on ? (mode === 'x' ? (satMix > .5 ? .55 : .26) : .3) : .06) + ')'; octx.lineWidth = hot ? 1.7 : (satMix > .5 ? 1.2 : 1);
+      const on = mode !== 'x' || jr || pinOn(a.pin);
+      octx.strokeStyle = AMBER + (hot ? .95 : on ? (satMix > .5 ? .55 : mode === 'x' && !jr ? .26 : .3) : .06) + ')'; octx.lineWidth = hot ? 1.7 : (satMix > .5 ? 1.2 : 1);
       drawArc(a, prog, hot);
     });
-    drawPins(now, mode, curPins);
+    drawPins(now, jr ? 'r' : mode, curPins);
     if (!sky) drawDive(mode === 'c' ? dive : 0);
 
     // ---- HUD
     show(ov.intro, mode === 'a' && p < J0 * .75);
-    show(ov.tl, mode === 'b'); show($('#skipTl'), mode === 'b' || (mode === 'a' && p > J0 * .6)); show(ov.card, mode === 'b'); show(ov.stats, mode === 'b' || (!mobile && mode === 'a' && p > J0 * .6));
+    show(ov.tl, jr); show(rpCtl, jr); show(ov.card, jr); show(ov.stats, jr || mode === 'b' || (mode === 'c' && dive < .38) || (!mobile && mode === 'a' && p > J0 * .6));
     show(ov.dive, mode === 'c' && dive > .5 && dive < .7 && !wind.broke);
     $('#diveHint').textContent = wind.mic ? 'Blow to break through, or keep scrolling' : 'Press and hold, blow into your mic, or keep scrolling';
-    show(ov.xp, mode === 'x'); show(ov.zoom, mode === 'x'); show($('#viewsw'), mode === 'x'); show(ov.idx, mode === 'x');
+    const xu = mode === 'x' && !jr; show(ov.xp, xu); show(ov.zoom, xu); show($('#viewsw'), xu); show(ov.idx, xu); show(playJ, xu);
     $$('.rail button').forEach((b, i) => b.classList.toggle('on', i === ({ a: 0, b: 1, c: 2, x: 3 })[mode]));
     show($('.rail'), mode !== 'x');
     show(blowBtn, blowable);
     stage.classList.toggle('explore', mode === 'x');   // in explore, a finger turns the globe every way (the page stops scrolling under it)
     if (mode !== 'x' && !pop.hidden) closePop();
-    if (mode === 'b') {
+    if (jr) {
       setCard(curStop);
-      const s = (p - J0) / (J1 - J0); ov.tl._mk.style.left = (clamp(s * N - .5, 0, N - 1) / (N - 1) * 100) + '%'; ov.tl.setAttribute('aria-valuenow', curStop + 1); ov.tl.setAttribute('aria-valuetext', `${stops[curStop].r.dates}, ${stops[curStop].r.project}`);
+      const s = replay.t / N; ov.tl._mk.style.left = (clamp(s * N - .5, 0, N - 1) / (N - 1) * 100) + '%'; ov.tl.setAttribute('aria-valuenow', curStop + 1); ov.tl.setAttribute('aria-valuetext', `${stops[curStop].r.dates}, ${stops[curStop].r.project}`);
       stops.forEach((st, i) => st.tick.classList.toggle('done', i <= curStop));
     }
-    const tgt = mode === 'a' ? { shoots: 0, countries: 0, km: 0 } : mode === 'b' ? stops[Math.max(0, reached)].cum : stops[N - 1].cum;
+    const tgt = reached < 0 ? { shoots: 0, countries: 0, km: 0 } : stops[reached].cum;
     const kf = 1 - Math.exp(-dt * 7);
     for (const k in disp) disp[k] += (tgt[k] - disp[k]) * kf;
     $('#sShoots').textContent = Math.round(disp.shoots); $('#sCountries').textContent = Math.round(disp.countries); $('#sKm').textContent = fmt(disp.km);
