@@ -92,14 +92,16 @@
   const reelF = $('.reel .frame'), reelIn = $('.reel .frame-in');
   if (reelF && reelIn && !reduce) {
     reelF.addEventListener('fullscreenchange', () => { reelIn.style.transform = reelIn.style.filter = ''; });
+    const reelPin = reelF.parentElement;
     const reelFx = () => {
-      const r = reelF.getBoundingClientRect(), T = Math.max(0, (innerHeight - r.height) / 2);
-      const d = clamp(r.top - T, 0, innerHeight), p = d / Math.max(1, innerHeight - T);
-      // …it then holds in place for a moment (sticky, see .reel-pin), and once the page moves on it slowly
-      // blurs and darkens as Projects takes over the screen, like the landing film
-      const out = clamp((T - r.top - r.height * .3) / (r.height * .7 + innerHeight * .25), 0, 1);
-      reelIn.style.transform = d ? `translateY(${(-d).toFixed(1)}px) scale(${(1 + 0.1 * p).toFixed(4)})` : out ? `scale(${(1 + .04 * out).toFixed(4)})` : '';
-      reelIn.style.filter = d ? `brightness(${(1 - 0.45 * p).toFixed(3)})` : out ? `blur(${(out * 12).toFixed(1)}px) brightness(${(1 - .6 * out).toFixed(3)})` : '';
+      // the film is already pinned in place while the page above slides off it (see .reel-pin);
+      // as it is uncovered it settles from slightly zoomed and dim to normal…
+      const r = reelF.getBoundingClientRect(), H = r.height, T = Math.max(0, (innerHeight - H) / 2);
+      const p = clamp((reelPin.getBoundingClientRect().top + H - T) / Math.max(1, H), 0, 1);
+      // …holds for a moment, and once the page moves on it slowly blurs and darkens as Projects takes over, like the landing film
+      const out = clamp((T - r.top - H * .3) / (H * .7 + innerHeight * .25), 0, 1);
+      reelIn.style.transform = p ? `scale(${(1 + 0.08 * p).toFixed(4)})` : out ? `scale(${(1 + .04 * out).toFixed(4)})` : '';
+      reelIn.style.filter = p ? `brightness(${(1 - 0.45 * p).toFixed(3)})` : out ? `blur(${(out * 12).toFixed(1)}px) brightness(${(1 - .6 * out).toFixed(3)})` : '';
     };
     addEventListener('scroll', reelFx, { passive: true }); addEventListener('resize', reelFx); reelFx();
   }
@@ -452,7 +454,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261009w';
+    const FMV = '20261009x';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();

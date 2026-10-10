@@ -132,7 +132,10 @@ img{display:block;max-width:100%}
 }
 
 /* ================= Showreel (full bleed) ================= */
-.reel{border-top:1px solid var(--line);padding-top:110px}
+.reel{position:relative}
+/* the showreel sits still underneath: everything above it is an opaque curtain that slides away (pure CSS, so it stays smooth on trackpads) */
+.bio,.logos,.reel>.wrap{position:relative;z-index:1;background:var(--ink)}
+.reel>.wrap{display:flow-root;border-top:1px solid var(--line);padding-top:110px}
 .reel .frame{position:relative;width:100%;aspect-ratio:16/9;background:#000}
 .reel iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .reel .cap{display:flex;justify-content:space-between;align-items:baseline;gap:24px;padding-top:20px;padding-bottom:110px}
@@ -303,7 +306,7 @@ footer .base{margin-top:96px;padding-top:24px;border-top:1px solid var(--line);d
   .sec{padding-block:80px}
   .bio{padding-block:96px 72px}
   .logos{padding-block:56px 64px}
-  .reel{padding-top:72px}.reel .cap{padding-bottom:72px}
+  .reel>.wrap{padding-top:72px}.reel .cap{padding-bottom:72px}
   .projects{padding-top:72px}
   .projects .wrap[style]{padding-block:20px 72px!important}
   .sec-head{margin-bottom:28px}
@@ -377,9 +380,9 @@ body.lb-open{overflow:hidden}
 .reel .frame:fullscreen{width:100vw;height:100vh;aspect-ratio:auto;max-height:none}
 .reel .frame:-webkit-full-screen{width:100vw;height:100vh}
 /* the showreel holds still for a moment before the page carries on */
-.reel-pin{height:calc(56.25vw + 55vh)}
+.reel-pin{position:relative;z-index:0;margin-top:-56.25vw;height:calc(112.5vw + 15vh)}
 .reel-pin .frame{position:sticky;top:max(0px,calc((100vh - 56.25vw) / 2))}
-@media (max-width:760px){.reel-pin{height:calc(56.25vw + 30vh)}.reel-pc .tm{display:none}.reel-pc{gap:8px}.reel-pc button{width:38px;height:38px}}
+@media (max-width:760px){.reel-pin{height:calc(112.5vw + 10vh)}.reel-pc .tm{display:none}.reel-pc{gap:8px}.reel-pc button{width:38px;height:38px}}
 .fm-n{display:inline-block;text-align:right;font-variant-numeric:tabular-nums;transition:text-shadow .4s}
 .fm-n.counting{text-shadow:0 0 18px rgba(240,195,90,.45)}
 
