@@ -270,6 +270,17 @@ const OTHER_WORK = {
           ] }
         ]
       }
+      ,{
+        client: "Extraordinary Treehouse Escapes", title: "TreeDwellers",
+        blocks: [
+          { type: "text", text: [
+            "TreeDwellers is tucked away in the ancient woodland of Cornbury Park, a 1,700-acre estate in the Oxfordshire Cotswolds. It opened in 2024 as a collection of seven architecturally designed treehouses raised among the canopy. TreeDwellers sits where luxury and wilderness meet, offering every comfort of a boutique hotel without ever losing touch with the forest around it.",
+            "After seeing my natural history cinematography on the BBC’s Wild London (2026), TreeDwellers founder Tim Rees invited me to capture the incredible wildlife that calls the estate its home. Over the course of a weekend, I filmed muntjac, fallow deer, woodpeckers, hares, rabbits, red kites and more. The films were featured across TreeDwellers’ social channels and website."
+          ] },
+          { type: "feature", video: "clips/hotels/treedwellers-01.mp4", poster: "clips/hotels/treedwellers-01.jpg", audio: true, once: true },
+          { type: "feature", video: "clips/hotels/treedwellers-02.mp4", poster: "clips/hotels/treedwellers-02.jpg", audio: true, once: true }
+        ]
+      }
     ]
   },
   property: {

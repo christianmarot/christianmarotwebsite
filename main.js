@@ -454,7 +454,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261011i';
+    const FMV = '20261011j';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();
@@ -686,6 +686,8 @@
     });
     if (rep) rep.addEventListener('click', () => { it.classList.remove('ended'); v.currentTime = 0; setSnd(true); v.play().catch(() => { setSnd(false); v.play(); }); });
   });
+  // play-once films (with sound) take turns: one waits until the one playing has finished or left the screen
+  const otherPlaying = it => vids.concat(vims).some(x => x !== it && x._state === 'playing' && x.hasAttribute('data-once'));
   function videoCheck() {
     vims.forEach(vimCheck);
     vids.forEach(it => {
@@ -699,12 +701,12 @@
       }
       if (reduce) return;
       if (it.hasAttribute('data-once')) {
-        if (it._state === 'idle' && inStage && vis > 0.6) {
+        if (it._state === 'idle' && inStage && vis > 0.6 && !otherPlaying(it)) {
           it._state = 'playing'; v.currentTime = 0;
           if (activated()) it._setSnd(true);
           v.play().catch(() => { it._setSnd(false); v.play().catch(() => {}); });
         } else if (it._state === 'playing' && vis < 0.2) { v.pause(); it._state = 'paused'; }
-        else if (it._state === 'paused' && vis > 0.6) { v.play().catch(() => {}); it._state = 'playing'; }
+        else if (it._state === 'paused' && vis > 0.6 && !otherPlaying(it)) { v.play().catch(() => {}); it._state = 'playing'; }
       } else {
         if (vis > 0.1 && v.paused) v.play().catch(() => {});
         else if (vis <= 0.1 && !v.paused) v.pause();
@@ -748,11 +750,11 @@
     if (!it._p || reduce || lbOpenVim) return;
     if (it.hasAttribute('data-once')) {
       // like the featured clips: plays once with sound (if the browser allows it) as it arrives, pauses when it leaves
-      if (it._state === 'idle' && inStage && vis > 0.6) {
+      if (it._state === 'idle' && inStage && vis > 0.6 && !otherPlaying(it)) {
         it._state = 'playing'; it._setSnd(activated());
         it._p.play().catch(() => { it._setSnd(false); it._p.play().catch(() => {}); });
       } else if (it._state === 'playing' && vis < 0.2) { it._state = 'paused'; it._p.pause().catch(() => {}); }
-      else if (it._state === 'paused' && vis > 0.6) { it._state = 'playing'; it._p.play().catch(() => {}); }
+      else if (it._state === 'paused' && vis > 0.6 && !otherPlaying(it)) { it._state = 'playing'; it._p.play().catch(() => {}); }
       return;
     }
     if (vis > 0.1 && !it._playing && inStage) { it._playing = true; it._p.play().catch(() => { it._playing = false; }); }
