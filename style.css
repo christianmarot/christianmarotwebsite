@@ -438,3 +438,22 @@ body.lb-open{overflow:hidden}
 .plb-nav svg{width:22px;height:22px;fill:#fff}
 .plb-nav.prev{left:var(--gut)}.plb-nav.next{right:var(--gut)}
 @media (max-width:760px){.plb-nav{top:auto;bottom:22px;transform:none;width:46px;height:46px}.plb-fig img{max-width:94vw;max-height:74vh}}
+
+/* ---------- Other work: 12-tile block, Vimeo film in the row, and its large viewer ---------- */
+.blk.t12{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr))}
+.blk.t12 .it{height:100%}
+.blk.vim .it.vm{cursor:zoom-in;background:#000}
+.vm-f{position:absolute;inset:0;pointer-events:none}
+.vm-f iframe{position:absolute;inset:0;width:100%;height:100%;border:0;opacity:0;transition:opacity .6s}
+.it.vm.on .vm-f iframe{opacity:1}
+.it.vm:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.vlb-box{position:relative}
+.vlb-f{position:relative;background:#000;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.vlb-f iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.vlb .vlb-pc{position:absolute;left:50%;right:auto;bottom:18px;transform:translateX(-50%);width:min(560px,calc(100% - 32px));padding:6px 10px;border-radius:999px;background:rgba(0,0,0,.35);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);transition:opacity .5s}
+.vlb.idle .vlb-pc,.vlb.idle .lb-x{opacity:0;pointer-events:none}
+.vlb.idle{cursor:none}
+.vlb .lb-x{transition:opacity .5s,border-color .3s}
+@media (max-width:760px){.vlb .vlb-pc{bottom:10px;gap:8px}.vlb .vlb-pc .tm{display:none}.vlb .vlb-pc button{width:38px;height:38px}}
+/* phones: longer project names (e.g. Iniala Beach House) stay on one line under the row */
+@media (max-width:760px){.wk-title .n{font-size:min(40px,8vw);white-space:nowrap}}

@@ -454,7 +454,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261011e';
+    const FMV = '20261011h';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();
@@ -548,6 +548,9 @@
     switch (b.type) {
       case 'feature': return `<div class="blk feat big" ${pa}>${mkVideo(b)}</div>`;
       case 'secondary': return `<div class="blk b2x2" ${pa}>${(b.videos || []).slice(0, 4).map(v => mkVideo(v)).join('')}</div>`;
+      case 'tiles12': return `<div class="blk t12" ${pa}>${(b.videos || []).slice(0, 12).map(v => mkVideo(v)).join('')}</div>`;
+      case 'vimeo': return `<div class="blk vim" ${pa} data-ar="${+b.ratio || 16 / 9}"><div class="it vm" data-vimeo="${esc(b.vimeo)}" tabindex="0" role="button" aria-label="Watch this film larger, with sound">
+          <div class="vm-f"></div><div class="vc"><button type="button" class="snd" aria-label="Turn sound on">${svg(ICON.muted)}<span>Sound</span></button></div></div></div>`;
       case 'hvideo': return `<div class="blk hv" ${pa}>${mkVideo(b)}</div>`;
       case 'hphoto': return `<div class="blk hp" ${pa}><div class="it"><img src="${esc(b.image)}" alt="" loading="lazy"></div></div>`;
       case 'fphoto': return `<div class="blk fp" ${pa}><div class="it"><img src="${esc(b.image)}" alt="" loading="lazy"></div></div>`;
@@ -584,6 +587,8 @@
     blks.forEach((b, i) => {
       b.style.height = H + 'px';
       if (b.classList.contains('feat')) b.style.width = fw + 'px';
+      else if (b.classList.contains('t12')) { const ch = (H - 12) / 2, cw = Math.round(ch * 9 / 16); b.style.width = (cw * 6 + 12 * 5) + 'px'; b.style.gap = '12px'; }
+      else if (b.classList.contains('vim')) b.style.width = Math.round(H * +b.dataset.ar) + 'px';
       else if (b.classList.contains('b2x2') || b.classList.contains('sph')) { const ch = (H - 12) / 2, cw = Math.round(ch * (b.classList.contains('b2x2') ? 9 / 16 : 4 / 5)); b.style.width = (cw * 2 + 12) + 'px'; b.style.gap = '12px'; }
       else if (b.classList.contains('hv') || b.classList.contains('hp')) b.style.width = Math.round(H * 16 / 9) + 'px';
       else if (b.classList.contains('fp')) b.style.width = Math.round(H * 4 / 5) + 'px';
@@ -604,7 +609,7 @@
       }
       else if (b.classList.contains('galh')) b.style.width = Math.round(H * (innerWidth < 760 ? .62 : .9)) + 'px';
     });
-    $$('.blk.feat .it, .blk.hv .it, .blk.hp .it, .blk.fp .it', row).forEach(it => it.style.height = '100%');
+    $$('.blk.feat .it, .blk.vim .it, .blk.hv .it, .blk.hp .it, .blk.fp .it', row).forEach(it => it.style.height = '100%');
     panMax = Math.max(0, row.scrollWidth - innerWidth);
     gatherLen = innerHeight * (innerWidth < 760 ? 1.6 : 1.3);
     stage.style.height = (gatherLen - innerHeight * LEAD + panMax * 1.15 + innerHeight * 1.3) + 'px';
@@ -625,8 +630,8 @@
     const blk = el.parentElement;
     if (blk.classList.contains('big'))
       return { x: side * 0.5, y: lift + 0.15, r: tilt * 0.6, s: 0.5 };
-    if (blk.classList.contains('b2x2') || blk.classList.contains('sph')) {
-      const top = [...blk.children].indexOf(el) < 2;
+    if (blk.classList.contains('b2x2') || blk.classList.contains('sph') || blk.classList.contains('t12')) {
+      const top = [...blk.children].indexOf(el) < (blk.classList.contains('t12') ? 6 : 2);
       return { x: side, y: (top ? -1 : 1) * lift, r: tilt, s: 0.2 };
     }
     return { x: side, y: (i % 2 ? -1 : 1) * lift, r: tilt, s: 0.25 };
@@ -681,6 +686,7 @@
     if (rep) rep.addEventListener('click', () => { it.classList.remove('ended'); v.currentTime = 0; setSnd(true); v.play().catch(() => { setSnd(false); v.play(); }); });
   });
   function videoCheck() {
+    vims.forEach(vimCheck);
     vids.forEach(it => {
       const v = $('video', it), r = it.getBoundingClientRect();
       const visW = Math.max(0, Math.min(r.right, innerWidth) - Math.max(r.left, 0)) / r.width;
@@ -704,6 +710,99 @@
       }
     });
   }
+
+  /* ---------- Vimeo films in the row: silent loop in place, a sound button, click to watch large ---------- */
+  const vims = $$('.it.vm', row);
+  const vimSrc = (id, o) => `https://player.vimeo.com/video/${id}?controls=0&title=0&byline=0&portrait=0&dnt=1&playsinline=1&autopause=0${o}`;
+  vims.forEach(it => {
+    const snd = $('.snd', it);
+    it._muted = true;
+    it._setSnd = on => { it._muted = !on; if (it._p) { it._p.setMuted(!on); if (on) it._p.setVolume(1); } snd.innerHTML = svg(on ? ICON.sound : ICON.muted) + `<span>${on ? 'Sound on' : 'Sound'}</span>`; snd.setAttribute('aria-label', on ? 'Mute' : 'Turn sound on'); };
+    snd.addEventListener('click', e => { e.stopPropagation(); it._setSnd(it._muted); if (it._p) it._p.play().catch(() => {}); });
+  });
+  function vimCheck(it) {
+    const r = it.getBoundingClientRect();
+    const vis = Math.max(0, Math.min(r.right, innerWidth) - Math.max(r.left, 0)) / r.width * Math.max(0, Math.min(r.bottom, innerHeight) - Math.max(r.top, 0)) / r.height;
+    if (vis > 0.02 && !it._p && window.Vimeo && Vimeo.Player) {
+      const f = document.createElement('iframe');
+      f.src = vimSrc(it.dataset.vimeo, '&muted=1&loop=1&autoplay=0'); f.allow = 'autoplay; fullscreen; picture-in-picture'; f.title = 'Film';
+      $('.vm-f', it).appendChild(f);
+      const p = it._p = new Vimeo.Player(f);
+      // size the block to the film's own shape (once it's known)
+      Promise.all([p.getVideoWidth(), p.getVideoHeight()]).then(([w, h]) => {
+        const blk = it.parentElement, ar = w && h ? w / h : 0;
+        if (ar && Math.abs(ar - +blk.dataset.ar) > 0.01) { blk.dataset.ar = ar; layout(); }
+      }).catch(() => {});
+      p.on('play', () => it.classList.add('on'));
+      it._playing = false;
+    }
+    if (!it._p || reduce || lbOpenVim) return;
+    if (vis > 0.1 && !it._playing && inStage) { it._playing = true; it._p.play().catch(() => { it._playing = false; }); }
+    else if ((vis <= 0.1 || !inStage) && it._playing) { it._playing = false; it._p.pause().catch(() => {}); }
+  }
+  // the large viewer: its own player with sound, and the bespoke controls, which fade after a few seconds of stillness
+  let lbOpenVim = null;
+  const vlb = document.createElement('div');
+  vlb.className = 'lb vlb'; vlb.setAttribute('role', 'dialog'); vlb.setAttribute('aria-modal', 'true'); vlb.setAttribute('aria-label', 'Film');
+  vlb.innerHTML = `<button type="button" class="lb-x" aria-label="Close">${svg('M6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12 19 6.4 17.6 5 12 10.6z')}</button>
+    <div class="lb-box vlb-box"><div class="vlb-f"></div>
+      <div class="pc vlb-pc"><button type="button" class="v-play" aria-label="Pause">${svg(ICON.pause)}</button>
+        <div class="bar v-bar" role="slider" aria-label="Seek" tabindex="0"><i></i><b></b><s></s></div>
+        <span class="tm v-tm">0:00 / 0:00</span>
+        <button type="button" class="v-mute" aria-label="Mute">${svg(ICON.sound)}</button></div></div>`;
+  document.body.appendChild(vlb);
+  const vBox = $('.vlb-box', vlb), vF = $('.vlb-f', vlb), vPlay = $('.v-play', vlb), vMute = $('.v-mute', vlb), vBar = $('.v-bar', vlb), vFill = $('b', vBar), vKnob = $('s', vBar), vTm = $('.v-tm', vlb);
+  let vP = null, vDur = 0, vDrag = false, vMuted = false, vIdle, vFocus = null;
+  const vShow = t => { const q = vDur ? t / vDur : 0; vFill.style.width = vKnob.style.left = (q * 100) + '%'; vTm.textContent = `${fmt(t)} / ${fmt(vDur)}`; vBar.setAttribute('aria-valuenow', Math.round(q * 100)); };
+  const vWake = () => { vlb.classList.remove('idle'); clearTimeout(vIdle); vIdle = setTimeout(() => { if (!vDrag) vlb.classList.add('idle'); }, 3000); };
+  ['mousemove', 'pointerdown', 'touchstart', 'keydown'].forEach(ev => vlb.addEventListener(ev, vWake, { passive: true }));
+  const vSize = ar => {   // as large as the screen allows, in the film's own shape
+    const w = Math.min(innerWidth * 0.9, innerHeight * 0.82 * ar); vF.style.width = w + 'px'; vF.style.height = (w / ar) + 'px';
+  };
+  addEventListener('resize', () => { if (lbOpenVim) vSize(+lbOpenVim.parentElement.dataset.ar); });
+  const openVim = it => {
+    if (!window.Vimeo || !Vimeo.Player) return;
+    vFocus = document.activeElement; lbOpenVim = it;
+    resume = vids.filter(x => !$('video', x).paused); resume.forEach(x => $('video', x).pause());
+    const from = it._p ? it._p.getCurrentTime() : Promise.resolve(0);
+    if (it._p) it._p.pause().catch(() => {}); it._playing = false;
+    vSize(+it.parentElement.dataset.ar);
+    const f = document.createElement('iframe');
+    f.src = vimSrc(it.dataset.vimeo, '&autoplay=1&muted=0'); f.allow = 'autoplay; fullscreen; picture-in-picture'; f.title = 'Film';
+    vF.innerHTML = ''; vF.appendChild(f);
+    vP = new Vimeo.Player(f); vDur = 0; vMuted = false; $('path', vMute).setAttribute('d', ICON.sound);
+    vP.getDuration().then(d => { vDur = d; }).catch(() => {});
+    vP.on('timeupdate', d => { vDur = d.duration || vDur; if (!vDrag) vShow(d.seconds); });
+    vP.on('play', () => { $('path', vPlay).setAttribute('d', ICON.pause); vPlay.setAttribute('aria-label', 'Pause'); });
+    vP.on('pause', () => { $('path', vPlay).setAttribute('d', ICON.play); vPlay.setAttribute('aria-label', 'Play'); vlb.classList.remove('idle'); });
+    vP.on('ended', () => vlb.classList.remove('idle'));
+    from.then(t => { if (t > 1) vP.setCurrentTime(t).catch(() => {}); vP.play().catch(() => { vMuted = true; vP.setMuted(true); $('path', vMute).setAttribute('d', ICON.muted); vP.play().catch(() => {}); }); });
+    document.body.classList.add('lb-open'); vlb.classList.add('open'); vWake(); $('.lb-x', vlb).focus();
+  };
+  const closeVim = () => {
+    if (!lbOpenVim) return;
+    const it = lbOpenVim; lbOpenVim = null;
+    const at = vP ? vP.getCurrentTime() : Promise.resolve(0);
+    at.then(t => { if (it._p && t) it._p.setCurrentTime(t).catch(() => {}); }).catch(() => {});
+    vlb.classList.remove('open'); document.body.classList.remove('lb-open');
+    setTimeout(() => { if (!lbOpenVim) { if (vP) vP.destroy().catch(() => {}); vP = null; vF.innerHTML = ''; } }, 400);
+    resume.forEach(x => $('video', x).play().catch(() => {})); resume = [];
+    vFocus?.focus?.({ preventScroll: true }); videoCheck();
+  };
+  vPlay.onclick = () => vP && vP.getPaused().then(pz => pz ? vP.play() : vP.pause());
+  vMute.onclick = () => { if (!vP) return; vMuted = !vMuted; vP.setMuted(vMuted); if (!vMuted) vP.setVolume(1); $('path', vMute).setAttribute('d', vMuted ? ICON.muted : ICON.sound); vMute.setAttribute('aria-label', vMuted ? 'Turn sound on' : 'Mute'); };
+  const vSeek = x => { const r = vBar.getBoundingClientRect(), t = clamp((x - r.left) / r.width, 0, 1) * vDur; vShow(t); return t; };
+  vBar.addEventListener('pointerdown', e => { vDrag = true; vBar.classList.add('drag'); vBar.setPointerCapture(e.pointerId); vSeek(e.clientX); });
+  vBar.addEventListener('pointermove', e => { if (vDrag) vSeek(e.clientX); });
+  vBar.addEventListener('pointerup', e => { if (!vDrag) return; vDrag = false; vBar.classList.remove('drag'); if (vP) vP.setCurrentTime(vSeek(e.clientX)).catch(() => {}); vWake(); });
+  vBar.addEventListener('keydown', e => { if (vP && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) vP.getCurrentTime().then(t => vP.setCurrentTime(clamp(t + (e.key === 'ArrowRight' ? 5 : -5), 0, vDur))); });
+  $('.lb-x', vlb).onclick = closeVim;
+  vlb.addEventListener('click', e => { if (e.target === vlb || e.target === vBox) closeVim(); });
+  addEventListener('keydown', e => { if (e.key === 'Escape') closeVim(); });
+  vims.forEach(it => {
+    it.addEventListener('click', e => { if (e.target.closest('.snd')) return; openVim(it); });
+    it.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openVim(it); } });
+  });
 
   /* ---------- Click a clip to watch it large, with sound ---------- */
   const lb = document.createElement('div');

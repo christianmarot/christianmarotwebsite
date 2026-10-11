@@ -88,6 +88,8 @@ const DOCUMENTARIES = [
      hphoto      { type:"hphoto", image:"images/…jpg" } (horizontal)
      fphoto      { type:"fphoto", image:"images/…jpg" } (featured vertical)
      sphoto      { type:"sphoto", images:[ "…", ×4 ] }  (4 vertical)
+     vimeo       { type:"vimeo", vimeo:"123456" }  (a Vimeo film that plays silently in place; click to watch it large)
+     tiles12     { type:"tiles12", videos:[ {video, poster} ×12 ] }  (six across, two down)
      gallery     { type:"gallery", dir:"images/…", photos:[ { file:"name", ratio:1.5 }, … ] }
                  (a preview block that opens the full gallery; ratio = width ÷ height; tiles in dir/m, large in dir/l, .webp)
                  add  preview:["file","file","file"]  to choose the three photos on the preview block
@@ -150,6 +152,69 @@ const OTHER_WORK = {
     heroTitle: "Iniala Valletta",
     markers: true,           // show the vertical project markers even while there is only one project
     projects: [
+      {
+        client: "Iniala Hotels", title: "Iniala Beach House",
+        blocks: [
+          { type: "fphoto", image: "images/hotels/iniala-beach-house/l/dji-0110-4x5.webp" },
+          { type: "text", text: [
+            "Iniala Beach House sits on the quiet white sands of Natai Beach in Phang Nga, Thailand, looking out over the Andaman Sea. It’s a small, design-led retreat made up of private villas, pool residences and a penthouse. Each one was shaped by a different international designer, including the Campana Brothers, Jaime Hayon and Joseph Walsh, so each space feels completely unique. Iniala received a Michelin Key in the guide’s first Thailand selection in 2024. On the beachfront, restaurant Anaalā is led by celebrated Thai chef Ian Kittichai. Its name comes from the Sanskrit word for fire, and it serves flame-grilled dishes from across Thailand’s four culinary regions.",
+            "I’ve returned to Iniala five times since 2015, capturing the villas in all their glory. For this latest trip, the brief was to look beyond the architecture: to shine a light on the destination and the experiences Iniala offers, as well as the incredible staff who make a stay at the Beach House so memorable. Alongside a full-length promotional video, I created a series of short-form reels and moments for social media, all aiming to capture the calm, barefoot luxury of life on Natai Beach."
+          ] },
+          // a full-length film from Vimeo: plays silently on the page (with a sound button), click to watch it large
+          { type: "vimeo", vimeo: "1187876054" },
+          // twelve reels, six across and two down (top row first). Several share shots, so each starts at a
+          // different point (start: seconds in) to keep the same shot from playing twice at once
+          { type: "tiles12", videos: [
+            { video: "clips/hotels/ibh-postcard.mp4", poster: "clips/hotels/ibh-postcard.jpg" },
+            { video: "clips/hotels/ibh-womens-day.mp4", poster: "clips/hotels/ibh-womens-day.jpg", start: 15.25 },
+            { video: "clips/hotels/ibh-sounds-of-nature.mp4", poster: "clips/hotels/ibh-sounds-of-nature.jpg" },
+            { video: "clips/hotels/ibh-bbq-anaala.mp4", poster: "clips/hotels/ibh-bbq-anaala.jpg", start: 8.5 },
+            { video: "clips/hotels/ibh-water.mp4", poster: "clips/hotels/ibh-water.jpg", start: 11.25 },
+            { video: "clips/hotels/ibh-sunny.mp4", poster: "clips/hotels/ibh-sunny.jpg", start: 3.25 },
+            { video: "clips/hotels/ibh-yoga.mp4", poster: "clips/hotels/ibh-yoga.jpg", start: 0.25 },
+            { video: "clips/hotels/ibh-experience-food.mp4", poster: "clips/hotels/ibh-experience-food.jpg", start: 1.75 },
+            { video: "clips/hotels/ibh-destination.mp4", poster: "clips/hotels/ibh-destination.jpg", start: 12.0 },
+            { video: "clips/hotels/ibh-nature-2.mp4", poster: "clips/hotels/ibh-nature-2.jpg", start: 7.75 },
+            { video: "clips/hotels/ibh-ambient.mp4", poster: "clips/hotels/ibh-ambient.jpg" },
+            { video: "clips/hotels/ibh-nature-3.mp4", poster: "clips/hotels/ibh-nature-3.jpg", start: 10.5 }
+          ] },
+          { type: "gallery", dir: "images/hotels/iniala-beach-house",
+            preview: ["beach-aerial-clone", "bianca-twighlight-sky-replacement-2-copy", "bianca-exterior-to-beach-2-cast-correction"],
+            photos: [
+              { file: "beach-aerial-clone", ratio: 1.781 },
+              { file: "bianca-twighlight-sky-replacement-2-copy", ratio: 1.500 },
+              { file: "bianca-exterior-to-beach-2-cast-correction", ratio: 1.500 },
+              { file: "bianca-room-right-landscape-brighter", ratio: 1.500 },
+              { file: "dsc-3469", ratio: 0.667 },
+              { file: "collectors-twilight-sala", ratio: 1.500 },
+              { file: "dsc-2069", ratio: 1.500 },
+              { file: "dsc-3786", ratio: 1.500 },
+              { file: "penthouse-exterior", ratio: 1.501 },
+              { file: "siam-room-1-wb", ratio: 1.497 },
+              { file: "collectors-twilight-exterior-3-crop", ratio: 1.778 },
+              { file: "dsc-3508", ratio: 0.667 },
+              { file: "palm-trees-beach", ratio: 1.500 },
+              { file: "collectors-joseph-walsh-bed", ratio: 1.500 },
+              { file: "dsc-5426", ratio: 0.667 },
+              { file: "collectors-twillight-exteror-2", ratio: 1.500 },
+              { file: "penthouse-to-beach-wb", ratio: 1.503 },
+              { file: "dsc-2126", ratio: 1.500 },
+              { file: "dsc-3511", ratio: 0.667 },
+              { file: "lightning-stack-hq", ratio: 1.778 },
+              { file: "sea-view-breakfast", ratio: 1.504 },
+              { file: "bianca-dining", ratio: 1.500 },
+              { file: "dsc-3818", ratio: 1.500 },
+              { file: "siam-room-right", ratio: 1.500 },
+              { file: "dsc-6305", ratio: 0.665 },
+              { file: "mv-living-room-straight", ratio: 1.500 },
+              { file: "sea-view-roof-to-beds", ratio: 1.500 },
+              { file: "collectors-owners-bathroom-edit", ratio: 1.500 },
+              { file: "penthouse-bedroom", ratio: 1.500 },
+              { file: "dsc-5449", ratio: 1.500 },
+              { file: "sv-drone-down", ratio: 1.778 },
+          ] }
+        ]
+      },
       {
         client: "Iniala Hotels", title: "Iniala Valletta",
         blocks: [
