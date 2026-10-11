@@ -454,7 +454,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261011b';
+    const FMV = '20261011c';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();
@@ -538,7 +538,7 @@
   const projects = S.projects || [{ client: S.group, title: S.title, blocks: [{ type: 'grid', items: S.tiles || [] }] }];
   const row = document.createElement('div'); row.className = 'wk-row'; pin.appendChild(row);
   const mkVideo = (v, extra = '') => v.video
-    ? `<div class="it vid${extra}" data-src="${esc(v.video)}" ${v.start ? `data-start="${+v.start}"` : ''} ${v.audio ? 'data-audio' : ''} ${v.once ? 'data-once' : ''}><video muted playsinline preload="none" ${v.once ? '' : 'loop'} ${v.poster ? `poster="${esc(v.poster)}"` : ''}></video>
+    ? `<div class="it vid${extra}" data-src="${esc(v.video)}" ${v.start ? `data-start="${+v.start}"` : ''} ${v.endFrame != null ? `data-end="${+v.endFrame}"` : ''} ${v.audio ? 'data-audio' : ''} ${v.once ? 'data-once' : ''}><video muted playsinline preload="none" ${v.once ? '' : 'loop'} ${v.poster ? `poster="${esc(v.poster)}"` : ''}></video>
         ${v.audio ? `<div class="vc"><button type="button" class="snd" aria-label="Turn sound on">${svg(ICON.muted)}<span>Sound</span></button></div>` : ''}
         ${v.once ? `<button type="button" class="replay" aria-label="Replay">${'<span>' + svg(ICON.replay) + 'Replay</span>'}</button>` : ''}</div>`
     : `<div class="it ph"><div class="ph" style="height:100%">[ ${esc(v.note || '9:16 clip to come')} ]</div></div>`;
@@ -672,7 +672,11 @@
     const setSnd = on => { v.muted = !on; if (snd) { snd.innerHTML = svg(on ? ICON.sound : ICON.muted) + `<span>${on ? 'Sound on' : 'Sound'}</span>`; snd.setAttribute('aria-label', on ? 'Mute' : 'Turn sound on'); } };
     it._setSnd = setSnd;
     if (snd) snd.addEventListener('click', e => { e.stopPropagation(); setSnd(v.muted); if (v.paused) v.play().catch(() => {}); });
-    v.addEventListener('ended', () => { if (it.hasAttribute('data-once')) { it.classList.add('ended'); it._state = 'done'; } });
+    v.addEventListener('ended', () => {
+      if (!it.hasAttribute('data-once')) return;
+      it.classList.add('ended'); it._state = 'done';
+      if (it.dataset.end) v.currentTime = +it.dataset.end;   // rest on a chosen frame behind the Replay button
+    });
     if (rep) rep.addEventListener('click', () => { it.classList.remove('ended'); v.currentTime = 0; setSnd(true); v.play().catch(() => { setSnd(false); v.play(); }); });
   });
   function videoCheck() {
