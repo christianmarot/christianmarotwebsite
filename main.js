@@ -454,7 +454,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261011c';
+    const FMV = '20261011d';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();
@@ -556,7 +556,8 @@
       case 'gallery': {
         // a single preview block; the full gallery opens on click
         const gi = galleries.push({ dir: b.dir, photos: b.photos || [], title: p.title }) - 1, ph = b.photos || [], more = Math.max(0, ph.length - 3);
-        const im = j => ph[j] ? `<img src="${esc(b.dir)}/m/${esc(ph[j].file)}.webp" alt="" loading="lazy" decoding="async">` : '';
+        const pv = (b.preview && b.preview.length ? b.preview : ph.slice(0, 3).map(x => x.file));
+        const im = j => pv[j] ? `<img src="${esc(b.dir)}/m/${esc(pv[j])}.webp" alt="" loading="lazy" decoding="async">` : '';
         return `<div class="blk galh" ${pa}><button type="button" class="it gh" data-g="${gi}" aria-label="Open the photo gallery, ${ph.length} photos">
           <span class="gh-a">${im(0)}</span><span class="gh-b">${im(1)}</span><span class="gh-c">${im(2)}${more ? `<i>+${more}</i>` : ''}</span>
           <span class="gh-l"><b>Photo gallery</b><small>${ph.length} photos · View all</small></span></button></div>`;

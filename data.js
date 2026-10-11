@@ -90,6 +90,7 @@ const DOCUMENTARIES = [
      sphoto      { type:"sphoto", images:[ "…", ×4 ] }  (4 vertical)
      gallery     { type:"gallery", dir:"images/…", photos:[ { file:"name", ratio:1.5 }, … ] }
                  (a preview block that opens the full gallery; ratio = width ÷ height; tiles in dir/m, large in dir/l, .webp)
+                 add  preview:["file","file","file"]  to choose the three photos on the preview block
    any clip can also take  start: 4.5  (seconds in, where it first starts playing)
    a play-once clip can take  endFrame: 10.9  (the frame it rests on when it finishes, behind Replay)
    audio:true = has a sound button; once:true = plays once (with sound if allowed), then shows Replay.
@@ -168,7 +169,9 @@ const OTHER_WORK = {
             { video: "clips/hotels/iniala-sailboat.mp4?v=3",          poster: "clips/hotels/iniala-sailboat.jpg?v=3" }
           ] },
           // photo gallery: shows as one small preview block; clicking it opens the full gallery (the first three photos make the preview). Files live in  <dir>/m  (tiles) and  <dir>/l  (large)
-          { type: "gallery", dir: "images/hotels/iniala-valletta", photos: [
+          { type: "gallery", dir: "images/hotels/iniala-valletta",
+            preview: ["dsc-1133", "ion-resuaraunt-table-to-view-cu-test-2", "grand-residence-chair-detial-p-clone"],   // the three photos on the preview block (big one first)
+            photos: [
           { file: "dsc-6477", ratio: 1.778 },
           { file: "112-close-to-view", ratio: 0.668 },
           { file: "penthouse-lounge-angle-curtains", ratio: 1.500 },
