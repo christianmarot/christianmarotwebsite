@@ -10,7 +10,8 @@ const VIDEOS = {
   showreel:    "846811194",   // Natural History showreel (homepage hero + showreel section)
   restaurants: "961609288",
   hotels:      "1187804977",
-  editorial:   "1188094947"   // The New York Times
+  editorial:   "1188094947",  // The New York Times
+  property:    "1187870438"   // Pearson Gardens
 };
 
 /* ---------- RELEASED PROJECTS (the "DVD stack") ----------
@@ -287,7 +288,26 @@ const OTHER_WORK = {
   property: {
     title: "Property", group: "Commercial",
     cover: "images/commercial-property-pool-reflection.jpg",
-    tiles: [ { image: "images/commercial-property-pool-reflection.jpg" } ]
+    hero: VIDEOS.property,
+    heroTitle: "Pearson Gardens",
+    // one project told in four parts: the introduction, then a film for each villa. The big title stays
+    // "Pearson Gardens"; the small line above it changes to the villa on screen. marker: the label on the
+    // divider before each part (noMarker: no divider)
+    projects: [
+      {
+        client: "Pedralbes, Barcelona", title: "Pearson Gardens", noMarker: true,
+        blocks: [
+          { type: "fphoto", image: "images/property/pearson-gardens/pearson-gardens-4x5.webp" },
+          { type: "text", text: [
+            "Pearson Gardens sits on Avenida Pearson in Pedralbes, Barcelona’s most exclusive neighbourhood, set against the green slopes of Collserola Natural Park with views across the city to the Mediterranean. Completed in 2024, it is a collection of three private villas: Villa Grande, Villa Alta and Villa Botanica. Priced from €14 million to €21 million, each is set in its own landscaped gardens, with a private pool and a rooftop terrace.",
+            "Over two trips to Barcelona, I created a dedicated film for each of the three villas, made to reflect its own character. The films were made to support sales and were shown on large screens inside the villas during open houses, as well as at promotional events across the country, bringing each home to life for potential buyers."
+          ] }
+        ]
+      },
+      { client: "Villa Grande",   title: "Pearson Gardens", marker: "Villa Grande",   blocks: [ { type: "vimeo", vimeo: "1187866350", once: true } ] },
+      { client: "Villa Alta",     title: "Pearson Gardens", marker: "Villa Alta",     blocks: [ { type: "vimeo", vimeo: "1187856259", once: true } ] },
+      { client: "Villa Botanica", title: "Pearson Gardens", marker: "Villa Botanica", blocks: [ { type: "vimeo", vimeo: "1187861141", once: true } ] }
+    ]
   },
   editorial: {
     title: "Editorial", group: "The New York Times",

@@ -454,7 +454,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261011l';
+    const FMV = '20261011m';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();
@@ -570,8 +570,10 @@
     }
     return '';
   }).join('');
-  const sepHTML = (p, i) => `<div class="sep" aria-hidden="true"><span>${String(i + 1).padStart(2, '0')} — ${esc(p.title)}</span></div>`;
-  row.innerHTML = projects.map((p, i) => (projects.length > 1 || S.markers ? sepHTML(p, i) : '') + blocksHTML(p, i)).join('');
+  // dividers: numbered in order, skipping any part marked noMarker; marker: replaces the title on the divider
+  let sepN = 0;
+  const sepHTML = p => `<div class="sep" aria-hidden="true"><span>${String(++sepN).padStart(2, '0')} — ${esc(p.marker || p.title)}</span></div>`;
+  row.innerHTML = projects.map((p, i) => ((projects.length > 1 || S.markers) && !p.noMarker ? sepHTML(p) : '') + blocksHTML(p, i)).join('');
   const blks = $$('.blk', row), items = $$('.it, .sep', row);
   const firstTxt = $('.blk.txt', row);
 
