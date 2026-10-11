@@ -279,7 +279,7 @@ const OTHER_WORK = {
             "After seeing my natural history cinematography on the BBC’s Wild London (2026), TreeDwellers founder Tim Rees invited me to capture the incredible wildlife that calls the estate its home. Over the course of a weekend, I filmed muntjac, fallow deer, woodpeckers, hares, rabbits, red kites and more. The films were featured across TreeDwellers’ social channels and website."
           ] },
           { type: "feature", video: "clips/hotels/treedwellers-01.mp4", poster: "clips/hotels/treedwellers-01.jpg", audio: true, once: true },
-          { type: "feature", video: "clips/hotels/treedwellers-02.mp4", poster: "clips/hotels/treedwellers-02.jpg", audio: true, once: true }
+          { type: "feature", video: "clips/hotels/treedwellers-02.mp4", poster: "clips/hotels/treedwellers-02-bluebells.jpg", audio: true, once: true }
         ]
       }
     ]
