@@ -170,7 +170,7 @@ const OTHER_WORK = {
           ] },
           // photo gallery: shows as one small preview block; clicking it opens the full gallery (the first three photos make the preview). Files live in  <dir>/m  (tiles) and  <dir>/l  (large)
           { type: "gallery", dir: "images/hotels/iniala-valletta",
-            preview: ["dsc-1133", "ion-resuaraunt-table-to-view-cu-test-2", "grand-residence-chair-detial-p-clone"],   // the three photos on the preview block (big one first)
+            preview: ["dsc-6477", "ion-resuaraunt-table-to-view-cu-test-2", "show-suite-jungle-room-angle-v1"],   // the three photos on the preview block (big one first)
             photos: [
           { file: "dsc-6477", ratio: 1.778 },
           { file: "112-close-to-view", ratio: 0.668 },
