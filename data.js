@@ -155,13 +155,14 @@ const OTHER_WORK = {
       {
         client: "Iniala Hotels", title: "Iniala Beach House",
         blocks: [
-          { type: "fphoto", image: "images/hotels/iniala-beach-house/l/dji-0110-4x5.webp" },
+          { type: "fphoto", image: "images/hotels/iniala-beach-house/l/bianca-twilight-4x5.webp" },
           { type: "text", text: [
             "Iniala Beach House sits on the quiet white sands of Natai Beach in Phang Nga, Thailand, looking out over the Andaman Sea. It’s a small, design-led retreat made up of private villas, pool residences and a penthouse. Each one was shaped by a different international designer, including the Campana Brothers, Jaime Hayon and Joseph Walsh, so each space feels completely unique. Iniala received a Michelin Key in the guide’s first Thailand selection in 2024. On the beachfront, restaurant Anaalā is led by celebrated Thai chef Ian Kittichai. Its name comes from the Sanskrit word for fire, and it serves flame-grilled dishes from across Thailand’s four culinary regions.",
             "I’ve returned to Iniala five times since 2015, capturing the villas in all their glory. For this latest trip, the brief was to look beyond the architecture: to shine a light on the destination and the experiences Iniala offers, as well as the incredible staff who make a stay at the Beach House so memorable. Alongside a full-length promotional video, I created a series of short-form reels and moments for social media, all aiming to capture the calm, barefoot luxury of life on Natai Beach."
           ] },
-          // a full-length film from Vimeo: plays silently on the page (with a sound button), click to watch it large
-          { type: "vimeo", vimeo: "1187876054" },
+          // a full-length film from Vimeo: like the featured clips, it plays once with sound as it arrives
+          // (then shows Replay); click it to watch large with full controls
+          { type: "vimeo", vimeo: "1187876054", once: true },
           // twelve reels, six across and two down (top row first). Several share shots, so each starts at a
           // different point (start: seconds in) to keep the same shot from playing twice at once
           { type: "tiles12", videos: [
@@ -183,6 +184,7 @@ const OTHER_WORK = {
             photos: [
               { file: "beach-aerial-clone", ratio: 1.781 },
               { file: "bianca-twighlight-sky-replacement-2-copy", ratio: 1.500 },
+              { file: "dji-0110", ratio: 1.778 },
               { file: "bianca-exterior-to-beach-2-cast-correction", ratio: 1.500 },
               { file: "bianca-room-right-landscape-brighter", ratio: 1.500 },
               { file: "dsc-3469", ratio: 0.667 },

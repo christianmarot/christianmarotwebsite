@@ -454,7 +454,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261011h';
+    const FMV = '20261011i';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();
@@ -549,8 +549,9 @@
       case 'feature': return `<div class="blk feat big" ${pa}>${mkVideo(b)}</div>`;
       case 'secondary': return `<div class="blk b2x2" ${pa}>${(b.videos || []).slice(0, 4).map(v => mkVideo(v)).join('')}</div>`;
       case 'tiles12': return `<div class="blk t12" ${pa}>${(b.videos || []).slice(0, 12).map(v => mkVideo(v)).join('')}</div>`;
-      case 'vimeo': return `<div class="blk vim" ${pa} data-ar="${+b.ratio || 16 / 9}"><div class="it vm" data-vimeo="${esc(b.vimeo)}" tabindex="0" role="button" aria-label="Watch this film larger, with sound">
-          <div class="vm-f"></div><div class="vc"><button type="button" class="snd" aria-label="Turn sound on">${svg(ICON.muted)}<span>Sound</span></button></div></div></div>`;
+      case 'vimeo': return `<div class="blk vim" ${pa} data-ar="${+b.ratio || 16 / 9}"><div class="it vm" data-vimeo="${esc(b.vimeo)}" ${b.once ? 'data-once' : ''} tabindex="0" role="button" aria-label="Watch this film larger, with sound">
+          <div class="vm-f"></div><div class="vc"><button type="button" class="snd" aria-label="Turn sound on">${svg(ICON.muted)}<span>Sound</span></button></div>
+          ${b.once ? `<button type="button" class="replay" aria-label="Replay"><span>${svg(ICON.replay)}Replay</span></button>` : ''}</div></div>`;
       case 'hvideo': return `<div class="blk hv" ${pa}>${mkVideo(b)}</div>`;
       case 'hphoto': return `<div class="blk hp" ${pa}><div class="it"><img src="${esc(b.image)}" alt="" loading="lazy"></div></div>`;
       case 'fphoto': return `<div class="blk fp" ${pa}><div class="it"><img src="${esc(b.image)}" alt="" loading="lazy"></div></div>`;
@@ -718,14 +719,21 @@
     const snd = $('.snd', it);
     it._muted = true;
     it._setSnd = on => { it._muted = !on; if (it._p) { it._p.setMuted(!on); if (on) it._p.setVolume(1); } snd.innerHTML = svg(on ? ICON.sound : ICON.muted) + `<span>${on ? 'Sound on' : 'Sound'}</span>`; snd.setAttribute('aria-label', on ? 'Mute' : 'Turn sound on'); };
-    snd.addEventListener('click', e => { e.stopPropagation(); it._setSnd(it._muted); if (it._p) it._p.play().catch(() => {}); });
+    snd.addEventListener('click', e => { e.stopPropagation(); it._setSnd(it._muted); if (it._p && it._state !== 'done') it._p.play().catch(() => {}); });
+    it._state = 'idle';
+    const rp = $('.replay', it);
+    if (rp) rp.addEventListener('click', e => {
+      e.stopPropagation(); if (!it._p) return;
+      it.classList.remove('ended'); it._state = 'playing'; it._setSnd(true);
+      it._p.setCurrentTime(0).then(() => it._p.play()).catch(() => { it._setSnd(false); it._p.play().catch(() => {}); });
+    });
   });
   function vimCheck(it) {
     const r = it.getBoundingClientRect();
     const vis = Math.max(0, Math.min(r.right, innerWidth) - Math.max(r.left, 0)) / r.width * Math.max(0, Math.min(r.bottom, innerHeight) - Math.max(r.top, 0)) / r.height;
     if (vis > 0.02 && !it._p && window.Vimeo && Vimeo.Player) {
       const f = document.createElement('iframe');
-      f.src = vimSrc(it.dataset.vimeo, '&muted=1&loop=1&autoplay=0'); f.allow = 'autoplay; fullscreen; picture-in-picture'; f.title = 'Film';
+      f.src = vimSrc(it.dataset.vimeo, it.hasAttribute('data-once') ? '&muted=1&loop=0&autoplay=0' : '&muted=1&loop=1&autoplay=0'); f.allow = 'autoplay; fullscreen; picture-in-picture'; f.title = 'Film';
       $('.vm-f', it).appendChild(f);
       const p = it._p = new Vimeo.Player(f);
       // size the block to the film's own shape (once it's known)
@@ -734,9 +742,19 @@
         if (ar && Math.abs(ar - +blk.dataset.ar) > 0.01) { blk.dataset.ar = ar; layout(); }
       }).catch(() => {});
       p.on('play', () => it.classList.add('on'));
+      p.on('ended', () => { if (it.hasAttribute('data-once')) { it.classList.add('ended'); it._state = 'done'; } });
       it._playing = false;
     }
     if (!it._p || reduce || lbOpenVim) return;
+    if (it.hasAttribute('data-once')) {
+      // like the featured clips: plays once with sound (if the browser allows it) as it arrives, pauses when it leaves
+      if (it._state === 'idle' && inStage && vis > 0.6) {
+        it._state = 'playing'; it._setSnd(activated());
+        it._p.play().catch(() => { it._setSnd(false); it._p.play().catch(() => {}); });
+      } else if (it._state === 'playing' && vis < 0.2) { it._state = 'paused'; it._p.pause().catch(() => {}); }
+      else if (it._state === 'paused' && vis > 0.6) { it._state = 'playing'; it._p.play().catch(() => {}); }
+      return;
+    }
     if (vis > 0.1 && !it._playing && inStage) { it._playing = true; it._p.play().catch(() => { it._playing = false; }); }
     else if ((vis <= 0.1 || !inStage) && it._playing) { it._playing = false; it._p.pause().catch(() => {}); }
   }
@@ -765,7 +783,7 @@
     vFocus = document.activeElement; lbOpenVim = it;
     resume = vids.filter(x => !$('video', x).paused); resume.forEach(x => $('video', x).pause());
     const from = it._p ? it._p.getCurrentTime() : Promise.resolve(0);
-    if (it._p) it._p.pause().catch(() => {}); it._playing = false;
+    if (it._p) it._p.pause().catch(() => {}); it._playing = false; if (it._state === 'playing') it._state = 'paused';
     vSize(+it.parentElement.dataset.ar);
     const f = document.createElement('iframe');
     f.src = vimSrc(it.dataset.vimeo, '&autoplay=1&muted=0'); f.allow = 'autoplay; fullscreen; picture-in-picture'; f.title = 'Film';
