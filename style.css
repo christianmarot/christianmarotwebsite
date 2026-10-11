@@ -396,3 +396,23 @@ body.lb-open{overflow:hidden}
 .fm .fm-drift{z-index:0}
 .fm .fm-globe{z-index:1}   /* the clouds pass behind the globe */
 .fm .fm-text{z-index:3}
+
+/* ---------- Other work: tiled photo gallery + photo viewer ---------- */
+.blk.gal{position:relative}
+.blk.gal .gi{position:absolute;display:block;padding:0;border:0;overflow:hidden;background:#151816;cursor:zoom-in}
+.blk.gal .gi img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .9s cubic-bezier(.2,.7,.2,1),filter .5s}
+.blk.gal .gi:hover img,.blk.gal .gi:focus-visible img{transform:scale(1.045)}
+.blk.gal:hover .gi:not(:hover) img{filter:brightness(.72)}
+.blk.gal .gi:focus-visible{outline:1px solid var(--paper);outline-offset:3px}
+.plb{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;background:rgba(8,10,9,.86);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);opacity:0;visibility:hidden;transition:opacity .4s,visibility .4s;touch-action:pan-y}
+.plb.open{opacity:1;visibility:visible}
+.plb-fig{margin:0;display:flex;flex-direction:column;align-items:center;gap:14px;transform:scale(.97);transition:transform .45s cubic-bezier(.2,.7,.2,1)}
+.plb.open .plb-fig{transform:none}
+.plb-fig img{display:block;max-width:min(calc(100vw - 2*var(--gut) - 150px),1800px);max-height:82vh;width:auto;height:auto;box-shadow:0 30px 80px rgba(0,0,0,.5);transition:opacity .25s;user-select:none;-webkit-user-drag:none}
+.plb.swap .plb-fig img{opacity:.25}
+.plb-n{font-family:var(--mono,monospace);font-size:12px;letter-spacing:.14em;color:var(--mid)}
+.plb-nav{position:absolute;top:50%;transform:translateY(-50%);width:52px;height:52px;border-radius:50%;border:1px solid rgba(255,255,255,.4);background:rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;transition:border-color .25s}
+.plb-nav:hover{border-color:#fff}
+.plb-nav svg{width:22px;height:22px;fill:#fff}
+.plb-nav.prev{left:var(--gut)}.plb-nav.next{right:var(--gut)}
+@media (max-width:760px){.plb-nav{top:auto;bottom:22px;transform:none;width:46px;height:46px}.plb-fig img{max-width:94vw;max-height:74vh}}

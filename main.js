@@ -454,7 +454,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261009x';
+    const FMV = '20261009z';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();
@@ -552,12 +552,13 @@
       case 'fphoto': return `<div class="blk fp" ${pa}><div class="it"><img src="${esc(b.image)}" alt="" loading="lazy"></div></div>`;
       case 'sphoto': return `<div class="blk sph" ${pa}>${(b.images || []).slice(0, 4).map(i => `<div class="it"><img src="${esc(i)}" alt="" loading="lazy"></div>`).join('')}</div>`;
       case 'text': case 'titletext': return `<div class="blk txt it" ${pa} style="background:none">${b.type === 'titletext' ? `<div class="k">${esc(p.client || S.group)}</div><h2>${esc(b.title || p.title)}</h2>` : ''}${(b.text || []).map(t => `<p>${esc(t)}</p>`).join('')}</div>`;
+      case 'gallery': return `<div class="blk gal" ${pa} data-dir="${esc(b.dir)}">${(b.photos || []).map((ph, j) => `<button type="button" class="it gi" data-r="${+ph.ratio || 1.5}" data-f="${esc(ph.file)}" aria-label="View photo ${j + 1} of ${b.photos.length} larger"><img src="${esc(b.dir)}/m/${esc(ph.file)}.webp" alt="" loading="lazy" decoding="async"></button>`).join('')}</div>`;
       case 'grid': { const items = [...b.items]; while (items.length < 12) items.push({}); return items.map(t => `<div class="blk feat" ${pa}>${t.image ? `<div class="it"><img src="${esc(t.image)}" alt="" loading="lazy"></div>` : mkVideo(t)}</div>`).join(''); }
     }
     return '';
   }).join('');
   const sepHTML = (p, i) => `<div class="sep" aria-hidden="true"><span>${String(i + 1).padStart(2, '0')} — ${esc(p.title)}</span></div>`;
-  row.innerHTML = projects.map((p, i) => (projects.length > 1 ? sepHTML(p, i) : '') + blocksHTML(p, i)).join('');
+  row.innerHTML = projects.map((p, i) => (projects.length > 1 || S.markers ? sepHTML(p, i) : '') + blocksHTML(p, i)).join('');
   const blks = $$('.blk', row), items = $$('.it, .sep', row);
   const firstTxt = $('.blk.txt', row);
 
@@ -591,6 +592,18 @@
         while (b.scrollHeight > H + 2 && w < wMax) { w += 20; b.style.width = (w + pad) + 'px'; }
         while (b.scrollHeight > H + 2 && fs > 12) { fs -= 0.5; ps.forEach(q => q.style.fontSize = fs + 'px'); }
         b.style.transform = tr;
+      }
+      else if (b.classList.contains('gal')) {
+        // tiled gallery: photos packed into rows of equal height (3, or 2 on short screens), each row stretched to the same length
+        const n = H >= 520 ? 3 : 2, gp = innerWidth < 760 ? 6 : 8, rh = (H - gp * (n - 1)) / n;
+        const tiles = $$('.gi', b), rows = Array.from({ length: n }, () => ({ w: 0, t: [] }));
+        tiles.forEach(t => { const r = rows.reduce((a, c) => c.w < a.w ? c : a); r.t.push(t); r.w += (r.t.length > 1 ? gp : 0) + rh * +t.dataset.r; });
+        const len = Math.max(...rows.map(r => r.w));
+        rows.forEach((r, ri) => {
+          const sum = r.t.reduce((a, t) => a + rh * +t.dataset.r, 0), k = (len - gp * (r.t.length - 1)) / sum; let x = 0;
+          r.t.forEach(t => { const w = rh * +t.dataset.r * k; Object.assign(t.style, { left: x + 'px', top: ri * (rh + gp) + 'px', width: w + 'px', height: rh + 'px' }); x += w + gp; });
+        });
+        b.style.width = Math.round(len) + 'px';
       }
     });
     $$('.blk.feat .it, .blk.hv .it, .blk.hp .it, .blk.fp .it', row).forEach(it => it.style.height = '100%');
@@ -736,6 +749,46 @@
     it.addEventListener('click', e => { if (e.target.closest('.snd, .replay')) return; openLB(it); });
     it.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLB(it); } });
   });
+
+  /* ---------- Gallery: click a photo to see it large; arrows, swipe or keys to move through ---------- */
+  const gals = $$('.blk.gal', row);
+  if (gals.length) {
+    const pb = document.createElement('div');
+    pb.className = 'plb'; pb.setAttribute('role', 'dialog'); pb.setAttribute('aria-modal', 'true'); pb.setAttribute('aria-label', 'Photo');
+    pb.innerHTML = `<button type="button" class="lb-x" aria-label="Close">${svg('M6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12 19 6.4 17.6 5 12 10.6z')}</button>
+      <button type="button" class="plb-nav prev" aria-label="Previous photo">${svg('M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z')}</button>
+      <figure class="plb-fig"><img alt=""><figcaption class="plb-n"></figcaption></figure>
+      <button type="button" class="plb-nav next" aria-label="Next photo">${svg('M8.6 5.4 10 4l8 8-8 8-1.4-1.4 6.6-6.6z')}</button>`;
+    document.body.appendChild(pb);
+    const pImg = $('img', pb), pN = $('.plb-n', pb);
+    let set = [], at = 0, pFocus = null;
+    const big = t => `${t.closest('.gal').dataset.dir}/l/${t.dataset.f}.webp`;
+    const showP = i => {
+      at = (i + set.length) % set.length; const t = set[at];
+      pb.classList.add('swap'); const src = big(t), im = new Image(); im.src = src;
+      const go = () => { pImg.src = src; pb.classList.remove('swap'); };
+      im.decode ? im.decode().then(go, go) : (im.onload = go);
+      pN.textContent = `${String(at + 1).padStart(2, '0')} / ${String(set.length).padStart(2, '0')}`;
+      [1, -1].forEach(d => { const n = new Image(); n.src = big(set[(at + d + set.length) % set.length]); });   // have the neighbours ready
+    };
+    const openP = t => {
+      pFocus = document.activeElement; set = $$('.gi', t.closest('.gal'));
+      pImg.removeAttribute('src'); showP(set.indexOf(t));
+      document.body.classList.add('lb-open'); pb.classList.add('open'); $('.lb-x', pb).focus();
+    };
+    const closeP = () => { if (!pb.classList.contains('open')) return; pb.classList.remove('open'); document.body.classList.remove('lb-open'); pFocus?.focus?.({ preventScroll: true }); };
+    $('.lb-x', pb).onclick = closeP;
+    $('.prev', pb).onclick = () => showP(at - 1); $('.next', pb).onclick = () => showP(at + 1);
+    pb.addEventListener('click', e => { if (e.target === pb || e.target.classList.contains('plb-fig')) closeP(); });
+    addEventListener('keydown', e => {
+      if (!pb.classList.contains('open')) return;
+      if (e.key === 'Escape') closeP(); else if (e.key === 'ArrowRight') showP(at + 1); else if (e.key === 'ArrowLeft') showP(at - 1);
+    });
+    let sx0 = null;
+    pb.addEventListener('pointerdown', e => { sx0 = e.clientX; });
+    pb.addEventListener('pointerup', e => { if (sx0 == null) return; const dx = e.clientX - sx0; sx0 = null; if (Math.abs(dx) > 50) showP(at + (dx < 0 ? 1 : -1)); });
+    $$('.gi', row).forEach(t => t.addEventListener('click', () => openP(t)));
+  }
 
   addEventListener('scroll', frame, { passive: true });
   let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(layout, 100); });

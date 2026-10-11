@@ -88,6 +88,8 @@ const DOCUMENTARIES = [
      hphoto      { type:"hphoto", image:"images/…jpg" } (horizontal)
      fphoto      { type:"fphoto", image:"images/…jpg" } (featured vertical)
      sphoto      { type:"sphoto", images:[ "…", ×4 ] }  (4 vertical)
+     gallery     { type:"gallery", dir:"images/…", photos:[ { file:"name", ratio:1.5 }, … ] }
+                 (tiled photos, click to enlarge; ratio = width ÷ height; tiles in dir/m, large in dir/l, .webp)
    audio:true = has a sound button; once:true = plays once (with sound if allowed), then shows Replay.
    Pages without "projects" still use the simple "tiles" list.
    hero:  the full-screen video behind the page title (a Vimeo number),
@@ -143,7 +145,57 @@ const OTHER_WORK = {
     cover: "images/commercial-hotel-suite.jpg",
     hero: VIDEOS.hotels,
     heroTitle: "Iniala Valletta",
-    tiles: [ { image: "images/commercial-hotel-suite.jpg" } ]
+    markers: true,           // show the vertical project markers even while there is only one project
+    projects: [
+      {
+        client: "Iniala Hotels", title: "Iniala Valletta",
+        blocks: [
+          { type: "text", text: [
+            "Iniala Valletta stands on the bastions of Malta’s UNESCO-listed capital, looking out over the Grand Harbour. The hotel is made up of a collection of beautifully restored townhouses and palazzos, some with vaults dating back to the 1600s. It has become one of the most decorated hotels in the Mediterranean – Malta’s only Forbes Five-Star hotel for five years running, and in 2025 the first hotel on the island to receive two Michelin Keys. On the rooftop, ION Harbour by Simon Rogan holds two Michelin stars, which makes it Malta’s only two-star restaurant.",
+            "I was brought in to create a full-length promotional video for the hotel (see featured above), along with a series of reels and short moments for social media. With Iniala Valletta being a design and experience-led hotel, the aim was to capture Malta as a destination, as well as the serenity of the hotel itself."
+          ] },
+          { type: "feature", video: "clips/hotels/iniala-sailboat-moment.mp4",   poster: "clips/hotels/iniala-sailboat-moment.jpg",   audio: true, once: true },
+          { type: "feature", video: "clips/hotels/iniala-malta-destination.mp4", poster: "clips/hotels/iniala-malta-destination.jpg", audio: true, once: true },
+          { type: "secondary", videos: [
+            { video: "clips/hotels/iniala-sailboat.mp4",        poster: "clips/hotels/iniala-sailboat.jpg" },
+            { video: "clips/hotels/iniala-sunset-sunrise.mp4",  poster: "clips/hotels/iniala-sunset-sunrise.jpg" },
+            { video: "clips/hotels/iniala-brindis-ocean.mp4",   poster: "clips/hotels/iniala-brindis-ocean.jpg" },
+            { video: "clips/hotels/iniala-social-malta.mp4",    poster: "clips/hotels/iniala-social-malta.jpg" }
+          ] },
+          // photo gallery: click a photo to see it large. Files live in  <dir>/m  (tiles) and  <dir>/l  (large)
+          { type: "gallery", dir: "images/hotels/iniala-valletta", photos: [
+          { file: "dsc-6477", ratio: 1.778 },
+          { file: "112-close-to-view", ratio: 0.668 },
+          { file: "penthouse-lounge-angle-curtains", ratio: 1.500 },
+          { file: "121-bed-to-view-p", ratio: 0.667 },
+          { file: "ion-resuaraunt-table-to-view-cu-test-2", ratio: 1.500 },
+          { file: "show-suite-jungle-room-angle-v1", ratio: 1.500 },
+          { file: "dsc-1131", ratio: 0.667 },
+          { file: "show-suite-kitchen-to-lounge", ratio: 1.500 },
+          { file: "grand-residence-lounge-to-chair-bright", ratio: 1.500 },
+          { file: "121-bed-detail", ratio: 0.667 },
+          { file: "ion-restrauant-side", ratio: 1.500 },
+          { file: "dsc-6413", ratio: 0.667 },
+          { file: "show-suite-jungle-room-straight-to-bed-skew", ratio: 1.500 },
+          { file: "show-suite-jungle-room-bed-detail-v2-10x8", ratio: 0.800 },
+          { file: "penthouse-lounge-side-to-kitchen-crop", ratio: 1.778 },
+          { file: "ion-restaurant-table-to-view-p-10x8-2", ratio: 0.800 },
+          { file: "dsc-1133", ratio: 1.500 },
+          { file: "penthouse-kitchen-to-lounge", ratio: 0.667 },
+          { file: "penthouse-lounge-to-kitchen-l-v2", ratio: 1.500 },
+          { file: "show-suite-to-bar-p-10x8", ratio: 0.800 },
+          { file: "penthouse-lounge-angle-to-bed-kitchen-blanket", ratio: 1.500 },
+          { file: "112-balcony-mid-to-view-10x8", ratio: 0.800 },
+          { file: "grand-residence-chair-detial-p-clone", ratio: 0.667 },
+          { file: "penthouse-lounge-straight-to-balcony-style-2-21x9", ratio: 2.333 },
+          { file: "show-suite-jungle-room-bed-detail-v2", ratio: 0.667 },
+          { file: "penthouse-dsc-4112", ratio: 0.667 },
+          { file: "122-living-area-doors-closed-p", ratio: 0.667 },
+          { file: "the-works-gym-main-room-test", ratio: 1.500 }
+          ] }
+        ]
+      }
+    ]
   },
   property: {
     title: "Property", group: "Commercial",
