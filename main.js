@@ -454,7 +454,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261011j';
+    const FMV = '20261011k';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();
@@ -750,16 +750,28 @@
     if (!it._p || reduce || lbOpenVim) return;
     if (it.hasAttribute('data-once')) {
       // like the featured clips: plays once with sound (if the browser allows it) as it arrives, pauses when it leaves
+      // (leaving includes scrolling back up to the film at the top of the page)
+      const away = vis < 0.2 || !inStage;
       if (it._state === 'idle' && inStage && vis > 0.6 && !otherPlaying(it)) {
         it._state = 'playing'; it._setSnd(activated());
         it._p.play().catch(() => { it._setSnd(false); it._p.play().catch(() => {}); });
-      } else if (it._state === 'playing' && vis < 0.2) { it._state = 'paused'; it._p.pause().catch(() => {}); }
-      else if (it._state === 'paused' && vis > 0.6 && !otherPlaying(it)) { it._state = 'playing'; it._p.play().catch(() => {}); }
+      } else if (it._state === 'playing' && away) { it._state = 'paused'; it._p.pause().catch(() => {}); }
+      else if (it._state === 'paused' && inStage && vis > 0.6 && !otherPlaying(it)) { it._state = 'playing'; it._p.play().catch(() => {}); }
+      // Vimeo can ignore a pause or play sent while it is still starting up, so check it actually did what was asked
+      const now = performance.now();
+      if ((it._state === 'paused' || it._state === 'playing') && now - (it._sync || 0) > 600) {
+        it._sync = now;
+        it._p.getPaused().then(pz => {
+          if (it._state === 'paused' && !pz) it._p.pause().catch(() => {});
+          else if (it._state === 'playing' && pz) it._p.getEnded().then(e => { if (!e && it._state === 'playing') it._p.play().catch(() => {}); }).catch(() => {});
+        }).catch(() => {});
+      }
       return;
     }
     if (vis > 0.1 && !it._playing && inStage) { it._playing = true; it._p.play().catch(() => { it._playing = false; }); }
     else if ((vis <= 0.1 || !inStage) && it._playing) { it._playing = false; it._p.pause().catch(() => {}); }
   }
+  if (vims.length) setInterval(() => vims.forEach(vimCheck), 700);   // keeps checking even when the page is still
   // the large viewer: its own player with sound, and the bespoke controls, which fade after a few seconds of stillness
   let lbOpenVim = null;
   const vlb = document.createElement('div');
