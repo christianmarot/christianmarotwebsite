@@ -454,7 +454,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261009z';
+    const FMV = '20261011a';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();
@@ -538,10 +538,11 @@
   const projects = S.projects || [{ client: S.group, title: S.title, blocks: [{ type: 'grid', items: S.tiles || [] }] }];
   const row = document.createElement('div'); row.className = 'wk-row'; pin.appendChild(row);
   const mkVideo = (v, extra = '') => v.video
-    ? `<div class="it vid${extra}" data-src="${esc(v.video)}" ${v.audio ? 'data-audio' : ''} ${v.once ? 'data-once' : ''}><video muted playsinline preload="none" ${v.once ? '' : 'loop'} ${v.poster ? `poster="${esc(v.poster)}"` : ''}></video>
+    ? `<div class="it vid${extra}" data-src="${esc(v.video)}" ${v.start ? `data-start="${+v.start}"` : ''} ${v.audio ? 'data-audio' : ''} ${v.once ? 'data-once' : ''}><video muted playsinline preload="none" ${v.once ? '' : 'loop'} ${v.poster ? `poster="${esc(v.poster)}"` : ''}></video>
         ${v.audio ? `<div class="vc"><button type="button" class="snd" aria-label="Turn sound on">${svg(ICON.muted)}<span>Sound</span></button></div>` : ''}
         ${v.once ? `<button type="button" class="replay" aria-label="Replay">${'<span>' + svg(ICON.replay) + 'Replay</span>'}</button>` : ''}</div>`
     : `<div class="it ph"><div class="ph" style="height:100%">[ ${esc(v.note || '9:16 clip to come')} ]</div></div>`;
+  const galleries = [];
   const blocksHTML = (p, pi) => p.blocks.map(b => {
     const pa = `data-p="${pi}"`;
     switch (b.type) {
@@ -552,7 +553,14 @@
       case 'fphoto': return `<div class="blk fp" ${pa}><div class="it"><img src="${esc(b.image)}" alt="" loading="lazy"></div></div>`;
       case 'sphoto': return `<div class="blk sph" ${pa}>${(b.images || []).slice(0, 4).map(i => `<div class="it"><img src="${esc(i)}" alt="" loading="lazy"></div>`).join('')}</div>`;
       case 'text': case 'titletext': return `<div class="blk txt it" ${pa} style="background:none">${b.type === 'titletext' ? `<div class="k">${esc(p.client || S.group)}</div><h2>${esc(b.title || p.title)}</h2>` : ''}${(b.text || []).map(t => `<p>${esc(t)}</p>`).join('')}</div>`;
-      case 'gallery': return `<div class="blk gal" ${pa} data-dir="${esc(b.dir)}">${(b.photos || []).map((ph, j) => `<button type="button" class="it gi" data-r="${+ph.ratio || 1.5}" data-f="${esc(ph.file)}" aria-label="View photo ${j + 1} of ${b.photos.length} larger"><img src="${esc(b.dir)}/m/${esc(ph.file)}.webp" alt="" loading="lazy" decoding="async"></button>`).join('')}</div>`;
+      case 'gallery': {
+        // a single preview block; the full gallery opens on click
+        const gi = galleries.push({ dir: b.dir, photos: b.photos || [], title: p.title }) - 1, ph = b.photos || [], more = Math.max(0, ph.length - 3);
+        const im = j => ph[j] ? `<img src="${esc(b.dir)}/m/${esc(ph[j].file)}.webp" alt="" loading="lazy" decoding="async">` : '';
+        return `<div class="blk galh" ${pa}><button type="button" class="it gh" data-g="${gi}" aria-label="Open the photo gallery, ${ph.length} photos">
+          <span class="gh-a">${im(0)}</span><span class="gh-b">${im(1)}</span><span class="gh-c">${im(2)}${more ? `<i>+${more}</i>` : ''}</span>
+          <span class="gh-l"><b>Photo gallery</b><small>${ph.length} photos · View all</small></span></button></div>`;
+      }
       case 'grid': { const items = [...b.items]; while (items.length < 12) items.push({}); return items.map(t => `<div class="blk feat" ${pa}>${t.image ? `<div class="it"><img src="${esc(t.image)}" alt="" loading="lazy"></div>` : mkVideo(t)}</div>`).join(''); }
     }
     return '';
@@ -586,25 +594,14 @@
         if (innerWidth < 760) {
           // phones: fill the screen width; the opening block must sit fully on screen beside its divider
           const gut = parseFloat(getComputedStyle(row).paddingLeft) || 24;
-          w = wMax = (b === firstTxt ? innerWidth - gut - b.offsetLeft : innerWidth - gut * 2) - pad;
+          w = wMax = (b === firstTxt && (!b.previousElementSibling || b.previousElementSibling.classList.contains('sep')) ? innerWidth - gut - b.offsetLeft : innerWidth - gut * 2) - pad;
         } else w = Math.max(260, Math.min(360, innerWidth * 0.24));
         b.style.width = (w + pad) + 'px';
         while (b.scrollHeight > H + 2 && w < wMax) { w += 20; b.style.width = (w + pad) + 'px'; }
         while (b.scrollHeight > H + 2 && fs > 12) { fs -= 0.5; ps.forEach(q => q.style.fontSize = fs + 'px'); }
         b.style.transform = tr;
       }
-      else if (b.classList.contains('gal')) {
-        // tiled gallery: photos packed into rows of equal height (3, or 2 on short screens), each row stretched to the same length
-        const n = H >= 520 ? 3 : 2, gp = innerWidth < 760 ? 6 : 8, rh = (H - gp * (n - 1)) / n;
-        const tiles = $$('.gi', b), rows = Array.from({ length: n }, () => ({ w: 0, t: [] }));
-        tiles.forEach(t => { const r = rows.reduce((a, c) => c.w < a.w ? c : a); r.t.push(t); r.w += (r.t.length > 1 ? gp : 0) + rh * +t.dataset.r; });
-        const len = Math.max(...rows.map(r => r.w));
-        rows.forEach((r, ri) => {
-          const sum = r.t.reduce((a, t) => a + rh * +t.dataset.r, 0), k = (len - gp * (r.t.length - 1)) / sum; let x = 0;
-          r.t.forEach(t => { const w = rh * +t.dataset.r * k; Object.assign(t.style, { left: x + 'px', top: ri * (rh + gp) + 'px', width: w + 'px', height: rh + 'px' }); x += w + gp; });
-        });
-        b.style.width = Math.round(len) + 'px';
-      }
+      else if (b.classList.contains('galh')) b.style.width = Math.round(H * (innerWidth < 760 ? .62 : .9)) + 'px';
     });
     $$('.blk.feat .it, .blk.hv .it, .blk.hp .it, .blk.fp .it', row).forEach(it => it.style.height = '100%');
     panMax = Math.max(0, row.scrollWidth - innerWidth);
@@ -684,7 +681,10 @@
       const visW = Math.max(0, Math.min(r.right, innerWidth) - Math.max(r.left, 0)) / r.width;
       const visH = Math.max(0, Math.min(r.bottom, innerHeight) - Math.max(r.top, 0)) / r.height;
       const vis = visW * visH;
-      if (vis > 0.05 && !v.src) { v.src = it.dataset.src; v.preload = 'auto'; }
+      if (vis > 0.05 && !v.src) {
+        v.src = it.dataset.src; v.preload = 'auto';
+        if (it.dataset.start) v.addEventListener('loadedmetadata', () => { v.currentTime = +it.dataset.start; }, { once: true });   // first play starts part-way in
+      }
       if (reduce) return;
       if (it.hasAttribute('data-once')) {
         if (it._state === 'idle' && inStage && vis > 0.6) {
@@ -750,44 +750,67 @@
     it.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLB(it); } });
   });
 
-  /* ---------- Gallery: click a photo to see it large; arrows, swipe or keys to move through ---------- */
-  const gals = $$('.blk.gal', row);
-  if (gals.length) {
+  /* ---------- Gallery: the preview opens a full-screen grid of every photo; click one to see it large ---------- */
+  if (galleries.length) {
+    const X = svg('M6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12 19 6.4 17.6 5 12 10.6z');
+    const pg = document.createElement('div');
+    pg.className = 'pgrid'; pg.setAttribute('role', 'dialog'); pg.setAttribute('aria-modal', 'true'); pg.setAttribute('aria-label', 'Photo gallery');
+    pg.innerHTML = `<div class="pg-hd"><div><div class="k">Photo gallery</div><h2></h2></div><button type="button" class="lb-x pg-x" aria-label="Close the gallery">${X}</button></div><div class="pg-body"><div class="pg-rows"></div></div>`;
     const pb = document.createElement('div');
     pb.className = 'plb'; pb.setAttribute('role', 'dialog'); pb.setAttribute('aria-modal', 'true'); pb.setAttribute('aria-label', 'Photo');
-    pb.innerHTML = `<button type="button" class="lb-x" aria-label="Close">${svg('M6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12 19 6.4 17.6 5 12 10.6z')}</button>
+    pb.innerHTML = `<button type="button" class="lb-x" aria-label="Close">${X}</button>
       <button type="button" class="plb-nav prev" aria-label="Previous photo">${svg('M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z')}</button>
       <figure class="plb-fig"><img alt=""><figcaption class="plb-n"></figcaption></figure>
       <button type="button" class="plb-nav next" aria-label="Next photo">${svg('M8.6 5.4 10 4l8 8-8 8-1.4-1.4 6.6-6.6z')}</button>`;
-    document.body.appendChild(pb);
-    const pImg = $('img', pb), pN = $('.plb-n', pb);
-    let set = [], at = 0, pFocus = null;
-    const big = t => `${t.closest('.gal').dataset.dir}/l/${t.dataset.f}.webp`;
+    document.body.append(pg, pb);
+    const pImg = $('img', pb), pN = $('.plb-n', pb), rowsEl = $('.pg-rows', pg);
+    let G = null, at = 0, gFocus = null;
+    const big = i => `${G.dir}/l/${G.photos[i].file}.webp`;
     const showP = i => {
-      at = (i + set.length) % set.length; const t = set[at];
-      pb.classList.add('swap'); const src = big(t), im = new Image(); im.src = src;
-      const go = () => { pImg.src = src; pb.classList.remove('swap'); };
+      const n = G.photos.length; at = (i + n) % n;
+      pb.classList.add('swap'); const src = big(at), im = new Image(); im.src = src;
+      const go = () => { if (big(at) === src) { pImg.src = src; pb.classList.remove('swap'); } };
       im.decode ? im.decode().then(go, go) : (im.onload = go);
-      pN.textContent = `${String(at + 1).padStart(2, '0')} / ${String(set.length).padStart(2, '0')}`;
-      [1, -1].forEach(d => { const n = new Image(); n.src = big(set[(at + d + set.length) % set.length]); });   // have the neighbours ready
+      pN.textContent = `${String(at + 1).padStart(2, '0')} / ${String(n).padStart(2, '0')}`;
+      [1, -1].forEach(d => { const x = new Image(); x.src = big((at + d + n) % n); });   // have the neighbours ready
     };
-    const openP = t => {
-      pFocus = document.activeElement; set = $$('.gi', t.closest('.gal'));
-      pImg.removeAttribute('src'); showP(set.indexOf(t));
-      document.body.classList.add('lb-open'); pb.classList.add('open'); $('.lb-x', pb).focus();
+    const openGrid = gi => {
+      G = galleries[gi]; gFocus = document.activeElement;
+      $('h2', pg).textContent = G.title;
+      // justified rows: each photo grows in proportion to its width, so every row lines up at both edges
+      rowsEl.innerHTML = G.photos.map((ph, i) => `<button type="button" class="pg-it" data-i="${i}" aria-label="Photo ${i + 1} of ${G.photos.length}"><img src="${G.dir}/m/${ph.file}.webp" alt="" loading="lazy" decoding="async"></button>`).join('');
+      $('.pg-body', pg).scrollTop = 0; justify();
+      document.body.classList.add('lb-open'); pg.classList.add('open'); $('.pg-x', pg).focus();
     };
-    const closeP = () => { if (!pb.classList.contains('open')) return; pb.classList.remove('open'); document.body.classList.remove('lb-open'); pFocus?.focus?.({ preventScroll: true }); };
+    // justified rows: photos are added to a row until it would be too wide, then the row is scaled to fit exactly
+    const justify = () => {
+      if (!G) return;
+      const W = rowsEl.clientWidth, gap = innerWidth < 760 ? 5 : 8, target = innerWidth < 760 ? 210 : Math.max(240, Math.min(380, innerHeight * .36));
+      const its = $$('.pg-it', rowsEl); let row = [], sum = 0;
+      const flush = last => {
+        const h = last ? Math.min(target, (W - gap * (row.length - 1)) / sum) : (W - gap * (row.length - 1)) / sum;
+        row.forEach(([el, r]) => { el.style.width = (r * h) + 'px'; el.style.height = h + 'px'; }); row = []; sum = 0;
+      };
+      its.forEach((el, i) => { const r = +G.photos[i].ratio || 1.5; row.push([el, r]); sum += r; if (sum * target + gap * (row.length - 1) >= W) flush(false); });
+      if (row.length) flush(true);
+    };
+    addEventListener('resize', () => { if (pg.classList.contains('open')) justify(); });
+    const closeGrid = () => { pg.classList.remove('open'); document.body.classList.remove('lb-open'); gFocus?.focus?.({ preventScroll: true }); };
+    const openP = i => { pImg.removeAttribute('src'); showP(i); pb.classList.add('open'); $('.lb-x', pb).focus(); };
+    const closeP = () => { pb.classList.remove('open'); $(`.pg-it[data-i="${at}"]`, pg)?.focus({ preventScroll: true }); };
+    $('.pg-x', pg).onclick = closeGrid;
+    rowsEl.addEventListener('click', e => { const t = e.target.closest('.pg-it'); if (t) openP(+t.dataset.i); });
     $('.lb-x', pb).onclick = closeP;
     $('.prev', pb).onclick = () => showP(at - 1); $('.next', pb).onclick = () => showP(at + 1);
     pb.addEventListener('click', e => { if (e.target === pb || e.target.classList.contains('plb-fig')) closeP(); });
     addEventListener('keydown', e => {
-      if (!pb.classList.contains('open')) return;
-      if (e.key === 'Escape') closeP(); else if (e.key === 'ArrowRight') showP(at + 1); else if (e.key === 'ArrowLeft') showP(at - 1);
+      if (pb.classList.contains('open')) { if (e.key === 'Escape') closeP(); else if (e.key === 'ArrowRight') showP(at + 1); else if (e.key === 'ArrowLeft') showP(at - 1); }
+      else if (pg.classList.contains('open') && e.key === 'Escape') closeGrid();
     });
     let sx0 = null;
     pb.addEventListener('pointerdown', e => { sx0 = e.clientX; });
     pb.addEventListener('pointerup', e => { if (sx0 == null) return; const dx = e.clientX - sx0; sx0 = null; if (Math.abs(dx) > 50) showP(at + (dx < 0 ? 1 : -1)); });
-    $$('.gi', row).forEach(t => t.addEventListener('click', () => openP(t)));
+    $$('.gh', row).forEach(t => t.addEventListener('click', () => openGrid(+t.dataset.g)));
   }
 
   addEventListener('scroll', frame, { passive: true });

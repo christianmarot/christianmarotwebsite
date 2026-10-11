@@ -89,7 +89,8 @@ const DOCUMENTARIES = [
      fphoto      { type:"fphoto", image:"images/…jpg" } (featured vertical)
      sphoto      { type:"sphoto", images:[ "…", ×4 ] }  (4 vertical)
      gallery     { type:"gallery", dir:"images/…", photos:[ { file:"name", ratio:1.5 }, … ] }
-                 (tiled photos, click to enlarge; ratio = width ÷ height; tiles in dir/m, large in dir/l, .webp)
+                 (a preview block that opens the full gallery; ratio = width ÷ height; tiles in dir/m, large in dir/l, .webp)
+   any clip can also take  start: 4.5  (seconds in, where it first starts playing)
    audio:true = has a sound button; once:true = plays once (with sound if allowed), then shows Replay.
    Pages without "projects" still use the simple "tiles" list.
    hero:  the full-screen video behind the page title (a Vimeo number),
@@ -150,19 +151,21 @@ const OTHER_WORK = {
       {
         client: "Iniala Hotels", title: "Iniala Valletta",
         blocks: [
+          { type: "fphoto", image: "images/hotels/iniala-valletta/l/show-suite-jungle-room-bed-detail-v2.webp" },
           { type: "text", text: [
             "Iniala Valletta stands on the bastions of Malta’s UNESCO-listed capital, looking out over the Grand Harbour. The hotel is made up of a collection of beautifully restored townhouses and palazzos, some with vaults dating back to the 1600s. It has become one of the most decorated hotels in the Mediterranean – Malta’s only Forbes Five-Star hotel for five years running, and in 2025 the first hotel on the island to receive two Michelin Keys. On the rooftop, ION Harbour by Simon Rogan holds two Michelin stars, which makes it Malta’s only two-star restaurant.",
-            "I was brought in to create a full-length promotional video for the hotel (see featured above), along with a series of reels and short moments for social media. With Iniala Valletta being a design and experience-led hotel, the aim was to capture Malta as a destination, as well as the serenity of the hotel itself."
+            "I was brought in to create a full-length promotional video for the hotel (see featured above), along with a series of reels and short moments for social media. Alongside the films, I shot a collection of high-end photography for the hotel’s website and promotional use, which has since appeared in publications including Forbes and Condé Nast. With Iniala Valletta being a design and experience-led hotel, the aim was to capture Malta as a destination, as well as the serenity of the hotel itself."
           ] },
-          { type: "feature", video: "clips/hotels/iniala-sailboat-moment.mp4",   poster: "clips/hotels/iniala-sailboat-moment.jpg",   audio: true, once: true },
           { type: "feature", video: "clips/hotels/iniala-malta-destination.mp4", poster: "clips/hotels/iniala-malta-destination.jpg", audio: true, once: true },
+          // start: seconds into the clip where it first starts playing. These four share some shots, so they're
+          // staggered so the same shot doesn't appear in two of them at the same time (good for about the first minute)
           { type: "secondary", videos: [
             { video: "clips/hotels/iniala-sailboat.mp4",        poster: "clips/hotels/iniala-sailboat.jpg" },
-            { video: "clips/hotels/iniala-sunset-sunrise.mp4",  poster: "clips/hotels/iniala-sunset-sunrise.jpg" },
-            { video: "clips/hotels/iniala-brindis-ocean.mp4",   poster: "clips/hotels/iniala-brindis-ocean.jpg" },
-            { video: "clips/hotels/iniala-social-malta.mp4",    poster: "clips/hotels/iniala-social-malta.jpg" }
+            { video: "clips/hotels/iniala-sunset-sunrise.mp4",  poster: "clips/hotels/iniala-sunset-sunrise.jpg", start: 4.75 },
+            { video: "clips/hotels/iniala-brindis-ocean.mp4",   poster: "clips/hotels/iniala-brindis-ocean.jpg",  start: 4.5 },
+            { video: "clips/hotels/iniala-social-malta.mp4",    poster: "clips/hotels/iniala-social-malta.jpg",   start: 10.25 }
           ] },
-          // photo gallery: click a photo to see it large. Files live in  <dir>/m  (tiles) and  <dir>/l  (large)
+          // photo gallery: shows as one small preview block; clicking it opens the full gallery (the first three photos make the preview). Files live in  <dir>/m  (tiles) and  <dir>/l  (large)
           { type: "gallery", dir: "images/hotels/iniala-valletta", photos: [
           { file: "dsc-6477", ratio: 1.778 },
           { file: "112-close-to-view", ratio: 0.668 },
