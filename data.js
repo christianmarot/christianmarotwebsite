@@ -316,14 +316,14 @@ const OTHER_WORK = {
     title: "Editorial", group: "The New York Times",
     cover: "images/editorial-fashion-hillside.jpg",
     hero: VIDEOS.editorial,
-    heroTitle: "New York Times — Departures",
+    heroTitle: "The New York Times — Departures",
     projects: [
       {
         client: "The New York Times", title: "Departures",
         blocks: [
           { type: "photo", image: "images/editorial/departures/l/000058100007.webp", ratio: 1.294 },
           { type: "text", text: [
-            "I collaborated with London-based photographer and director Bex Day on Departures, a project for The New York Times. Bex’s work explores gender, identity and diversity and challenges rigid beauty ideals. For this project, eight models travelled to a series of locations across Wales and the Brecon Beacons, placing them in the rugged, open landscapes of the Welsh countryside. As drone operator, I captured the aerial perspective, showing the scale of the landscape around the models. The project was styled by Leith Clark, with music by Patrick James Fitzroy, grading by Anna Barsukova and editing by David Zbrika."
+            "A collaboration with London-based photographer and director Bex Day on Departures, a project for The New York Times. Bex’s work explores gender, identity and diversity and challenges rigid beauty ideals. For this project, eight models travelled to a series of locations across Wales and the Brecon Beacons, placing them in the rugged, open landscapes of the Welsh countryside. As drone operator, I captured the aerial perspective, showing the scale of the landscape around the models. The project was styled by Leith Clark, with music by Patrick James Fitzroy, grading by Anna Barsukova and editing by David Zbrika."
           ] },
           // a tiled gallery laid out along the row (rows: how many rows of photos); click a photo to see it large
           { type: "tiled", rows: 2, dir: "images/editorial/departures", photos: [
@@ -348,7 +348,171 @@ const OTHER_WORK = {
   fineart: {
     title: "Fine Art", group: "Exhibitions · Projects",
     cover: "images/fine-art-frost-patterns.jpg",
-    tiles: [ { image: "images/fine-art-frost-patterns.jpg" } ]
+    // no film here: the opening screen is a slideshow of the work, in a random order that never shows two
+    // pictures from the same project back to back. "project" is the name shown as Featured project
+    slides: [
+      { image: "images/fine-art/l/europa-neg-3.webp", project: "Europa" },
+      { image: "images/fine-art/l/europa-thud-1.webp", project: "Europa" },
+      { image: "images/fine-art/l/europa-cascade.webp", project: "Europa" },
+      { image: "images/fine-art/l/europa-thud-2.webp", project: "Europa" },
+      { image: "images/fine-art/l/europa-tray-frame.webp", project: "Europa" },
+      { image: "images/fine-art/l/europa-neg-11.webp", project: "Europa" },
+      { image: "images/fine-art/l/europa-thud-3.webp", project: "Europa" },
+      { image: "images/fine-art/l/europa-cascade-2.webp", project: "Europa" },
+      { image: "images/fine-art/l/europa-thud-4.webp", project: "Europa" },
+      { image: "images/fine-art/l/europa-albedo.webp", project: "Europa" },
+      { image: "images/fine-art/l/kc-100001.webp", project: "Kerrejja Causi" },
+      { image: "images/fine-art/l/kc-100007.webp", project: "Kerrejja Causi" },
+      { image: "images/fine-art/l/kc-150002.webp", project: "Kerrejja Causi" },
+      { image: "images/fine-art/l/kc-150005.webp", project: "Kerrejja Causi" },
+      { image: "images/fine-art/l/kc-110010.webp", project: "Kerrejja Causi" },
+      { image: "images/fine-art/l/kc-150007.webp", project: "Kerrejja Causi" },
+      { image: "images/fine-art/l/kc-170008.webp", project: "Kerrejja Causi" },
+      { image: "images/fine-art/l/kc-170010-a.webp", project: "Kerrejja Causi" },
+      { image: "images/fine-art/l/kc-529.webp", project: "Kerrejja Causi" },
+      { image: "images/fine-art/l/kc-530.webp", project: "Kerrejja Causi" },
+      { image: "images/fine-art/l/kc-170010-b.webp", project: "Kerrejja Causi" },
+      { image: "images/fine-art/l/kc-531.webp", project: "Kerrejja Causi" },
+      { image: "images/fine-art/l/kc-170010-c.webp", project: "Kerrejja Causi" },
+      { image: "images/fine-art/l/kc-532.webp", project: "Kerrejja Causi" }
+    ],
+    // each project is numbered (01, 02 …); an exhibition follows its project behind a smaller, unnumbered
+    // divider (sub: true). The big title stays the project name; the small line reads Project / Exhibition
+    projects: [
+      {
+        client: "Project", title: "Europa",
+        blocks: [
+          { type: "text", text: [
+            "Europa is a series of camera-less photographs exploring unfamiliar, otherworldly landscapes. At first glance they could be the frozen surface of Europa, one of Jupiter’s moons, yet every image was made in the darkroom with large format film, salt, water, ice and light. The materials echo the moon itself – an icy crust over a salty ocean – and the work asks the viewer to question both the process and the reality of what they are looking at."
+          ] },
+          { type: "tiled", rows: 1, dir: "images/fine-art", photos: [
+              { file: "europa-neg-3", ratio: 0.800 },
+              { file: "europa-thud-1", ratio: 0.813 },
+              { file: "europa-cascade", ratio: 1.056 },
+              { file: "europa-thud-2", ratio: 0.805 },
+              { file: "europa-tray-frame", ratio: 1.223 },
+              { file: "europa-neg-11", ratio: 0.782 },
+              { file: "europa-thud-3", ratio: 0.805 },
+              { file: "europa-cascade-2", ratio: 1.046 },
+              { file: "europa-thud-4", ratio: 0.806 },
+              { file: "europa-albedo", ratio: 1.223 }
+          ] },
+          { type: "strip", image: "images/fine-art/l/europa-10m-roll.webp", ratio: 12.941, caption: "Europa · 10 metre roll" }
+        ]
+      },
+      {
+        client: "Exhibition", title: "Europa", sub: true, marker: "Europa · Exhibition",
+        blocks: [
+          { type: "text", text: [
+            "Europa was first shown at the Arts University Bournemouth graduate exhibition in 2017, then in smaller shows around Bournemouth – The Raw Project (2017) and Contained Exhibition (2018) – and in the group exhibition THUD (2017) at The Truman Brewery in London. After two years of exhibiting in the UK, the full series was shown for the first time in a month-long solo exhibition at Iniala Gallery in Phuket, Thailand."
+          ] },
+          { type: "titletext", k: "Solo exhibition", title: "Europa | Thailand", text: ["Iniala Gallery, Phuket"] },
+          { type: "tiled", rows: 2, dir: "images/fine-art", photos: [
+              { file: "thai-0292", ratio: 1.502 },
+              { file: "thai-0302", ratio: 1.502 },
+              { file: "thai-0308", ratio: 0.666 },
+              { file: "thai-0258", ratio: 0.666 },
+              { file: "thai-0253", ratio: 1.502 },
+              { file: "thai-0616", ratio: 1.502 },
+              { file: "thai-0631", ratio: 1.502 },
+              { file: "thai-0601", ratio: 1.502 },
+              { file: "thai-0668", ratio: 0.667 },
+              { file: "thai-0619", ratio: 1.502 },
+              { file: "thai-0646", ratio: 1.502 },
+              { file: "thai-0606", ratio: 1.502 },
+              { file: "thai-0685", ratio: 0.667 },
+              { file: "thai-0621", ratio: 1.502 },
+              { file: "thai-0653", ratio: 1.502 },
+              { file: "thai-0696", ratio: 0.667 },
+              { file: "thai-0607", ratio: 1.502 },
+              { file: "thai-0661", ratio: 1.500 },
+              { file: "thai-0707", ratio: 0.667 },
+              { file: "thai-0615", ratio: 1.502 },
+              { file: "thai-0665", ratio: 1.500 },
+              { file: "thai-0719", ratio: 1.500 }
+          ] },
+          { type: "titletext", k: "Group exhibition · BA (Hons) Photography", title: "THUD", text: ["The Truman Brewery, London · 2017"] },
+          { type: "tiled", rows: 2, dir: "images/fine-art", photos: [
+              { file: "thud-1062", ratio: 0.667 },
+              { file: "thud-1080", ratio: 1.500 },
+              { file: "thud-1104", ratio: 1.500 },
+              { file: "thud-1063", ratio: 0.667 },
+              { file: "thud-1106", ratio: 1.500 },
+              { file: "thud-5962", ratio: 1.333 },
+              { file: "thud-1108", ratio: 0.667 },
+              { file: "thud-5972", ratio: 1.333 },
+              { file: "thud-6021", ratio: 2.995 }
+          ] }
+        ]
+      },
+      {
+        client: "Project", title: "Kerrejja Causi",
+        blocks: [
+          { type: "text", text: [
+            "Kerrejja Causi tells the story of an abandoned 16th-century tenement building, or ‘Kerrejja’, that stands in the heart of Valletta. A series of moments captured on medium format film, alongside a collection of found artefacts, builds up the sense that it was deserted on a single day, with knives and forks left laid on tables. Kerrejja Causi is full of character, and it represents a past Malta which will be lost to the natural passage of time and modern development."
+          ] },
+          { type: "tiled", rows: 1, dir: "images/fine-art", photos: [
+              { file: "kc-100001", ratio: 1.284 },
+              { file: "kc-100007", ratio: 1.253 },
+              { file: "kc-150002", ratio: 1.284 },
+              { file: "kc-150005", ratio: 1.278 },
+              { file: "kc-110010", ratio: 1.268 }
+          ] },
+          { type: "text", text: [
+            "The building, Kerrejja Causi, otherwise known as ‘Casa Causi’, was originally built in the 1500s by the noble Testaferrata family. Throughout its history, the nobility endowed many churches, built many fine palazzi and patronised the arts. This home was a statement of grandeur. Split across five floors, it was decorated with the finest furnishings, paintings, jewellery and objets d’art. There was even a tunnel built in the basement which led under Valletta and out to the grand palace.",
+            "In the summer of 1565, Malta and the Knights of the Order of St John came under attack from the Turks. In the mid-1500s the Ottoman Empire was reaching its zenith, its reach spreading far into Europe, North Africa and the Mediterranean. Severely outnumbered, the Maltese and 10,000 Knights fought off a force of 40,000 Turks – one of the most iconic events in Maltese history, ‘The Great Siege’."
+          ] },
+          { type: "tiled", rows: 1, dir: "images/fine-art", photos: [
+              { file: "kc-150007", ratio: 1.212 },
+              { file: "kc-170008", ratio: 1.270 },
+              { file: "kc-170010-a", ratio: 1.212 },
+              { file: "kc-529", ratio: 1.225 },
+              { file: "kc-530", ratio: 1.225 }
+          ] },
+          { type: "text", text: [
+            "Fast forward 350 years and Malta found itself in the midst of another violent and bloody conflict – the First World War. Although not a direct participant, the Great War had a profound impact on Malta due to its strategic location. It was during the Second World War (1942) that Malta was hit the worst. The island holds the record for the heaviest sustained bombing attack: for 154 days and nights, 6,700 tons of bombs fell on the island. The Maltese people are the only entire population ever to be awarded the George Cross, Britain’s highest civilian honour for bravery.",
+            "Given Malta’s turbulent history, it is a miracle that Kerrejja Causi has remained unscathed. From the grand 16th-century palazzo it once was to the separate apartments, or ‘Kerrejja’, it has become, there is an overwhelming sense of history. The building even featured in Alan Parker’s Midnight Express in 1978. With tenants disappearing over the decades and little work done to maintain it, the building became a living museum, frozen in time, haunted by neglect and full of memories and treasures."
+          ] },
+          { type: "tiled", rows: 1, dir: "images/fine-art", photos: [
+              { file: "kc-170010-b", ratio: 1.212 },
+              { file: "kc-531", ratio: 1.227 },
+              { file: "kc-170010-c", ratio: 1.211 },
+              { file: "kc-532", ratio: 1.227 }
+          ] }
+        ]
+      },
+      {
+        client: "Exhibition", title: "Kerrejja Causi", sub: true, marker: "Kerrejja Causi · Exhibition",
+        blocks: [
+          { type: "text", text: [
+            "In Malta’s capital Valletta, nestled within the same grand arches as the National Library, Christian Marot’s second international solo exhibition, Kerrejja Causi, took place for ten days between 9 and 19 May 2019."
+          ] },
+          { type: "titletext", k: "Photography exhibition", title: "Kerrejja Causi", text: ["Valletta, Malta · 9 – 19 May 2019"] },
+          { type: "tiled", rows: 2, dir: "images/fine-art", photos: [
+              { file: "kcx-2340", ratio: 1.500 },
+              { file: "kcx-2352", ratio: 0.667 },
+              { file: "kcx-2161", ratio: 1.500 },
+              { file: "kcx-2167", ratio: 0.667 },
+              { file: "kcx-stack-1", ratio: 1.500 },
+              { file: "kcx-2188", ratio: 1.500 },
+              { file: "kcx-2192", ratio: 1.500 },
+              { file: "kcx-2268", ratio: 1.500 },
+              { file: "kcx-2293", ratio: 1.500 },
+              { file: "kcx-2194", ratio: 1.500 },
+              { file: "kcx-stack-2", ratio: 1.500 },
+              { file: "kcx-2319", ratio: 1.500 },
+              { file: "kcx-2322", ratio: 1.500 },
+              { file: "kcx-stack-3", ratio: 1.500 },
+              { file: "kcx-2332", ratio: 1.500 },
+              { file: "kcx-stack-4", ratio: 1.499 },
+              { file: "kcx-2090", ratio: 0.667 },
+              { file: "kcx-2095", ratio: 1.500 },
+              { file: "kcx-2098", ratio: 0.667 },
+              { file: "kcx-2100", ratio: 0.667 }
+          ] }
+        ]
+      }
+    ]
   }
 };
 

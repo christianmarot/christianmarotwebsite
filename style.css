@@ -463,7 +463,25 @@ body.lb-open{overflow:hidden}
 .blk.gal .gi{position:absolute;display:block;padding:0;border:0;overflow:hidden;background:#151816;cursor:zoom-in}
 .blk.gal .gi img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .9s cubic-bezier(.2,.7,.2,1),filter .5s}
 .blk.gal .gi:hover img,.blk.gal .gi:focus-visible img{transform:scale(1.04)}
-.blk.gal:hover .gi:not(:hover) img{filter:brightness(.72)}
 .blk.gal .gi:focus-visible{outline:1px solid var(--paper);outline-offset:3px}
 .vm-poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .vm-poster:not([src]){display:none}
+
+/* ---------- Fine art: hero slideshow, the 10 m roll strip, smaller dividers inside a project, title cards ---------- */
+.wk-hero .vbg img.sl{opacity:0;transition:opacity 1.6s ease}
+.wk-hero .vbg img.sl.on{opacity:1}
+.wk-hero .fv{transition:opacity .35s}
+.wk-hero .fv.swap{opacity:0}
+.blk.strip{display:flex;flex-direction:column;justify-content:center;gap:14px}
+.blk.strip .it{height:var(--sh,40%) !important;flex:0 0 auto;background:none}
+.blk.strip .it img{object-fit:contain}
+.blk.strip .cap{font-size:var(--caps);letter-spacing:.2em;text-transform:uppercase;color:var(--mid)}
+.sep.sub{margin:0 28px}
+.sep.sub span{color:var(--dim);font-size:10.5px;letter-spacing:.24em}
+.sep.sub{justify-content:center}
+.sep.sub::before,.sep.sub::after{flex:0 0 22%;opacity:.6}
+.blk.txt.tt{justify-content:center}
+.blk.txt.tt h2{font-size:clamp(40px,4.4vw,72px);margin:6px 0 4px}
+.blk.txt.tt p{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--mid)}
+.pc[hidden]{display:none!important}
+.blk.strip .cap{white-space:nowrap}

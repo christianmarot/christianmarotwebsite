@@ -454,7 +454,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261012a';
+    const FMV = '20261012d';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();
@@ -531,6 +531,35 @@
       // phones held upright: tap the film to see it whole (16:9) instead of cropped; tap again to return
       const portrait = matchMedia('(max-width: 760px) and (orientation: portrait)');
       heroEl.addEventListener('click', e => { if (!portrait.matches || e.target.closest('.pc')) return; heroEl.classList.toggle('fit'); });
+    } else if (S.slides && S.slides.length) {
+      // a slideshow of the work: random order, never two from the same project in a row; the label follows along
+      const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+      const order = list => {   // re-arrange so neighbours (and the wrap-around) come from different projects where possible
+        const left = shuffle(list), out = [];
+        while (left.length) {
+          const prev = out[out.length - 1];
+          let k = left.findIndex(s => !prev || s.project !== prev.project);
+          if (k < 0) k = 0; out.push(left.splice(k, 1)[0]);
+        }
+        return out;
+      };
+      let seq = order(S.slides), si = 0;
+      const a = document.createElement('img'), b = document.createElement('img');
+      [a, b].forEach(im => { im.alt = ''; im.className = 'sl'; hbg.appendChild(im); });
+      let cur = a;
+      const label = s => { if (!fv) return; fv.classList.add('swap'); setTimeout(() => { fv.textContent = `Featured project: ${s.project}`; fv.classList.remove('swap'); }, 350); };
+      const show = s => {
+        const nx = cur === a ? b : a, im = new Image(); im.src = s.image;
+        const go = () => { nx.src = s.image; nx.classList.remove('on'); void nx.offsetWidth; nx.classList.add('on'); cur.classList.remove('on'); cur = nx; label(s); };
+        im.decode ? im.decode().then(go, go) : (im.onload = go);
+      };
+      cur.src = seq[0].image; cur.classList.add('on');
+      if (fv) { fv.textContent = `Featured project: ${seq[0].project}`; fv.hidden = false; }
+      if (!reduce) setInterval(() => {
+        if (document.hidden || heroEl.getBoundingClientRect().bottom < 0) return;
+        si++; if (si >= seq.length) { const last = seq[seq.length - 1]; seq = order(S.slides); if (seq[0].project === last.project) seq.push(seq.shift()); si = 0; }
+        show(seq[si]);
+      }, 5500);
     } else hbg.innerHTML = `<img src="${esc(S.cover)}" alt="">`;
   }
 
@@ -561,7 +590,8 @@
       case 'hphoto': return `<div class="blk hp" ${pa}><div class="it"><img src="${esc(b.image)}" alt="" loading="lazy"></div></div>`;
       case 'fphoto': return `<div class="blk fp" ${pa}><div class="it"><img src="${esc(b.image)}" alt="" loading="lazy"></div></div>`;
       case 'sphoto': return `<div class="blk sph" ${pa}>${(b.images || []).slice(0, 4).map(i => `<div class="it"><img src="${esc(i)}" alt="" loading="lazy"></div>`).join('')}</div>`;
-      case 'text': case 'titletext': return `<div class="blk txt it" ${pa} style="background:none">${b.type === 'titletext' ? `<div class="k">${esc(p.client || S.group)}</div><h2>${esc(b.title || p.title)}</h2>` : ''}${(b.text || []).map(t => `<p>${esc(t)}</p>`).join('')}</div>`;
+      case 'strip': return `<div class="blk strip" ${pa} data-ar="${+b.ratio || 10}"><div class="it"><img src="${esc(b.image)}" alt="" loading="lazy" decoding="async"></div>${b.caption ? `<div class="cap">${esc(b.caption)}</div>` : ''}</div>`;
+      case 'text': case 'titletext': return `<div class="blk txt it${b.type === 'titletext' ? ' tt' : ''}" ${pa} style="background:none">${b.type === 'titletext' ? `<div class="k">${esc(b.k || p.client || S.group)}</div><h2>${esc(b.title || p.title)}</h2>` : ''}${(b.text || []).map(t => `<p>${esc(t)}</p>`).join('')}</div>`;
       case 'gallery': {
         // a single preview block; the full gallery opens on click
         const gi = galleries.push({ dir: b.dir, photos: b.photos || [], title: p.title }) - 1, ph = b.photos || [], more = Math.max(0, ph.length - 3);
@@ -577,7 +607,9 @@
   }).join('');
   // dividers: numbered in order, skipping any part marked noMarker; marker: replaces the title on the divider
   let sepN = 0;
-  const sepHTML = p => `<div class="sep" aria-hidden="true"><span>${String(++sepN).padStart(2, '0')} — ${esc(p.marker || p.title)}</span></div>`;
+  const sepHTML = p => p.sub
+    ? `<div class="sep sub" aria-hidden="true"><span>${esc(p.marker || p.title)}</span></div>`    // a part within a project: smaller, unnumbered
+    : `<div class="sep" aria-hidden="true"><span>${String(++sepN).padStart(2, '0')} — ${esc(p.marker || p.title)}</span></div>`;
   row.innerHTML = projects.map((p, i) => ((projects.length > 1 || S.markers) && !p.noMarker ? sepHTML(p) : '') + blocksHTML(p, i)).join('');
   const blks = $$('.blk', row), items = $$('.it, .sep', row);
   const firstTxt = $('.blk.txt', row);
@@ -597,6 +629,7 @@
       if (b.classList.contains('feat')) b.style.width = fw + 'px';
       else if (b.classList.contains('t12')) { const ch = (H - 12) / 2, cw = Math.round(ch * 9 / 16); b.style.width = (cw * 6 + 12 * 5) + 'px'; b.style.gap = '12px'; }
       else if (b.classList.contains('vim') || b.classList.contains('np')) b.style.width = Math.round(H * +b.dataset.ar) + 'px';
+      else if (b.classList.contains('strip')) { const sh = Math.round(H * (innerWidth < 760 ? .3 : .4)); b.style.width = Math.round(sh * +b.dataset.ar) + 'px'; b.style.setProperty('--sh', sh + 'px'); }
       else if (b.classList.contains('gal')) {
         // tiled gallery: photos packed into rows of equal height, each row stretched to the same length
         const n = +b.dataset.rows || 2, gp = innerWidth < 760 ? 6 : 10, rh = (H - gp * (n - 1)) / n;
