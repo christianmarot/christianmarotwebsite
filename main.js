@@ -454,7 +454,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261011m';
+    const FMV = '20261012a';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();
@@ -548,9 +548,14 @@
     switch (b.type) {
       case 'feature': return `<div class="blk feat big" ${pa}>${mkVideo(b)}</div>`;
       case 'secondary': return `<div class="blk b2x2" ${pa}>${(b.videos || []).slice(0, 4).map(v => mkVideo(v)).join('')}</div>`;
+      case 'photo': return `<div class="blk np" ${pa} data-ar="${+b.ratio || 1.5}"><div class="it"><img src="${esc(b.image)}" alt="" loading="lazy" decoding="async"></div></div>`;
+      case 'tiled': {
+        const gi = galleries.push({ dir: b.dir, photos: b.photos || [], title: p.title }) - 1;
+        return `<div class="blk gal" ${pa} data-rows="${+b.rows || 2}">${(b.photos || []).map((ph, j) => `<button type="button" class="it gi" data-g="${gi}" data-i="${j}" data-r="${+ph.ratio || 1.5}" aria-label="View photo ${j + 1} of ${b.photos.length} larger"><img src="${esc(b.dir)}/m/${esc(ph.file)}.webp" alt="" loading="lazy" decoding="async"></button>`).join('')}</div>`;
+      }
       case 'tiles12': return `<div class="blk t12" ${pa}>${(b.videos || []).slice(0, 12).map(v => mkVideo(v)).join('')}</div>`;
       case 'vimeo': return `<div class="blk vim" ${pa} data-ar="${+b.ratio || 16 / 9}"><div class="it vm" data-vimeo="${esc(b.vimeo)}" ${b.once ? 'data-once' : ''} tabindex="0" role="button" aria-label="Watch this film larger, with sound">
-          <div class="vm-f"></div><div class="vc"><button type="button" class="snd" aria-label="Turn sound on">${svg(ICON.muted)}<span>Sound</span></button></div>
+          <img class="vm-poster" alt="" ${b.poster ? `src="${esc(b.poster)}"` : ''} decoding="async"><div class="vm-f"></div><div class="vc"><button type="button" class="snd" aria-label="Turn sound on">${svg(ICON.muted)}<span>Sound</span></button></div>
           ${b.once ? `<button type="button" class="replay" aria-label="Replay"><span>${svg(ICON.replay)}Replay</span></button>` : ''}</div></div>`;
       case 'hvideo': return `<div class="blk hv" ${pa}>${mkVideo(b)}</div>`;
       case 'hphoto': return `<div class="blk hp" ${pa}><div class="it"><img src="${esc(b.image)}" alt="" loading="lazy"></div></div>`;
@@ -591,7 +596,19 @@
       b.style.height = H + 'px';
       if (b.classList.contains('feat')) b.style.width = fw + 'px';
       else if (b.classList.contains('t12')) { const ch = (H - 12) / 2, cw = Math.round(ch * 9 / 16); b.style.width = (cw * 6 + 12 * 5) + 'px'; b.style.gap = '12px'; }
-      else if (b.classList.contains('vim')) b.style.width = Math.round(H * +b.dataset.ar) + 'px';
+      else if (b.classList.contains('vim') || b.classList.contains('np')) b.style.width = Math.round(H * +b.dataset.ar) + 'px';
+      else if (b.classList.contains('gal')) {
+        // tiled gallery: photos packed into rows of equal height, each row stretched to the same length
+        const n = +b.dataset.rows || 2, gp = innerWidth < 760 ? 6 : 10, rh = (H - gp * (n - 1)) / n;
+        const tiles = $$('.gi', b), rows = Array.from({ length: n }, () => ({ w: 0, t: [] }));
+        tiles.forEach(t => { const r = rows.reduce((a, c) => c.w < a.w ? c : a); r.t.push(t); r.w += (r.t.length > 1 ? gp : 0) + rh * +t.dataset.r; });
+        const len = Math.max(...rows.map(r => r.w));
+        rows.forEach((r, ri) => {
+          const sum = r.t.reduce((a, t) => a + rh * +t.dataset.r, 0), k = (len - gp * (r.t.length - 1)) / sum; let x = 0;
+          r.t.forEach(t => { const w = rh * +t.dataset.r * k; Object.assign(t.style, { left: x + 'px', top: ri * (rh + gp) + 'px', width: w + 'px', height: rh + 'px' }); x += w + gp; });
+        });
+        b.style.width = Math.round(len) + 'px';
+      }
       else if (b.classList.contains('b2x2') || b.classList.contains('sph')) { const ch = (H - 12) / 2, cw = Math.round(ch * (b.classList.contains('b2x2') ? 9 / 16 : 4 / 5)); b.style.width = (cw * 2 + 12) + 'px'; b.style.gap = '12px'; }
       else if (b.classList.contains('hv') || b.classList.contains('hp')) b.style.width = Math.round(H * 16 / 9) + 'px';
       else if (b.classList.contains('fp')) b.style.width = Math.round(H * 4 / 5) + 'px';
@@ -612,7 +629,7 @@
       }
       else if (b.classList.contains('galh')) b.style.width = Math.round(H * (innerWidth < 760 ? .62 : .9)) + 'px';
     });
-    $$('.blk.feat .it, .blk.vim .it, .blk.hv .it, .blk.hp .it, .blk.fp .it', row).forEach(it => it.style.height = '100%');
+    $$('.blk.feat .it, .blk.vim .it, .blk.np .it, .blk.hv .it, .blk.hp .it, .blk.fp .it', row).forEach(it => it.style.height = '100%');
     panMax = Math.max(0, row.scrollWidth - innerWidth);
     gatherLen = innerHeight * (innerWidth < 760 ? 1.6 : 1.3);
     stage.style.height = (gatherLen - innerHeight * LEAD + panMax * 1.15 + innerHeight * 1.3) + 'px';
@@ -732,10 +749,23 @@
       it._p.setCurrentTime(0).then(() => it._p.play()).catch(() => { it._setSnd(false); it._p.play().catch(() => {}); });
     });
   });
+  // holding image: Vimeo's own thumbnail (unless a poster was given), which also tells us the film's shape early
+  vims.forEach(it => {
+    const img = $('.vm-poster', it), blk = it.parentElement;
+    fetch(`https://vimeo.com/api/oembed.json?url=${encodeURIComponent('https://vimeo.com/' + it.dataset.vimeo)}&width=1920`)
+      .then(r => r.ok ? r.json() : null).then(d => {
+        if (!d) return;
+        if (!img.getAttribute('src') && d.thumbnail_url) img.src = d.thumbnail_url;
+        const ar = d.width && d.height ? d.width / d.height : 0;
+        if (ar && Math.abs(ar - +blk.dataset.ar) > 0.01) { blk.dataset.ar = ar; layout(); }
+      }).catch(() => {});
+  });
   function vimCheck(it) {
     const r = it.getBoundingClientRect();
     const vis = Math.max(0, Math.min(r.right, innerWidth) - Math.max(r.left, 0)) / r.width * Math.max(0, Math.min(r.bottom, innerHeight) - Math.max(r.top, 0)) / r.height;
-    if (vis > 0.02 && !it._p && window.Vimeo && Vimeo.Player) {
+    // start loading the player well before it arrives, so it's ready by the time it's on screen
+    const near = r.left < innerWidth * 1.6 && r.right > -innerWidth * 0.6 && r.top < innerHeight * 1.5 && r.bottom > -innerHeight * 0.5;
+    if (near && !it._p && window.Vimeo && Vimeo.Player) {
       const f = document.createElement('iframe');
       f.src = vimSrc(it.dataset.vimeo, it.hasAttribute('data-once') ? '&muted=1&loop=0&autoplay=0' : '&muted=1&loop=1&autoplay=0'); f.allow = 'autoplay; fullscreen; picture-in-picture'; f.title = 'Film';
       $('.vm-f', it).appendChild(f);
@@ -934,8 +964,14 @@
     };
     addEventListener('resize', () => { if (pg.classList.contains('open')) justify(); });
     const closeGrid = () => { pg.classList.remove('open'); document.body.classList.remove('lb-open'); gFocus?.focus?.({ preventScroll: true }); };
+    let direct = null;   // the tile a photo was opened from, when it wasn't opened from the full-screen grid
     const openP = i => { pImg.removeAttribute('src'); showP(i); pb.classList.add('open'); $('.lb-x', pb).focus(); };
-    const closeP = () => { pb.classList.remove('open'); $(`.pg-it[data-i="${at}"]`, pg)?.focus({ preventScroll: true }); };
+    const closeP = () => {
+      pb.classList.remove('open');
+      if (direct) { document.body.classList.remove('lb-open'); direct.focus({ preventScroll: true }); direct = null; }
+      else $(`.pg-it[data-i="${at}"]`, pg)?.focus({ preventScroll: true });
+    };
+    $$('.gi', row).forEach(t => t.addEventListener('click', () => { G = galleries[+t.dataset.g]; direct = t; document.body.classList.add('lb-open'); openP(+t.dataset.i); }));
     $('.pg-x', pg).onclick = closeGrid;
     rowsEl.addEventListener('click', e => { const t = e.target.closest('.pg-it'); if (t) openP(+t.dataset.i); });
     $('.lb-x', pb).onclick = closeP;

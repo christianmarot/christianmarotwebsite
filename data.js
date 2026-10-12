@@ -89,7 +89,10 @@ const DOCUMENTARIES = [
      hphoto      { type:"hphoto", image:"images/…jpg" } (horizontal)
      fphoto      { type:"fphoto", image:"images/…jpg" } (featured vertical)
      sphoto      { type:"sphoto", images:[ "…", ×4 ] }  (4 vertical)
-     vimeo       { type:"vimeo", vimeo:"123456" }  (a Vimeo film that plays silently in place; click to watch it large)
+     vimeo       { type:"vimeo", vimeo:"123456" }  (a Vimeo film; once:true plays it once with sound. Shows Vimeo's own
+                 thumbnail while it loads, or add  poster:"images/…jpg"  to choose the holding image)
+     photo       { type:"photo", image:"images/…", ratio:1.3 }  (one photo at its own shape, ratio = width ÷ height)
+     tiled       { type:"tiled", rows:2, dir:"images/…", photos:[ { file, ratio }, … ] }  (photos tiled along the row; click to enlarge)
      tiles12     { type:"tiles12", videos:[ {video, poster} ×12 ] }  (six across, two down)
      gallery     { type:"gallery", dir:"images/…", photos:[ { file:"name", ratio:1.5 }, … ] }
                  (a preview block that opens the full gallery; ratio = width ÷ height; tiles in dir/m, large in dir/l, .webp)
@@ -313,8 +316,34 @@ const OTHER_WORK = {
     title: "Editorial", group: "The New York Times",
     cover: "images/editorial-fashion-hillside.jpg",
     hero: VIDEOS.editorial,
-    heroTitle: "The New York Times — Departures",
-    tiles: [ { image: "images/editorial-fashion-hillside.jpg" } ]
+    heroTitle: "New York Times — Departures",
+    projects: [
+      {
+        client: "The New York Times", title: "Departures",
+        blocks: [
+          { type: "photo", image: "images/editorial/departures/l/000058100007.webp", ratio: 1.294 },
+          { type: "text", text: [
+            "I collaborated with London-based photographer and director Bex Day on Departures, a project for The New York Times. Bex’s work explores gender, identity and diversity and challenges rigid beauty ideals. For this project, eight models travelled to a series of locations across Wales and the Brecon Beacons, placing them in the rugged, open landscapes of the Welsh countryside. As drone operator, I captured the aerial perspective, showing the scale of the landscape around the models. The project was styled by Leith Clark, with music by Patrick James Fitzroy, grading by Anna Barsukova and editing by David Zbrika."
+          ] },
+          // a tiled gallery laid out along the row (rows: how many rows of photos); click a photo to see it large
+          { type: "tiled", rows: 2, dir: "images/editorial/departures", photos: [
+              { file: "000058080004-bd", ratio: 1.277 },
+              { file: "dji-0082", ratio: 1.334 },
+              { file: "000058090009", ratio: 0.800 },
+              { file: "dji-0149", ratio: 1.334 },
+              { file: "000058110007", ratio: 1.250 },
+              { file: "dji-0185-bd", ratio: 1.335 },
+              { file: "dji-0113", ratio: 1.167 },
+              { file: "dji-0400", ratio: 1.333 },
+              { file: "dji-0016", ratio: 1.410 },
+              { file: "dji-0133", ratio: 1.334 },
+              { file: "dji-0025", ratio: 1.333 },
+              { file: "dji-0317-bd", ratio: 1.333 },
+              { file: "dji-0124", ratio: 1.250 }
+          ] }
+        ]
+      }
+    ]
   },
   fineart: {
     title: "Fine Art", group: "Exhibitions · Projects",
