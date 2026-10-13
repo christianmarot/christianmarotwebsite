@@ -454,7 +454,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261013a';
+    const FMV = '20261013b';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();
@@ -580,7 +580,7 @@
       case 'photo': return `<div class="blk np" ${pa} data-ar="${+b.ratio || 1.5}"><div class="it"><img src="${esc(b.image)}" alt="" loading="lazy" decoding="async"></div></div>`;
       case 'tiled': {
         const gi = galleries.push({ dir: b.dir, photos: b.photos || [], title: p.title }) - 1;
-        return `<div class="blk gal" ${pa} data-rows="${+b.rows || 2}">${(b.photos || []).map((ph, j) => `<button type="button" class="it gi" data-g="${gi}" data-i="${j}" data-r="${+ph.ratio || 1.5}" aria-label="View photo ${j + 1} of ${b.photos.length} larger"><img src="${esc(b.dir)}/m/${esc(ph.file)}.webp" alt="" loading="lazy" decoding="async"></button>`).join('')}</div>`;
+        return `<div class="blk gal" ${pa} data-rows="${+b.rows || 2}" ${b.h ? `data-h="${+b.h}"` : ''}>${(b.photos || []).map((ph, j) => `<button type="button" class="it gi" data-g="${gi}" data-i="${j}" data-r="${+ph.ratio || 1.5}" aria-label="View photo ${j + 1} of ${b.photos.length} larger"><img src="${esc(b.dir)}/m/${esc(ph.file)}.webp" alt="" loading="lazy" decoding="async"></button>`).join('')}</div>`;
       }
       case 'tiles12': return `<div class="blk t12" ${pa}>${(b.videos || []).slice(0, 12).map(v => mkVideo(v)).join('')}</div>`;
       case 'vimeo': return `<div class="blk vim" ${pa} data-ar="${+b.ratio || 16 / 9}"><div class="it vm" data-vimeo="${esc(b.vimeo)}" ${b.once ? 'data-once' : ''} tabindex="0" role="button" aria-label="Watch this film larger, with sound">
@@ -597,9 +597,9 @@
         const gi = galleries.push({ dir: b.dir, photos: b.photos || [], title: p.title }) - 1, ph = b.photos || [], more = Math.max(0, ph.length - 3);
         const pv = (b.preview && b.preview.length ? b.preview : ph.slice(0, 3).map(x => x.file));
         const im = j => pv[j] ? `<img src="${esc(b.dir)}/m/${esc(pv[j])}.webp" alt="" loading="lazy" decoding="async">` : '';
-        return `<div class="blk galh" ${pa}><button type="button" class="it gh" data-g="${gi}" aria-label="Open the photo gallery, ${ph.length} photos">
+        return `<div class="blk galh${b.join ? ' join' : ''}" ${pa}><button type="button" class="it gh" data-g="${gi}" aria-label="Open the photo gallery, ${ph.length} photos">
           <span class="gh-a">${im(0)}</span><span class="gh-b">${im(1)}</span><span class="gh-c">${im(2)}${more ? `<i>+${more}</i>` : ''}</span>
-          <span class="gh-l"><b>Photo gallery</b><small>${ph.length} photos · View all</small></span></button></div>`;
+          <span class="gh-l"><b>${esc(b.label || 'Photo gallery')}</b><small>${ph.length} photos · View all</small></span></button></div>`;
       }
       case 'grid': { const items = [...b.items]; while (items.length < 12) items.push({}); return items.map(t => `<div class="blk feat" ${pa}>${t.image ? `<div class="it"><img src="${esc(t.image)}" alt="" loading="lazy"></div>` : mkVideo(t)}</div>`).join(''); }
     }
@@ -632,13 +632,14 @@
       else if (b.classList.contains('strip')) { const sh = Math.round(H * (innerWidth < 760 ? .3 : .4)); b.style.width = Math.round(sh * +b.dataset.ar) + 'px'; b.style.setProperty('--sh', sh + 'px'); }
       else if (b.classList.contains('gal')) {
         // tiled gallery: photos packed into rows of equal height, each row stretched to the same length
-        const n = +b.dataset.rows || 2, gp = innerWidth < 760 ? 6 : 10, rh = (H - gp * (n - 1)) / n;
+        // data-h: the rows use only that share of the height, centred (artworks sit smaller than a full-height opener)
+        const n = +b.dataset.rows || 2, gp = innerWidth < 760 ? 6 : 10, gh = H * (+b.dataset.h || 1), y0 = (H - gh) / 2, rh = (gh - gp * (n - 1)) / n;
         const tiles = $$('.gi', b), rows = Array.from({ length: n }, () => ({ w: 0, t: [] }));
         tiles.forEach(t => { const r = rows.reduce((a, c) => c.w < a.w ? c : a); r.t.push(t); r.w += (r.t.length > 1 ? gp : 0) + rh * +t.dataset.r; });
         const len = Math.max(...rows.map(r => r.w));
         rows.forEach((r, ri) => {
           const sum = r.t.reduce((a, t) => a + rh * +t.dataset.r, 0), k = (len - gp * (r.t.length - 1)) / sum; let x = 0;
-          r.t.forEach(t => { const w = rh * +t.dataset.r * k; Object.assign(t.style, { left: x + 'px', top: ri * (rh + gp) + 'px', width: w + 'px', height: rh + 'px' }); x += w + gp; });
+          r.t.forEach(t => { const w = rh * +t.dataset.r * k; Object.assign(t.style, { left: x + 'px', top: y0 + ri * (rh + gp) + 'px', width: w + 'px', height: rh + 'px' }); x += w + gp; });
         });
         b.style.width = Math.round(len) + 'px';
       }
