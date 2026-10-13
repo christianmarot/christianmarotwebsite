@@ -415,6 +415,10 @@ const OTHER_WORK = {
         blocks: [
           { type: "photo", image: "images/fine-art/l/thud-1062.webp", ratio: 0.667 },
           { type: "titletext", k: "Exhibition installation", title: "THUD | London", text: ["BA (Hons) Photography · The Truman Brewery, Brick Lane · 2017"] },
+          { type: "text", text: [
+            "Following the work’s debut in the Arts University Bournemouth graduate exhibition in 2017, selected pieces featured in several smaller exhibitions across the city, including ‘The Raw Project’ (2017) and ‘Contained Exhibition’ (2018), before ending up in the collective exhibition ‘THUD’ (2017), held at The Truman Brewery on Brick Lane, London.",
+            "After a successful two years of shows across the UK, I was offered the opportunity to exhibit the entire series in my debut solo exhibition at the Iniala Gallery in Phuket, Thailand, where the show ran for a month."
+          ] },
           { type: "gallery", join: true, label: "THUD | London", preview: ["thud-6021", "thud-1080", "thud-1106"], dir: "images/fine-art", photos: [
               { file: "thud-6021", ratio: 2.995 },
               { file: "thud-1080", ratio: 1.500 },
@@ -422,10 +426,6 @@ const OTHER_WORK = {
               { file: "thud-1108", ratio: 0.667 },
               { file: "thud-5962", ratio: 1.333 },
               { file: "thud-5972", ratio: 1.333 }
-          ] },
-          { type: "text", text: [
-            "Following the work’s debut in the Arts University Bournemouth graduate exhibition in 2017, selected pieces featured in several smaller exhibitions across the city, including ‘The Raw Project’ (2017) and ‘Contained Exhibition’ (2018), before ending up in the collective exhibition ‘THUD’ (2017), held at The Truman Brewery on Brick Lane, London.",
-            "After a successful two years of shows across the UK, I was offered the opportunity to exhibit the entire series in my debut solo exhibition at the Iniala Gallery in Phuket, Thailand, where the show ran for a month."
           ] },
           { type: "titletext", k: "Solo exhibition", title: "Europa | Thailand", text: ["Iniala Gallery, Phuket"] },
           { type: "gallery", join: true, label: "Europa | Thailand", preview: ["thai-0292", "thai-0616", "thai-0601"], dir: "images/fine-art", photos: [
