@@ -492,3 +492,4 @@ body.lb-open{overflow:hidden}
 .wk-row.mid .blk.txt{justify-content:safe center}
 .wk-row.mid .blk.txt.pair{justify-content:flex-start}
 .wk-row.mid .blk.txt.tt{padding-right:0}
+.wk-title .n{padding-bottom:.18em;margin-bottom:-.18em}   /* room for the tails of J and Q below the line */

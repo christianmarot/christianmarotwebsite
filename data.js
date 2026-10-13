@@ -351,25 +351,25 @@ const OTHER_WORK = {
     // no film here: the opening screen is a slideshow of the work, in a random order that avoids showing two
     // pictures from the same project back to back. "project" is the name shown as Featured project
     slides: [
-      { image: "images/fine-art/l/thai-0616.webp", project: "Europa | Exhibition" },
-      { image: "images/fine-art/l/thai-0602.webp", project: "Europa | Exhibition" },
-      { image: "images/fine-art/l/thai-0608.webp", project: "Europa | Exhibition" },
-      { image: "images/fine-art/l/thai-0611.webp", project: "Europa | Exhibition" },
-      { image: "images/fine-art/l/thai-0655.webp", project: "Europa | Exhibition" },
+      { image: "images/fine-art/l/thai-0616.webp", project: "Europa — Exhibition" },
+      { image: "images/fine-art/l/thai-0602.webp", project: "Europa — Exhibition" },
+      { image: "images/fine-art/l/thai-0608.webp", project: "Europa — Exhibition" },
+      { image: "images/fine-art/l/thai-0611.webp", project: "Europa — Exhibition" },
+      { image: "images/fine-art/l/thai-0655.webp", project: "Europa — Exhibition" },
       { image: "images/fine-art/l/europa-tray-frame.webp", project: "Europa" },
       { image: "images/fine-art/l/europa-neg-11.webp", project: "Europa" },
       { image: "images/fine-art/l/europa-thud-4.webp", project: "Europa" },
       { image: "images/fine-art/l/europa-albedo.webp", project: "Europa" },
       { image: "images/fine-art/l/europa-thud-2.webp", project: "Europa" },
       { image: "images/fine-art/l/europa-thud-1.webp", project: "Europa" },
-      { image: "images/fine-art/l/kcx-2095.webp", project: "Kerrejja Causi | Exhibition" },
-      { image: "images/fine-art/l/kcx-2192.webp", project: "Kerrejja Causi | Exhibition" },
-      { image: "images/fine-art/l/kcx-2332.webp", project: "Kerrejja Causi | Exhibition" },
-      { image: "images/fine-art/l/kcx-2268.webp", project: "Kerrejja Causi | Exhibition" },
-      { image: "images/fine-art/l/kcx-stack-4.webp", project: "Kerrejja Causi | Exhibition" },
-      { image: "images/fine-art/l/kcx-stack-1.webp", project: "Kerrejja Causi | Exhibition" },
-      { image: "images/fine-art/l/kcx-2161.webp", project: "Kerrejja Causi | Exhibition" },
-      { image: "images/fine-art/l/kcx-2340.webp", project: "Kerrejja Causi | Exhibition" },
+      { image: "images/fine-art/l/kcx-2095.webp", project: "Kerrejja Causi — Exhibition" },
+      { image: "images/fine-art/l/kcx-2192.webp", project: "Kerrejja Causi — Exhibition" },
+      { image: "images/fine-art/l/kcx-2332.webp", project: "Kerrejja Causi — Exhibition" },
+      { image: "images/fine-art/l/kcx-2268.webp", project: "Kerrejja Causi — Exhibition" },
+      { image: "images/fine-art/l/kcx-stack-4.webp", project: "Kerrejja Causi — Exhibition" },
+      { image: "images/fine-art/l/kcx-stack-1.webp", project: "Kerrejja Causi — Exhibition" },
+      { image: "images/fine-art/l/kcx-2161.webp", project: "Kerrejja Causi — Exhibition" },
+      { image: "images/fine-art/l/kcx-2340.webp", project: "Kerrejja Causi — Exhibition" },
       { image: "images/fine-art/l/kc-529.webp", project: "Kerrejja Causi" },
       { image: "images/fine-art/l/kc-532.webp", project: "Kerrejja Causi" },
       { image: "images/fine-art/l/kc-170010-c.webp", project: "Kerrejja Causi" },
@@ -413,13 +413,13 @@ const OTHER_WORK = {
       {
         client: "Exhibition", title: "Europa", sub: true, marker: "Europa · Exhibition",
         blocks: [
+          { type: "titletext", k: "Exhibition installation", title: "THUD — London", text: ["BA (Hons) Photography · The Truman Brewery, Brick Lane · 2017"] },
           { type: "photo", image: "images/fine-art/l/thud-1062.webp", ratio: 0.667 },
-          { type: "titletext", k: "Exhibition installation", title: "THUD | London", text: ["BA (Hons) Photography · The Truman Brewery, Brick Lane · 2017"] },
           { type: "text", text: [
             "Following the work’s debut in the Arts University Bournemouth graduate exhibition in 2017, selected pieces featured in several smaller exhibitions across the city, including ‘The Raw Project’ (2017) and ‘Contained Exhibition’ (2018), before ending up in the collective exhibition ‘THUD’ (2017), held at The Truman Brewery on Brick Lane, London.",
             "After a successful two years of shows across the UK, I was offered the opportunity to exhibit the entire series in my debut solo exhibition at the Iniala Gallery in Phuket, Thailand, where the show ran for a month."
           ] },
-          { type: "gallery", join: true, label: "THUD | London", preview: ["thud-6021", "thud-1080", "thud-1106"], dir: "images/fine-art", photos: [
+          { type: "gallery", join: true, label: "THUD — London", preview: ["thud-6021", "thud-1080", "thud-1106"], dir: "images/fine-art", photos: [
               { file: "thud-6021", ratio: 2.995 },
               { file: "thud-1080", ratio: 1.500 },
               { file: "thud-1106", ratio: 1.500 },
@@ -427,8 +427,8 @@ const OTHER_WORK = {
               { file: "thud-5962", ratio: 1.333 },
               { file: "thud-5972", ratio: 1.333 }
           ] },
-          { type: "titletext", k: "Solo exhibition", title: "Europa | Thailand", text: ["Iniala Gallery, Phuket"] },
-          { type: "gallery", join: true, label: "Europa | Thailand", preview: ["thai-0292", "thai-0616", "thai-0601"], dir: "images/fine-art", photos: [
+          { type: "titletext", k: "Solo exhibition", title: "Europa — Thailand", text: ["Iniala Gallery, Phuket"] },
+          { type: "gallery", join: true, label: "Europa — Thailand", preview: ["thai-0292", "thai-0616", "thai-0601"], dir: "images/fine-art", photos: [
               { file: "thai-0292", ratio: 1.502 },
               { file: "thai-0302", ratio: 1.502 },
               { file: "thai-0308", ratio: 0.666 },
@@ -492,14 +492,14 @@ const OTHER_WORK = {
       {
         client: "Exhibition", title: "Kerrejja Causi", sub: true, marker: "Kerrejja Causi · Exhibition",
         blocks: [
-          { type: "photo", image: "images/fine-art/l/kcx-stack-1.webp", ratio: 1.500 },
+          { type: "titletext", k: "Solo exhibition", title: "Kerrejja Causi — Valletta", text: ["9 – 19 May 2019"] },
+          { type: "photo", image: "images/fine-art/l/kcx-2352.webp", ratio: 0.667 },
           { type: "text", text: [
             "In Malta’s quaint capital Valletta, and nestled within the same grand arches as the National Library, Christian Marot’s second international solo exhibition ‘Kerrejja Causi’ took place for 10 days between 9th – 19th May 2019.",
             "The exhibition tells the story of an abandoned 16th century tenement building, or ‘Kerrejja’, that stands in the heart of Valletta. A series of moments captured on medium format film, alongside a collection of found artefacts, helps to build up the sense that it was deserted on a single day, with knives and forks left laid on tables. Kerrejja Causi is full of character, and it represents a past Malta which will be lost in the natural passage of time and modern development."
           ] },
-          { type: "titletext", k: "Solo exhibition", title: "Kerrejja Causi | Valletta", text: ["9 – 19 May 2019"] },
-          { type: "gallery", join: true, label: "Kerrejja Causi | Valletta", preview: ["kcx-2352", "kcx-2340", "kcx-2293"], dir: "images/fine-art", photos: [
-              { file: "kcx-2352", ratio: 0.667 },
+          { type: "gallery", join: true, label: "Kerrejja Causi — Valletta", preview: ["kcx-stack-1", "kcx-2340", "kcx-2293"], dir: "images/fine-art", photos: [
+              { file: "kcx-stack-1", ratio: 1.500 },
               { file: "kcx-2340", ratio: 1.500 },
               { file: "kcx-2167", ratio: 0.667 },
               { file: "kcx-2194", ratio: 1.500 },
@@ -525,34 +525,24 @@ const OTHER_WORK = {
         client: "Project", title: "Morning, Noon, Night",
         blocks: [
           { type: "tiled", rows: 1, dir: "images/fine-art", photos: [
-              { file: "mnn-0006", ratio: 1.226 },
-              { file: "mnn-0009", ratio: 1.225 },
-              { file: "mnn-0008", ratio: 0.816 },
-              { file: "mnn-350002", ratio: 1.226 },
-              { file: "mnn-350003", ratio: 1.226 },
               { file: "mnn-350004", ratio: 1.226 },
-              { file: "mnn-350005", ratio: 1.226 }
+              { file: "mnn-350005", ratio: 1.226 },
+              { file: "mnn-350002", ratio: 1.226 },
+              { file: "mnn-350003", ratio: 1.226 }
           ] }
         ]
       },
       {
         client: "Project", title: "Predannack",
         blocks: [
+          { type: "photo", image: "images/fine-art/l/pr-130009.webp", ratio: 1.225 },
           { type: "tiled", rows: 2, dir: "images/fine-art", photos: [
               { file: "pr-120003", ratio: 1.226 },
-              { file: "pr-120007", ratio: 1.226 },
               { file: "pr-120008", ratio: 1.225 },
-              { file: "pr-130002", ratio: 1.226 },
               { file: "pr-130003", ratio: 1.225 },
-              { file: "pr-130004", ratio: 1.226 },
               { file: "pr-130006", ratio: 1.225 },
               { file: "pr-130007", ratio: 1.226 },
-              { file: "pr-130009", ratio: 1.225 },
-              { file: "pr-130010", ratio: 1.226 },
-              { file: "pr-150001", ratio: 1.226 },
-              { file: "pr-150002", ratio: 1.226 },
-              { file: "pr-150003", ratio: 1.226 },
-              { file: "pr-150005", ratio: 1.226 }
+              { file: "pr-150001", ratio: 1.226 }
           ] }
         ]
       }
