@@ -116,6 +116,7 @@ const OTHER_WORK = {
       {
         client: "Simon Rogan", title: "Aulis Phuket",
         blocks: [
+          { type: "photo", image: "images/restaurants/l/aulis-radish.webp", ratio: 0.563 },
           { type: "text", text: [
             "Aulis Phuket is a 15-seat chef’s table restaurant set on the white sands of Natai Beach, on Thailand’s Andaman coast. It opened in December 2023 as the first Thai venture from Simon Rogan, the chef behind the three-Michelin-star L’Enclume in the Lake District.",
             "It brings his farm-to-fork approach to Southeast Asia. Guests sit directly in front of the open kitchen and watch the chefs cook and plate a multi-course tasting menu. The menu is led by what’s available locally, and more than 95% of the ingredients come from nearby farmers, fishermen and growers.",
@@ -123,16 +124,42 @@ const OTHER_WORK = {
           ] },
           { type: "feature", video: "clips/restaurants/aulis-promo.mp4", poster: "clips/restaurants/aulis-promo.jpg", audio: true, once: true },
           { type: "secondary", videos: [
-            { video: "clips/restaurants/aulis-michelin-star.mp4", poster: "clips/restaurants/aulis-michelin-star.jpg" },
-            { video: "clips/restaurants/aulis-salad.mp4",         poster: "clips/restaurants/aulis-salad.jpg" },
-            { video: "clips/restaurants/aulis-fish.mp4",          poster: "clips/restaurants/aulis-fish.jpg" },
-            { video: "clips/restaurants/aulis-fire.mp4",          poster: "clips/restaurants/aulis-fire.jpg" }
+            { video: "clips/restaurants/aulis-michelin-star.mp4", poster: "clips/restaurants/aulis-michelin-star.jpg", cut: 22.65 },
+            { video: "clips/restaurants/aulis-salad.mp4",         poster: "clips/restaurants/aulis-salad.jpg", cut: 12.76 },
+            { video: "clips/restaurants/aulis-fish.mp4",          poster: "clips/restaurants/aulis-fish.jpg", cut: 13.77 },
+            { video: "clips/restaurants/aulis-fire.mp4",          poster: "clips/restaurants/aulis-fire.jpg", cut: 11.39 }
+          ] },
+          // stills from the shoot, in a shuffled order; the first three named in preview make the preview block
+          { type: "gallery", label: "Stills", dir: "images/restaurants/aulis-stills", preview: ["aulis-still-08", "aulis-still-05", "aulis-still-13"], photos: [
+              { file: "aulis-still-06", ratio: 1.896 },
+              { file: "aulis-still-18", ratio: 1.894 },
+              { file: "aulis-still-21", ratio: 1.897 },
+              { file: "aulis-still-16", ratio: 1.894 },
+              { file: "aulis-still-08", ratio: 1.896 },
+              { file: "aulis-still-15", ratio: 1.899 },
+              { file: "aulis-still-22", ratio: 1.894 },
+              { file: "aulis-still-20", ratio: 1.897 },
+              { file: "aulis-still-07", ratio: 1.896 },
+              { file: "aulis-still-19", ratio: 1.899 },
+              { file: "aulis-still-14", ratio: 1.894 },
+              { file: "aulis-still-17", ratio: 1.894 },
+              { file: "aulis-still-09", ratio: 1.896 },
+              { file: "aulis-still-01", ratio: 1.896 },
+              { file: "aulis-still-10", ratio: 1.896 },
+              { file: "aulis-still-12", ratio: 1.896 },
+              { file: "aulis-still-04", ratio: 1.896 },
+              { file: "aulis-still-03", ratio: 1.896 },
+              { file: "aulis-still-02", ratio: 1.896 },
+              { file: "aulis-still-13", ratio: 1.778 },
+              { file: "aulis-still-05", ratio: 1.896 },
+              { file: "aulis-still-11", ratio: 1.896 }
           ] }
         ]
       },
       {
         client: "Simon Rogan", title: "ION Harbour",
         blocks: [
+          { type: "photo", image: "images/restaurants/l/ion-renny.webp", ratio: 0.563 },
           { type: "text", text: [
             "ION Harbour by Simon Rogan sits overlooking Malta’s Grand Harbour, Valletta. It opened in November 2020 and won its first Michelin star less than six months later. In April 2024 it became the first restaurant in Malta to hold two Michelin stars.",
             "ION Harbour takes the farm-to-fork approach Rogan developed at L’Enclume in the Lake District and applies it to the Mediterranean. Its seasonal tasting menu depends on close relationships with Maltese farmers, fishermen and artisans, and it is shaped by whatever the island is producing at its best.",
@@ -140,10 +167,10 @@ const OTHER_WORK = {
           ] },
           { type: "feature", video: "clips/restaurants/ion-harbour-simon-rogan.mp4", poster: "clips/restaurants/ion-harbour-simon-rogan.jpg", audio: true, once: true },
           { type: "secondary", videos: [
-            { video: "clips/restaurants/ion-carob.mp4",       poster: "clips/restaurants/ion-carob.jpg" },
-            { video: "clips/restaurants/ion-simon-malta.mp4", poster: "clips/restaurants/ion-simon-malta.jpg" },
-            { video: "clips/restaurants/ion-nature.mp4",      poster: "clips/restaurants/ion-nature.jpg" },
-            { video: "clips/restaurants/ion-microherbs.mp4",  poster: "clips/restaurants/ion-microherbs.jpg" }
+            { video: "clips/restaurants/ion-carob.mp4",       poster: "clips/restaurants/ion-carob.jpg", cut: 16.6 },
+            { video: "clips/restaurants/ion-simon-malta.mp4", poster: "clips/restaurants/ion-simon-malta.jpg", cut: 16.02 },
+            { video: "clips/restaurants/ion-nature.mp4",      poster: "clips/restaurants/ion-nature.jpg", cut: 14.27 },
+            { video: "clips/restaurants/ion-microherbs.mp4",  poster: "clips/restaurants/ion-microherbs.jpg", cut: 11.93 }
           ] }
         ]
       }
@@ -234,10 +261,10 @@ const OTHER_WORK = {
           // start: seconds into the clip where it first starts playing. Some of these share shots with each other
           // (and with the featured clip), so they're staggered so the same shot doesn't play twice at once
           { type: "secondary", videos: [
-            { video: "clips/hotels/iniala-malta-destination.mp4?v=3", poster: "clips/hotels/iniala-malta-destination.jpg?v=3" },
-            { video: "clips/hotels/iniala-sunset-sunrise.mp4?v=3",    poster: "clips/hotels/iniala-sunset-sunrise.jpg?v=4", start: 12.5 },
-            { video: "clips/hotels/iniala-brindis-ocean.mp4?v=3",     poster: "clips/hotels/iniala-brindis-ocean.jpg?v=4",  start: 14.25 },
-            { video: "clips/hotels/iniala-sailboat.mp4?v=3",          poster: "clips/hotels/iniala-sailboat.jpg?v=3" }
+            { video: "clips/hotels/iniala-malta-destination.mp4?v=4", poster: "clips/hotels/iniala-malta-destination.jpg?v=3", cut: 13.333 },
+            { video: "clips/hotels/iniala-sunset-sunrise.mp4?v=4",    poster: "clips/hotels/iniala-sunset-sunrise.jpg?v=4", start: 12.5, cut: 13.417 },
+            { video: "clips/hotels/iniala-brindis-ocean.mp4?v=4",     poster: "clips/hotels/iniala-brindis-ocean.jpg?v=4",  start: 14.25, cut: 15.5 },
+            { video: "clips/hotels/iniala-sailboat.mp4?v=4",          poster: "clips/hotels/iniala-sailboat.jpg?v=3", cut: 12.637 }
           ] },
           // photo gallery: shows as one small preview block; clicking it opens the full gallery (the first three photos make the preview). Files live in  <dir>/m  (tiles) and  <dir>/l  (large)
           { type: "gallery", dir: "images/hotels/iniala-valletta",

@@ -114,7 +114,7 @@ img{display:block;max-width:100%}
 @media (max-width:900px){
   .bio{display:flex;flex-direction:column}
   .bio .rail{display:none}
-  .bio .photo{width:70%;align-self:flex-end;margin:40px 0 40px}
+  .bio .photo{width:70%;align-self:center;margin:40px auto 40px}
   .bio .p2{margin-top:0}
 }
 
@@ -516,3 +516,17 @@ body.lb-open{overflow:hidden}
 .wk-row.mid .blk.txt.tt{padding-left:0}
 /* title cards break only where the words are set to break, whatever the screen or font */
 .blk.txt.tt h2{white-space:pre}
+
+/* menu + index: just the names, no small descriptions */
+.hl .m{display:none}
+/* Other Work: the sub-list fades in once there is room for it, instead of sliding out from under a hard edge */
+.hl .subl a{transform:translateY(8px);transition:color .3s,transform .5s cubic-bezier(.2,.7,.2,1),opacity .35s ease}
+.hl li.expanded .subl>div{overflow:visible}   /* once open, nothing is clipped by the edge of the list */
+
+/* documentary cards: once opened with Read more, the full text scrolls inside the card (phones included) */
+.doc .card .desc.full{overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch}
+.doc .card .desc.full p{overflow:visible;flex-shrink:0;-webkit-line-clamp:unset}
+.doc .card .desc .rm{flex-shrink:0}
+/* projects: a soft, feathered blur behind the open project's text so it reads over any frame */
+.dvd .detail::before{content:"";position:absolute;inset:-60px -160px -60px -80px;z-index:-1;pointer-events:none;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);background:rgba(0,0,0,.1);-webkit-mask-image:linear-gradient(to right,transparent,#000 80px,#000 calc(100% - 160px),transparent),linear-gradient(to bottom,transparent,#000 60px,#000 calc(100% - 60px),transparent);mask-image:linear-gradient(to right,transparent,#000 80px,#000 calc(100% - 160px),transparent),linear-gradient(to bottom,transparent,#000 60px,#000 calc(100% - 60px),transparent);-webkit-mask-composite:source-in;mask-composite:intersect}
+@media (max-width:900px){.bio .photo figcaption{text-align:center}}
