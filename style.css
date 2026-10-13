@@ -566,3 +566,5 @@ footer{padding-top:100px}
 .dvd .detail{top:96px;bottom:auto}
 .dvd.open::before{background:linear-gradient(to bottom,rgba(0,0,0,.6),rgba(0,0,0,.38) 190px,rgba(0,0,0,0) 330px)}
 @media (max-width:700px){.dvd .detail{top:84px;bottom:auto;padding:0 0 16px}}
+/* hero name in title case — Christian Marot (still sized to match the width of the role line beneath it) */
+.idblock .nm{text-transform:none;letter-spacing:-.01em}
