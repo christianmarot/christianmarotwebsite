@@ -454,7 +454,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261013f';
+    const FMV = '20261013h';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();
@@ -613,6 +613,8 @@
   row.innerHTML = projects.map((p, i) => ((projects.length > 1 || S.markers) && !p.noMarker ? sepHTML(p) : '') + blocksHTML(p, i)).join('');
   const blks = $$('.blk', row), items = $$('.it, .sep', row);
   const firstTxt = $('.blk.txt', row);
+  // text blocks that sit side by side start level with each other instead of each centring on its own
+  $$('.blk.txt:not(.tt)', row).forEach(b => { const n = b.nextElementSibling, p = b.previousElementSibling, t = e => e && e.matches('.blk.txt:not(.tt)'); if (t(n) || t(p)) b.classList.add('pair'); });
 
   // sizes: featured 9:16 fills from under the menu to above the title; secondary = 2×2 of the same width
   let H = 0, panMax = 0, gatherLen = 0, rowTop = 200; const LEAD = 0.75;
@@ -659,6 +661,12 @@
         b.style.width = (w + pad) + 'px';
         while (b.scrollHeight > H + 2 && w < wMax) { w += 20; b.style.width = (w + pad) + 'px'; }
         while (b.scrollHeight > H + 2 && fs > 12) { fs -= 0.5; ps.forEach(q => q.style.fontSize = fs + 'px'); }
+        if (S.midText && b.classList.contains('tt') && innerWidth >= 760) {
+          // title cards: trim to the width the words actually take, so the gap after them matches the gap before
+          const range = document.createRange(), x0 = b.getBoundingClientRect().left; let right = 0;
+          [...b.children].forEach(c => { range.selectNodeContents(c); [...range.getClientRects()].forEach(r => { right = Math.max(right, r.right); }); });
+          if (right > x0) b.style.width = Math.ceil(right - x0) + 'px';
+        }
         b.style.transform = tr;
       }
       else if (b.classList.contains('galh')) b.style.width = Math.round(H * (innerWidth < 760 ? .62 : .9)) + 'px';

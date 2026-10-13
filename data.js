@@ -461,6 +461,7 @@ const OTHER_WORK = {
       {
         client: "Project", title: "Kerrejja Causi",
         blocks: [
+          { type: "photo", image: "images/fine-art/l/kc-150002.webp", ratio: 1.284 },
           { type: "text", text: [
             "Kerrejja Causi tells the story of an abandoned 16th century tenement building, or ‘Kerrejja’, that stands in the heart of Valletta. A series of moments captured on medium format film, alongside a collection of found artefacts, helps to build up the sense that it was deserted on a single day, with knives and forks left laid on tables. Kerrejja Causi is full of character, and it represents a past Malta which will be lost in the natural passage of time and modern development."
           ] },
@@ -475,19 +476,15 @@ const OTHER_WORK = {
             "With tenants disappearing over the decades and with little work done to maintain it, the building became a living museum, frozen in time, haunted by neglect and full of memories and treasures."
           ] },
           { type: "tiled", rows: 1, dir: "images/fine-art", photos: [
-              { file: "kc-100001", ratio: 1.284 },
-              { file: "kc-150002", ratio: 1.284 },
-              { file: "kc-150005", ratio: 1.278 },
-              { file: "kc-532", ratio: 1.227 },
               { file: "kc-529", ratio: 1.225 },
               { file: "kc-170010-c", ratio: 1.211 },
-              { file: "kc-110010", ratio: 1.268 },
-              { file: "kc-150007", ratio: 1.212 },
-              { file: "kc-531", ratio: 1.227 },
+              { file: "kc-532", ratio: 1.227 },
               { file: "kc-170010-a", ratio: 1.212 },
-              { file: "kc-530", ratio: 1.225 },
+              { file: "kc-150005", ratio: 1.278 },
+              { file: "kc-531", ratio: 1.227 },
               { file: "kc-170010-b", ratio: 1.212 },
-              { file: "kc-170008", ratio: 1.270 },
+              { file: "kc-530", ratio: 1.225 },
+              { file: "kc-100001", ratio: 1.284 },
               { file: "kc-100007", ratio: 1.253 }
           ] }
         ]
@@ -495,13 +492,13 @@ const OTHER_WORK = {
       {
         client: "Exhibition", title: "Kerrejja Causi", sub: true, marker: "Kerrejja Causi · Exhibition",
         blocks: [
+          { type: "photo", image: "images/fine-art/l/kcx-stack-1.webp", ratio: 1.500 },
           { type: "text", text: [
             "In Malta’s quaint capital Valletta, and nestled within the same grand arches as the National Library, Christian Marot’s second international solo exhibition ‘Kerrejja Causi’ took place for 10 days between 9th – 19th May 2019.",
             "The exhibition tells the story of an abandoned 16th century tenement building, or ‘Kerrejja’, that stands in the heart of Valletta. A series of moments captured on medium format film, alongside a collection of found artefacts, helps to build up the sense that it was deserted on a single day, with knives and forks left laid on tables. Kerrejja Causi is full of character, and it represents a past Malta which will be lost in the natural passage of time and modern development."
           ] },
           { type: "titletext", k: "Solo exhibition", title: "Kerrejja Causi | Valletta", text: ["9 – 19 May 2019"] },
-          { type: "gallery", join: true, label: "Kerrejja Causi | Valletta", preview: ["kcx-stack-1", "kcx-2352", "kcx-2293"], dir: "images/fine-art", photos: [
-              { file: "kcx-stack-1", ratio: 1.500 },
+          { type: "gallery", join: true, label: "Kerrejja Causi | Valletta", preview: ["kcx-2352", "kcx-2340", "kcx-2293"], dir: "images/fine-art", photos: [
               { file: "kcx-2352", ratio: 0.667 },
               { file: "kcx-2340", ratio: 1.500 },
               { file: "kcx-2167", ratio: 0.667 },
