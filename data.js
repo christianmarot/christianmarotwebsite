@@ -129,37 +129,36 @@ const OTHER_WORK = {
             { video: "clips/restaurants/aulis-fish.mp4",          poster: "clips/restaurants/aulis-fish.jpg", cut: 13.77 },
             { video: "clips/restaurants/aulis-fire.mp4",          poster: "clips/restaurants/aulis-fire.jpg", cut: 11.39 }
           ] },
-          // stills from the shoot, in a shuffled order; the first three named in preview make the preview block
-          { type: "gallery", label: "Stills", dir: "images/restaurants/aulis-stills", preview: ["aulis-still-08", "aulis-still-05", "aulis-still-13"], photos: [
-              { file: "aulis-still-06", ratio: 1.896 },
-              { file: "aulis-still-18", ratio: 1.894 },
-              { file: "aulis-still-21", ratio: 1.897 },
-              { file: "aulis-still-16", ratio: 1.894 },
-              { file: "aulis-still-08", ratio: 1.896 },
-              { file: "aulis-still-15", ratio: 1.899 },
-              { file: "aulis-still-22", ratio: 1.894 },
-              { file: "aulis-still-20", ratio: 1.897 },
+          // stills from the shoot, three to a row when opened: kitchen and food shots alternate with sourcing and suppliers outdoors
+          { type: "gallery", label: "Stills", cols: 3, dir: "images/restaurants/aulis-stills", preview: ["aulis-still-08", "aulis-still-05", "aulis-still-13"], photos: [
+              { file: "aulis-still-14", ratio: 1.896 },
+              { file: "aulis-still-19", ratio: 1.896 },
               { file: "aulis-still-07", ratio: 1.896 },
-              { file: "aulis-still-19", ratio: 1.899 },
-              { file: "aulis-still-14", ratio: 1.894 },
-              { file: "aulis-still-17", ratio: 1.894 },
-              { file: "aulis-still-09", ratio: 1.896 },
-              { file: "aulis-still-01", ratio: 1.896 },
-              { file: "aulis-still-10", ratio: 1.896 },
-              { file: "aulis-still-12", ratio: 1.896 },
-              { file: "aulis-still-04", ratio: 1.896 },
-              { file: "aulis-still-03", ratio: 1.896 },
-              { file: "aulis-still-02", ratio: 1.896 },
-              { file: "aulis-still-13", ratio: 1.778 },
+              { file: "aulis-still-08", ratio: 1.896 },
+              { file: "aulis-still-22", ratio: 1.896 },
               { file: "aulis-still-05", ratio: 1.896 },
-              { file: "aulis-still-11", ratio: 1.896 }
+              { file: "aulis-still-12", ratio: 1.896 },
+              { file: "aulis-still-17", ratio: 1.896 },
+              { file: "aulis-still-13", ratio: 1.896 },
+              { file: "aulis-still-10", ratio: 1.896 },
+              { file: "aulis-still-18", ratio: 1.896 },
+              { file: "aulis-still-01", ratio: 1.896 },
+              { file: "aulis-still-09", ratio: 1.896 },
+              { file: "aulis-still-15", ratio: 1.896 },
+              { file: "aulis-still-06", ratio: 1.896 },
+              { file: "aulis-still-11", ratio: 1.896 },
+              { file: "aulis-still-16", ratio: 1.896 },
+              { file: "aulis-still-02", ratio: 1.896 },
+              { file: "aulis-still-03", ratio: 1.896 },
+              { file: "aulis-still-21", ratio: 1.896 },
+              { file: "aulis-still-04", ratio: 1.896 }
           ] }
         ]
       },
       {
         client: "Simon Rogan", title: "ION Harbour",
         blocks: [
-          { type: "photo", image: "images/restaurants/l/ion-renny.webp", ratio: 0.563 },
+          { type: "photo", image: "images/restaurants/l/ion-greenhouse.webp", ratio: 0.564 },
           { type: "text", text: [
             "ION Harbour by Simon Rogan sits overlooking Malta’s Grand Harbour, Valletta. It opened in November 2020 and won its first Michelin star less than six months later. In April 2024 it became the first restaurant in Malta to hold two Michelin stars.",
             "ION Harbour takes the farm-to-fork approach Rogan developed at L’Enclume in the Lake District and applies it to the Mediterranean. Its seasonal tasting menu depends on close relationships with Maltese farmers, fishermen and artisans, and it is shaped by whatever the island is producing at its best.",

@@ -454,7 +454,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261013n';
+    const FMV = '20261013p';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();
@@ -605,7 +605,7 @@
       case 'text': case 'titletext': return `<div class="blk txt it${b.type === 'titletext' ? ' tt' : ''}" ${pa} style="background:none">${b.type === 'titletext' ? `<div class="k">${esc(b.k || p.client || S.group)}</div><h2>${esc(b.title || p.title)}</h2>` : ''}${(b.text || []).map(t => `<p>${esc(t)}</p>`).join('')}</div>`;
       case 'gallery': {
         // a single preview block; the full gallery opens on click
-        const gi = galleries.push({ dir: b.dir, photos: b.photos || [], title: p.title }) - 1, ph = b.photos || [], more = Math.max(0, ph.length - 3);
+        const gi = galleries.push({ dir: b.dir, photos: b.photos || [], title: p.title, cols: +b.cols || 0 }) - 1, ph = b.photos || [], more = Math.max(0, ph.length - 3);
         const pv = (b.preview && b.preview.length ? b.preview : ph.slice(0, 3).map(x => x.file));
         const im = j => pv[j] ? `<img src="${esc(b.dir)}/m/${esc(pv[j])}.webp" alt="" loading="lazy" decoding="async">` : '';
         return `<div class="blk galh${b.join ? ' join' : ''}" ${pa}><button type="button" class="it gh" data-g="${gi}" aria-label="Open the photo gallery, ${ph.length} photos">
@@ -1040,7 +1040,8 @@
         const h = last ? Math.min(target, (W - gap * (row.length - 1)) / sum) : (W - gap * (row.length - 1)) / sum;
         row.forEach(([el, r]) => { el.style.width = (r * h) + 'px'; el.style.height = h + 'px'; }); row = []; sum = 0;
       };
-      its.forEach((el, i) => { const r = +G.photos[i].ratio || 1.5; row.push([el, r]); sum += r; if (sum * target + gap * (row.length - 1) >= W) flush(false); });
+      const cols = innerWidth >= 760 && G.cols;   // a set number per row, e.g. three across
+      its.forEach((el, i) => { const r = +G.photos[i].ratio || 1.5; row.push([el, r]); sum += r; if (cols ? row.length === cols : sum * target + gap * (row.length - 1) >= W) flush(false); });
       if (row.length) flush(true);
     };
     addEventListener('resize', () => { if (pg.classList.contains('open')) justify(); });
