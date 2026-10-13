@@ -610,3 +610,7 @@ footer{padding-top:100px}
   .lb-box>.lb-x{top:10px;right:10px;width:40px;height:40px;z-index:5;background:rgba(0,0,0,.4);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
   .lb-box>.lb-x svg{width:18px;height:18px}
 }
+/* ---- round 66: the name waits for its typeface, then fades in at its final size ---- */
+.idblock{transition:opacity .6s ease}
+.idblock.wait{opacity:0;animation:idshow .6s 3s forwards}
+@keyframes idshow{to{opacity:1}}

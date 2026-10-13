@@ -148,7 +148,12 @@
     nm.style.fontSize = (44 * k).toFixed(2) + 'px';
   };
   if (idBlock) {
-    fitName(); (document.fonts?.ready || Promise.resolve()).then(fitName);
+    // the name stays hidden until its typeface has arrived, then is sized once and fades in
+    // (sizing it in the stand-in font first is what made it jump from small to full size)
+    fitName();
+    const fontsIn = document.fonts ? Promise.all([document.fonts.load('44px "Instrument Serif"'), document.fonts.load('400 14px Manrope')]).then(() => document.fonts.ready) : Promise.resolve();
+    Promise.race([fontsIn, new Promise(ok => setTimeout(ok, 2500))]).catch(() => {}).then(() => { fitName(); requestAnimationFrame(() => idBlock.classList.remove('wait')); });
+    (document.fonts?.ready || Promise.resolve()).then(fitName);
     let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(fitName, 120); });
   }
   const vbg = $('.hero .vbg'), fade = $('.hero .fade'), heroBox = $('.hero');
@@ -504,7 +509,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261014m';
+    const FMV = '20261014n';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();
