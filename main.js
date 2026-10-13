@@ -128,7 +128,7 @@
   $$('.hl li.has-sub > button').forEach(b => b.addEventListener('click', () => {
     const li = b.parentElement, o = !li.classList.contains('expanded');
     li.classList.toggle('expanded', o); b.setAttribute('aria-expanded', o);
-    $$('.subl a', li).forEach((a, i) => a.style.transitionDelay = o ? `0ms, ${240 + i * 55}ms, ${240 + i * 55}ms` : '0ms');
+    $$('.subl a', li).forEach((a, i) => a.style.transitionDelay = o ? `0ms, ${110 + i * 35}ms, ${110 + i * 35}ms` : '0ms');
   }));
 
   /* ---------- Name sized to the role line; hero video blurs as it leaves ---------- */
@@ -454,7 +454,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261013p';
+    const FMV = '20261013s';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();

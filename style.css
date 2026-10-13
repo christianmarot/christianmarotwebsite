@@ -64,7 +64,7 @@ img{display:block;max-width:100%}
 .menu .hl li.on .m{color:rgba(255,255,255,.85)}
 .hl .plus{display:inline-block;margin-left:14px;font-family:var(--sans);font-size:.4em;vertical-align:middle;transition:transform .4s}
 .hl li.expanded .plus{transform:rotate(45deg)}
-.hl .subl{padding-left:clamp(24px,6vw,96px);display:grid;grid-template-rows:0fr;transition:grid-template-rows .55s cubic-bezier(.7,0,.2,1)}
+.hl .subl{padding-left:clamp(24px,6vw,96px);display:grid;grid-template-rows:0fr;transition:grid-template-rows .42s cubic-bezier(.6,0,.2,1)}
 .hl .subl>div{overflow:hidden}
 .hl li.expanded .subl{grid-template-rows:1fr}
 .hl .subl a{display:flex;justify-content:space-between;align-items:baseline;gap:24px;padding:4px 0;color:var(--dim);transition:color .3s,transform .5s ease,opacity .5s ease;opacity:0;transform:translateX(-16px)}
@@ -520,7 +520,7 @@ body.lb-open{overflow:hidden}
 /* menu + index: just the names, no small descriptions */
 .hl .m{display:none}
 /* Other Work: the sub-list fades in once there is room for it, instead of sliding out from under a hard edge */
-.hl .subl a{transform:translateY(8px);transition:color .3s,transform .5s cubic-bezier(.2,.7,.2,1),opacity .35s ease}
+.hl .subl a{transform:translateY(6px);transition:color .3s,transform .4s cubic-bezier(.2,.7,.2,1),opacity .3s ease}
 .hl li.expanded .subl>div{overflow:visible}   /* once open, nothing is clipped by the edge of the list */
 
 /* documentary cards: once opened with Read more, the full text scrolls inside the card (phones included) */

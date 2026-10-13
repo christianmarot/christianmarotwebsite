@@ -65,7 +65,7 @@ const DOCUMENTARIES = [
   {
     title: "Day of the Camel", for: "The Edge", role: "Cinematographer", date: "Coming Soon",
     image: "images/day-of-the-camel.jpg",
-    description: "Filming over five months, Day of the Camel is a feature documentary exploring the connection between humans and camels across the world, from Kenya to Mongolia, and Saudi Arabia to India. My role on the project was almost exclusively shooting on long lens (CN20), cross-shooting every scene, picking up moments of emotion and connection, and covering some high-octane races and camel events. Aside from the CN20, the entire project was shot on anamorphics, including the aerials. Other kit included RED Raptors, DJI RS4 gimbal, DJI 4D, Inspire 3 and a Mavic 4 Pro."
+    description: "Day of the Camel is a feature documentary about the deep and enduring bond between humans and camels around the world. Over five months of filming, the crew followed stories from Kenya to Mongolia and from Saudi Arabia to India. The film moves between quiet, intimate moments and the raw energy of camel races and festivals, set against some of the most dramatic and varied landscapes on earth. These range from 40°C heat in Kenya to −28°C in the Mongolian winter, where the two-humped Bactrian camel survives by growing a thick, shaggy coat. My role on the project was almost exclusively shooting on long lens (CN20), cross-shooting every scene, picking up moments of emotion and connection, and covering some high-octane races and camel events. Aside from the CN20, the entire project was shot on anamorphics, including the aerials. Other kit included RED Raptors, DJI RS4 gimbal, DJI 4D, Inspire 3 and a Mavic 4 Pro."
   },
   {
     title: "The Earthshot Prize", for: "BBC", role: "1st AC", date: "2021",
@@ -408,8 +408,6 @@ const OTHER_WORK = {
       { image: "images/fine-art/l/mnn-350005.webp", project: "Morning, Noon, Night" },
       { image: "images/fine-art/l/mnn-350004.webp", project: "Morning, Noon, Night" },
       { image: "images/fine-art/l/mnn-350002.webp", project: "Morning, Noon, Night" },
-      { image: "images/fine-art/l/kcx-2319.webp", project: "Predannack & Morning, Noon, Night · Exhibition" },
-      { image: "images/fine-art/l/kcx-2322.webp", project: "Predannack & Morning, Noon, Night · Exhibition" }
     ],
     // each project is numbered (01, 02 …); an exhibition follows its project behind a smaller, unnumbered
     // divider (sub: true). The big title stays the project name; the small line reads Project / Exhibition
@@ -454,22 +452,15 @@ const OTHER_WORK = {
               { file: "thud-5972", ratio: 1.333 }
           ] },
           { type: "titletext", k: "Solo exhibition", title: "Europa —\nThailand", text: ["Iniala Gallery, Phuket"] },
-          { type: "gallery", join: true, label: "Europa — Thailand", preview: ["thai-0292", "thai-0616", "thai-0601"], dir: "images/fine-art", photos: [
+          { type: "gallery", join: true, label: "Europa — Thailand", preview: ["thai-0292", "thai-0615", "thai-0606"], dir: "images/fine-art", photos: [
               { file: "thai-0292", ratio: 1.502 },
-              { file: "thai-0302", ratio: 1.502 },
               { file: "thai-0308", ratio: 0.666 },
               { file: "thai-0606", ratio: 1.502 },
-              { file: "thai-0601", ratio: 1.502 },
               { file: "thai-0602", ratio: 1.502 },
-              { file: "thai-0607", ratio: 1.502 },
               { file: "thai-0608", ratio: 1.503 },
               { file: "thai-0611", ratio: 1.502 },
-              { file: "thai-0616", ratio: 1.502 },
               { file: "thai-0615", ratio: 1.502 },
               { file: "thai-0619", ratio: 1.502 },
-              { file: "thai-0621", ratio: 1.502 },
-              { file: "thai-0653", ratio: 1.502 },
-              { file: "thai-0655", ratio: 1.500 },
               { file: "thai-0685", ratio: 0.667 },
               { file: "thai-0668", ratio: 0.667 },
               { file: "thai-0665", ratio: 1.500 },
@@ -480,7 +471,6 @@ const OTHER_WORK = {
               { file: "thai-0707", ratio: 0.667 },
               { file: "thai-0719", ratio: 1.500 },
               { file: "thai-0253", ratio: 1.502 },
-              { file: "thai-0258", ratio: 0.666 }
           ] }
         ]
       },
@@ -528,7 +518,6 @@ const OTHER_WORK = {
               { file: "kcx-2340", ratio: 1.500 },
               { file: "kcx-2167", ratio: 0.667 },
               { file: "kcx-2194", ratio: 1.500 },
-              { file: "kcx-2192", ratio: 1.500 },
               { file: "kcx-2268", ratio: 1.500 },
               { file: "kcx-2090", ratio: 0.667 },
               { file: "kcx-2188", ratio: 1.500 },
