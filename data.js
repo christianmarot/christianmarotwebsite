@@ -391,22 +391,22 @@ const OTHER_WORK = {
       {
         client: "Project", title: "Europa",
         blocks: [
-          { type: "photo", image: "images/fine-art/l/europa-tray-frame.webp", ratio: 1.223, title: "Tray Frame" },
+          { type: "photo", image: "images/fine-art/l/europa-tray-frame.webp", ratio: 1.223, zoom: true },
           { type: "text", text: [
             "Using an array of camera-less photographic techniques, the ongoing series ‘Europa’ explores unfamiliar and otherworldly landscapes that could perhaps be mistaken for the icy surface of Jupiter’s smallest Galilean moon. Whilst the images resemble these barren lunar landscapes, in reality they have been created in a darkroom using large format film, a selection of minerals and compounds found throughout the solar system, and the intervention of light. The use of such minerals and compounds – namely salt, water and ice – means that the process is indexically bound to Europa itself, whose icy surface encases an ocean of salty water that lies below. The works intend to provoke a dialogue and encourage audiences to question the process and reality of what they are looking at."
           ] },
           { type: "tiled", rows: 1, h: 0.82, dir: "images/fine-art", photos: [
-              { file: "europa-neg-11", ratio: 0.782, title: "Neg 11" },
-              { file: "europa-thud-2", ratio: 0.805, title: "THUD 2" },
-              { file: "europa-thud-1", ratio: 0.813, title: "THUD 1" },
-              { file: "europa-thud-3", ratio: 0.805, title: "THUD 3" },
-              { file: "europa-neg-7-10x8", ratio: 0.787, title: "Neg 7" },
-              { file: "europa-neg-1", ratio: 0.804, title: "Neg 1" },
-              { file: "europa-neg-8-5x4", ratio: 0.803, title: "Neg 8 (5 × 4)" },
-              { file: "europa-untitled-13", ratio: 0.793, title: "Untitled 13" },
-              { file: "europa-thud-4", ratio: 0.806, title: "THUD 4" },
-              { file: "europa-neg-8-10x8", ratio: 0.798, title: "Neg 8 (10 × 8)" },
-              { file: "europa-neg-3", ratio: 0.800, title: "Neg 3" }
+              { file: "europa-neg-11", ratio: 0.782 },
+              { file: "europa-thud-2", ratio: 0.805 },
+              { file: "europa-thud-1", ratio: 0.813 },
+              { file: "europa-thud-3", ratio: 0.805 },
+              { file: "europa-neg-7-10x8", ratio: 0.787 },
+              { file: "europa-neg-1", ratio: 0.804 },
+              { file: "europa-neg-8-5x4", ratio: 0.803 },
+              { file: "europa-untitled-13", ratio: 0.793 },
+              { file: "europa-thud-4", ratio: 0.806 },
+              { file: "europa-neg-8-10x8", ratio: 0.798 },
+              { file: "europa-neg-3", ratio: 0.800 }
           ] }
         ]
       },
@@ -481,8 +481,8 @@ const OTHER_WORK = {
               { file: "kc-532", ratio: 1.227 },
               { file: "kc-170010-a", ratio: 1.212 },
               { file: "kc-531", ratio: 1.227 },
-              { file: "kc-170010-b", ratio: 1.212 },
               { file: "kc-530", ratio: 1.225 },
+              { file: "kc-170010-b", ratio: 1.212 },
               { file: "kc-100001", ratio: 1.284 },
               { file: "kc-100007", ratio: 1.253 }
           ] }

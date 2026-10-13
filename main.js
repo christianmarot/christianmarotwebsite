@@ -454,7 +454,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261013j';
+    const FMV = '20261013l';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();
@@ -578,10 +578,10 @@
       case 'feature': return `<div class="blk feat big" ${pa}>${mkVideo(b)}</div>`;
       case 'secondary': return `<div class="blk b2x2" ${pa}>${(b.videos || []).slice(0, 4).map(v => mkVideo(v)).join('')}</div>`;
       case 'photo': {
-        if (!b.title) return `<div class="blk np" ${pa} data-ar="${+b.ratio || 1.5}"><div class="it"><img src="${esc(b.image)}" alt="" loading="lazy" decoding="async"></div></div>`;
+        if (!b.title && !b.zoom) return `<div class="blk np" ${pa} data-ar="${+b.ratio || 1.5}"><div class="it"><img src="${esc(b.image)}" alt="" loading="lazy" decoding="async"></div></div>`;
         // a titled photo opens large, with its title, like the gallery tiles
         const m = b.image.match(/^(.*)\/l\/([^/]+)\.webp$/), gi = galleries.push({ dir: m[1], photos: [{ file: m[2], ratio: +b.ratio || 1.5, title: b.title }], title: p.title }) - 1;
-        return `<div class="blk np" ${pa} data-ar="${+b.ratio || 1.5}"><button type="button" class="it gi" data-g="${gi}" data-i="0" aria-label="View ${esc(b.title)} larger"><img src="${esc(b.image)}" alt="" loading="lazy" decoding="async"></button></div>`;
+        return `<div class="blk np" ${pa} data-ar="${+b.ratio || 1.5}"><button type="button" class="it gi" data-g="${gi}" data-i="0" aria-label="View ${esc(b.title || 'this photo')} larger"><img src="${esc(b.image)}" alt="" loading="lazy" decoding="async"></button></div>`;
       }
       case 'textdetail': {
         // text at the top, two detail photos with a caption at the bottom — one column the height of the photos beside it
@@ -684,7 +684,7 @@
         const tr = b.style.transform; b.style.transform = '';
         const ps = $$('p', b), gap = 10; let fs = 15; ps.forEach(q => q.style.fontSize = '');
         let w = innerWidth < 760 ? innerWidth - 48 : Math.max(380, Math.min(480, innerWidth * .3)), wMax = innerWidth < 760 ? w : Math.min(680, innerWidth * .5);
-        const fits = () => { b.style.width = w + 'px'; const sq = (w - gap) / 2; $$('.gi', b).forEach(g => { g.style.width = g.style.height = sq + 'px'; }); return $('.td-t', b).scrollHeight + sq + 40 + 28 <= H; };
+        const fits = () => { b.style.width = w + 'px'; const sq = (w - gap) / 2; $$('.gi', b).forEach(g => { g.style.width = g.style.height = sq + 'px'; }); return $('.td-t', b).scrollHeight + sq + 40 + 36 <= H; };
         while (!fits() && w < wMax) w += 20;
         while (!fits() && fs > 12) { fs -= 0.5; ps.forEach(q => q.style.fontSize = fs + 'px'); }
         b.style.transform = tr;
@@ -692,6 +692,18 @@
       else if (b.classList.contains('galh')) b.style.width = Math.round(H * (innerWidth < 760 ? .62 : .9)) + 'px';
     });
     $$('.blk.feat .it, .blk.vim .it, .blk.np .it, .blk.hv .it, .blk.hp .it, .blk.fp .it', row).forEach(it => it.style.height = '100%');
+    // fine art: title cards and the text-with-details column sit with the same space on their left and right
+    if (S.midText && innerWidth >= 760) {
+      const edgeR = e => e.classList.contains('sep') ? e.offsetLeft + e.offsetWidth / 2 : e.offsetLeft + e.offsetWidth;
+      const edgeL = e => e.classList.contains('sep') ? e.offsetLeft + e.offsetWidth / 2 : e.offsetLeft;
+      $$('.blk.tt, .blk.tdx', row).forEach(b => { b.style.marginLeft = b.style.marginRight = ''; });
+      $$('.blk.tt, .blk.tdx', row).forEach(b => {
+        const pv = b.previousElementSibling, nx = b.nextElementSibling; if (!pv || !nx) return;
+        const cs = getComputedStyle(b), pl = parseFloat(cs.paddingLeft), pr = parseFloat(cs.paddingRight);
+        const gl = b.offsetLeft + pl - edgeR(pv), gr = edgeL(nx) - (b.offsetLeft + b.offsetWidth - pr), t = Math.max(gl, gr, Math.min(64, innerWidth * .045));
+        b.style.marginLeft = (parseFloat(cs.marginLeft) + t - gl) + 'px'; b.style.marginRight = (parseFloat(cs.marginRight) + t - gr) + 'px';
+      });
+    }
     panMax = Math.max(0, row.scrollWidth - innerWidth);
     gatherLen = innerHeight * (innerWidth < 760 ? 1.6 : 1.3);
     stage.style.height = (gatherLen - innerHeight * LEAD + panMax * 1.15 + innerHeight * 1.3) + 'px';
