@@ -530,3 +530,25 @@ body.lb-open{overflow:hidden}
 /* projects: a soft, feathered blur behind the open project's text so it reads over any frame */
 .dvd .detail::before{content:"";position:absolute;inset:-60px -160px -60px -80px;z-index:-1;pointer-events:none;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);background:rgba(0,0,0,.1);-webkit-mask-image:linear-gradient(to right,transparent,#000 80px,#000 calc(100% - 160px),transparent),linear-gradient(to bottom,transparent,#000 60px,#000 calc(100% - 60px),transparent);mask-image:linear-gradient(to right,transparent,#000 80px,#000 calc(100% - 160px),transparent),linear-gradient(to bottom,transparent,#000 60px,#000 calc(100% - 60px),transparent);-webkit-mask-composite:source-in;mask-composite:intersect}
 @media (max-width:900px){.bio .photo figcaption{text-align:center}}
+/* home page: tighter spacing between sections (about a quarter less) */
+.sec{padding-block:96px}
+.sec-head{margin-bottom:36px}
+.bio{padding-block:112px 88px}
+.logos{padding-block:64px 72px}
+.reel>.wrap{padding-top:84px}.reel .cap{padding-bottom:84px}
+.projects{padding-top:84px}
+footer{padding-top:100px}
+.fm{padding-block:84px;min-height:min(88vh,880px)}
+@media (max-width:900px){.fm{padding-block:60px;min-height:0}}
+@media (max-width:760px){
+  .sec{padding-block:64px}
+  .bio{padding-block:80px 60px}
+  .logos{padding-block:48px 52px}
+  .reel>.wrap{padding-top:60px}.reel .cap{padding-bottom:60px}
+  .projects{padding-top:60px}
+  .projects .wrap[style]{padding-block:20px 60px!important}
+  footer{padding-top:72px}
+}
+/* "Copied" note shown when an email link is clicked */
+.copied-tip{position:fixed;z-index:200;transform:translate(-50%,-100%) translateY(6px);padding:7px 12px;border-radius:999px;background:rgba(238,235,228,.95);color:#0b0d0c;font-size:11px;letter-spacing:.16em;text-transform:uppercase;pointer-events:none;opacity:0;transition:opacity .25s,transform .35s cubic-bezier(.2,.7,.2,1)}
+.copied-tip.on{opacity:1;transform:translate(-50%,-100%)}

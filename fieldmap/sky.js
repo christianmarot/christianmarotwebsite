@@ -39,7 +39,7 @@ const makeSky = (canvas, satSrc) => {
   }
   float fbm(vec3 p, int oct){ float a=.5, s=0.; for(int i=0;i<8;i++){ if(i>=oct) break; s+=a*snoise(p); p=p*2.03+vec3(1.7,9.2,3.1); a*=.5; } return .5+.5*s; }
   // billowy cloud density: soft fbm, with the lumps sharpened a touch
-  float cloudD(vec3 p, int oct){ vec3 w=vec3(snoise(p*.7+3.1),snoise(p*.7+7.7),snoise(p*.7+1.3))*.18; float d=fbm(p+w,oct); return d; }
+  float cloudD(vec3 p, int oct){ vec3 w=vec3(snoise(p*.55+3.1),snoise(p*.55+7.7),snoise(p*.55+1.3))*.34; float d=fbm(p+w,oct); return d; }
 
   // screen pixel → point on the globe
   bool sphereAt(vec2 px, out vec3 wp, out float z, out float lon, out float lat){
@@ -84,13 +84,15 @@ const makeSky = (canvas, satSrc) => {
       if (uCloud > .001 && sphereAt(sfc, cwp, cz, clon, clat)) {
         wp = cwp; z = min(z, cz);
         vec3 drift = vec3(uTime*.006, uTime*.0012, -uTime*.004);
-        vec3 p = wp*3.1 + drift;
-        float d  = cloudD(p, 7);
+        // larger weather systems with clear sky between them, rather than lots of small puffs
+        vec3 p = wp*1.7 + drift;
+        float big = fbm(wp*.85 + drift*.5 + vec3(11.,4.,7.), 3);
+        float d  = cloudD(p, 6)*.72 + big*.38 + .012;
         vec3 sun = vec3(-.035, .045, .03);
-        float dl = fbm(p+sun, 4);
-        float ds = fbm(p+sun*3.2, 4);
+        float dl = fbm(p+sun, 4)*.72 + big*.38 + .012;
+        float ds = fbm(p+sun*3.2, 4)*.72 + big*.38 + .012;
         float th = uCover + gust;
-        float c  = smoothstep(th, th+.2, d);
+        float c  = smoothstep(th, th+.24, d);
         float shadow = smoothstep(th, th+.28, ds) * (1.-c);
         float light = clamp(.62 + (d-dl)*5.2, 0., 1.);
         float thick = smoothstep(th, th+.45, d);

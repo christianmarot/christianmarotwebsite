@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="icon" href="images/favicon.png">
 <title>Field Map — Christian Marot, Cinematographer</title>
-<meta name="description" content="Field Map: every shoot on Christian Marot's credits board, flown from London, through the clouds and down to the field. Wildlife and natural history cinematography across 22 countries.">
+<meta name="description" content="Field Map: every shoot on Christian Marot's credits board, travelled from London, through the clouds and down to the field. Wildlife and natural history cinematography across 22 countries.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -223,6 +223,17 @@ a{color:inherit}
 .listbtn{display:none}
 @media (max-width:900px){.listbtn{display:inline-flex}}
 @media (prefers-reduced-motion:reduce){.hint i{animation:none}.ov{transition:none}}
+/* filters stay on one line: a little more room for them, and on phones they scroll sideways */
+.xp-top{max-width:min(700px,calc(100vw - 2*var(--gut) - 340px))}
+.chips{flex-wrap:nowrap;gap:6px}
+.chip{padding:0 11px;letter-spacing:.12em;white-space:nowrap;flex-shrink:0}
+@media (max-width:760px){
+  .xp-top{max-width:calc(100vw - 2*var(--gut))}
+  .chips{gap:4px;overflow-x:auto;scrollbar-width:none}   /* sized to fit a phone; scrolls sideways only on the narrowest screens */
+  .chips::-webkit-scrollbar{display:none}
+  .chip{height:28px;padding:0 6px;font-size:9px;letter-spacing:.03em;gap:4px}
+  .chip .dot{width:5px;height:5px}
+}
 </style>
 
 </head>
@@ -246,7 +257,7 @@ a{color:inherit}
 
       <div class="ov intro" id="intro">
         <div class="eyebrow">Credits board · <span id="nRange">Mar 2021 – Oct 2026</span></div>
-        <h1><span id="nShoots">39</span> shoots,<br><em><span id="nCountries">22</span> countries</em>, one small planet.</h1>
+        <h1><span id="nShoots">39</span> shoots,<br><em><span id="nCountries">22</span> countries</em>,<br>one small planet.</h1>
         <p>Scroll to send five years of routes out from London, then drop through the clouds and explore it yourself.</p>
         <div class="cta"><button class="btn" type="button" data-go="3">Skip animation &amp; explore</button><span class="hint"><i></i>Scroll</span></div>
       </div>
@@ -271,7 +282,7 @@ a{color:inherit}
       <div class="ov stats off" id="stats">
         <div class="stat"><div class="k">Shoots</div><div class="v" id="sShoots">0</div></div>
         <div class="stat"><div class="k">Countries</div><div class="v" id="sCountries">0</div></div>
-        <div class="stat"><div class="k">Flown from London</div><div class="v"><span id="sKm">0</span><small>km</small></div></div>
+        <div class="stat"><div class="k">Travelled from London</div><div class="v"><span id="sKm">0</span><small>km</small></div></div>
       </div>
 
       <div class="ov dive off" id="dive" aria-hidden="true"><div class="eyebrow">Descending</div><h2>Through the clouds, down to the field.</h2><p class="dh" id="diveHint">Keep scrolling</p></div>
@@ -312,12 +323,12 @@ a{color:inherit}
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
-<script src="data.js?v=20261013u"></script>
-<script src="fieldmap/geo.js?v=20261013u"></script>
-<script src="fieldmap/geo50.js?v=20261013u"></script>
-<script src="fieldmap/earth.js?v=20261013u"></script>
-<script src="fieldmap/sky.js?v=20261013u"></script>
-<script src="fieldmap/map.js?v=20261013u"></script>
+<script src="data.js?v=20261013y"></script>
+<script src="fieldmap/geo.js?v=20261013y"></script>
+<script src="fieldmap/geo50.js?v=20261013y"></script>
+<script src="fieldmap/earth.js?v=20261013y"></script>
+<script src="fieldmap/sky.js?v=20261013y"></script>
+<script src="fieldmap/map.js?v=20261013y"></script>
 
 </body>
 </html>

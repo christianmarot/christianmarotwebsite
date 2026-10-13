@@ -454,7 +454,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261013u';
+    const FMV = '20261013y';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();
@@ -1073,4 +1073,28 @@
   let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(layout, 100); });
   setProject(0);
   layout();
+})();
+
+/* ---------- Email links: still open the mail app, and also copy the address, with a small "Copied" note ---------- */
+(() => {
+  let tip, tt;
+  const copy = txt => {
+    if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(txt);
+    return new Promise((ok, no) => {
+      const t = document.createElement('textarea'); t.value = txt; t.setAttribute('readonly', ''); t.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
+      document.body.appendChild(t); t.select(); try { document.execCommand('copy') ? ok() : no(); } catch (e) { no(e); } t.remove();
+    });
+  };
+  document.addEventListener('click', e => {
+    const a = e.target.closest('a[href^="mailto:"]'); if (!a) return;
+    const addr = decodeURIComponent(a.getAttribute('href').slice(7).split('?')[0]);
+    copy(addr).then(() => {
+      if (!tip) { tip = document.createElement('div'); tip.className = 'copied-tip'; tip.setAttribute('role', 'status'); document.body.appendChild(tip); }
+      tip.textContent = 'Copied';
+      const r = a.getBoundingClientRect();
+      tip.style.left = Math.min(innerWidth - 60, Math.max(60, r.left + r.width / 2)) + 'px';
+      tip.style.top = Math.max(12, r.top - 12) + 'px';
+      tip.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => tip.classList.remove('on'), 1600);
+    }).catch(() => {});
+  });
 })();
