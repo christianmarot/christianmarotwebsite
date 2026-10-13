@@ -463,11 +463,15 @@
       // counts one number at a time like before (quick at first, easing off towards the total), but each step is a
       // short roll of the reel, blurred while it moves; the leading zero stays hidden until the tens reel is needed
       const steps = []; let at = 0;
-      for (let k = 1; k <= nC; k++) { const d = k === 1 ? 60 : 40 + 380 * Math.pow(k / nC, 4); at += d; steps.push({ t: at, d: Math.min(240, d * .85) }); }
-      const ease = u => 1 - Math.pow(1 - u, 3);
+      for (let k = 1; k <= nC; k++) { const d = k === 1 ? 60 : 40 + 380 * Math.pow(k / nC, 4); at += d; steps.push({ t: at, f: k / nC }); }
+      // each roll lasts until the next one starts, so the slow final numbers glide from one to the next instead of
+      // snapping and waiting; early rolls are brisk, later ones ease in and out softly, and the last one settles gently
+      steps.forEach((s0, k) => { const nx = steps[k + 1]; s0.d = nx ? nx.t - s0.t : 620; });
+      const easeOut = u => 1 - Math.pow(1 - u, 3), easeInOut = u => .5 - .5 * Math.cos(Math.PI * u), settle = u => 1 - Math.pow(1 - u, 2.2);
+      const ease = (u, f, last) => last ? settle(u) : easeOut(u) * (1 - f * f) + easeInOut(u) * f * f;
       const valueAt = ms => {
         let v = 0;
-        for (let k = 0; k < steps.length; k++) { const s0 = steps[k]; if (ms < s0.t) break; v = k + ease(Math.min(1, (ms - s0.t) / s0.d)); }
+        for (let k = 0; k < steps.length; k++) { const s0 = steps[k]; if (ms < s0.t) break; v = k + ease(Math.min(1, (ms - s0.t) / s0.d), s0.f, k === steps.length - 1); }
         return v;
       };
       const lead = strips.length > 1 ? strips[0].parentElement : null;
@@ -492,7 +496,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261014b';
+    const FMV = '20261014c';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();
