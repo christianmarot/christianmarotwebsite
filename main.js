@@ -7,6 +7,8 @@
   const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const has = name => { try { return typeof eval(name) !== 'undefined'; } catch { return false; } };
   const fmt = t => { t = Math.max(0, Math.floor(t || 0)); return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`; };
+  // [muted?, volume] of a Vimeo player (older players lack getMuted)
+  const vimMuted = pl => Promise.all([pl.getMuted ? pl.getMuted() : Promise.resolve(false), pl.getVolume ? pl.getVolume() : Promise.resolve(1)]);
   const ICON = {
     play: 'M8 5v14l11-7z', pause: 'M7 5h3.5v14H7zM13.5 5H17v14h-3.5z',
     muted: 'M4 9v6h4l5 4V5L8 9H4zm12.6 3 2.7-2.7-1.1-1.1-2.7 2.7-2.7-2.7-1.1 1.1 2.7 2.7-2.7 2.7 1.1 1.1 2.7-2.7 2.7 2.7 1.1-1.1z',
@@ -63,6 +65,10 @@
       pl.getDuration().then(d => { dur = d; show(0); }).catch(() => {});
       pl.on('timeupdate', d => { dur = d.duration || dur; if (!dragging) show(d.seconds); });
       pl.on('play', () => set(true)); pl.on('pause', () => set(false)); pl.on('ended', () => set(false));
+      pl.on('volumechange', () => vimMuted(pl).then(([m, v]) => { muted = m || v === 0; muteI.setAttribute('d', muted ? ICON.muted : ICON.sound); $('.rp-mute', pc).setAttribute('aria-label', muted ? 'Turn sound on' : 'Mute'); }).catch(() => {}));
+      // phones: a tap on the film while its controls are hidden just brings them back (a second tap plays / pauses)
+      let wasIdle = false; frame.addEventListener('pointerdown', () => { wasIdle = frame.classList.contains('idle'); }, { capture: true, passive: true });
+      btn.addEventListener('click', e => { if (wasIdle && matchMedia('(hover: none)').matches) { e.stopImmediatePropagation(); wasIdle = false; } }, { capture: true });
       const toggle = () => { if (playing) pl.pause(); else { if (!muted) pl.setVolume(1).catch(() => {}); pl.play().catch(() => {}); } };
       btn.addEventListener('click', toggle); $('.rp-play', pc).addEventListener('click', toggle);
       $('.rp-mute', pc).addEventListener('click', () => { muted = !muted; pl.setMuted(muted).catch(() => {}); if (!muted) pl.setVolume(1).catch(() => {}); muteI.setAttribute('d', muted ? ICON.muted : ICON.sound); $('.rp-mute', pc).setAttribute('aria-label', muted ? 'Turn sound on' : 'Mute'); });
@@ -70,6 +76,7 @@
       bar.addEventListener('pointerdown', e => { dragging = true; bar.classList.add('drag'); bar.setPointerCapture(e.pointerId); seekTo(e.clientX); });
       bar.addEventListener('pointermove', e => { if (dragging) seekTo(e.clientX); });
       bar.addEventListener('pointerup', e => { if (!dragging) return; dragging = false; bar.classList.remove('drag'); pl.setCurrentTime(seekTo(e.clientX)).catch(() => {}); });
+      bar.addEventListener('pointercancel', () => { dragging = false; bar.classList.remove('drag'); });
       bar.addEventListener('keydown', e => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') pl.getCurrentTime().then(t => pl.setCurrentTime(clamp(t + (e.key === 'ArrowRight' ? 5 : -5), 0, dur))); });
       // full screen: the whole frame (so our controls come too); phones without that fall back to Vimeo's own
       $('.rp-fs', pc).addEventListener('click', () => {
@@ -149,7 +156,8 @@
     if (!vbg || reduce) return;
     // only start blurring once the whole video has been seen (matters on short, landscape screens)
     const start = Math.max(0, (heroBox ? heroBox.offsetHeight : innerHeight) - innerHeight);
-    const p = clamp((scrollY - start) / (innerHeight * 0.85), 0, 1);
+    const p = Math.round(clamp((scrollY - start) / (innerHeight * 0.85), 0, 1) * 400) / 400;
+    if (p === heroFx.last) return; heroFx.last = p;
     vbg.style.filter = `blur(${(p * 16).toFixed(1)}px) brightness(${(1 - p * 0.55).toFixed(2)})`;
     vbg.style.setProperty('--hs', (1 + p * 0.06).toFixed(4));
     if (fade) fade.style.opacity = p.toFixed(2);
@@ -496,7 +504,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261014k';
+    const FMV = '20261014l';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();
@@ -550,17 +558,20 @@
         heroPlayer.on('play', () => { paused = false; playI.setAttribute('d', ICON.pause); playB.setAttribute('aria-label', 'Pause'); });
         heroPlayer.on('pause', () => { paused = true; playI.setAttribute('d', ICON.play); playB.setAttribute('aria-label', 'Play'); });
         playB.onclick = () => paused ? heroPlayer.play() : heroPlayer.pause();
-        muteB.onclick = () => {
-          muted = !muted; heroPlayer.setMuted(muted); if (!muted) heroPlayer.setVolume(1);
-          muteI.setAttribute('d', muted ? ICON.muted : ICON.sound); muteB.setAttribute('aria-label', muted ? 'Turn sound on' : 'Mute');
-        };
+        const muteIcon = () => { muteI.setAttribute('d', muted ? ICON.muted : ICON.sound); muteB.setAttribute('aria-label', muted ? 'Turn sound on' : 'Mute'); };
+        muteB.onclick = () => { muted = !muted; heroPlayer.setMuted(muted).catch(() => {}); if (!muted) heroPlayer.setVolume(1).catch(() => {}); muteIcon(); };
+        // the sound button always shows what the film is really doing (phones can silence a film on their own)
+        const syncSnd = () => vimMuted(heroPlayer).then(([m, v]) => { muted = m || v === 0; muteIcon(); }).catch(() => {});
+        heroPlayer.on('volumechange', syncSnd); heroPlayer.on('play', syncSnd);
+        const playSafe = () => heroPlayer.play().catch(() => { muted = true; muteIcon(); heroPlayer.setMuted(true).then(() => heroPlayer.play()).catch(() => {}); });
         const seekTo = x => { const r = bar.getBoundingClientRect(); const p = clamp((x - r.left) / r.width, 0, 1); show(p * dur); return p * dur; };
         bar.addEventListener('pointerdown', e => { dragging = true; bar.classList.add('drag'); bar.setPointerCapture(e.pointerId); seekTo(e.clientX); });
         bar.addEventListener('pointermove', e => { if (dragging) seekTo(e.clientX); });
-        bar.addEventListener('pointerup', e => { if (!dragging) return; dragging = false; bar.classList.remove('drag'); heroPlayer.setCurrentTime(seekTo(e.clientX)); });
+        bar.addEventListener('pointerup', e => { if (!dragging) return; dragging = false; bar.classList.remove('drag'); heroPlayer.setCurrentTime(seekTo(e.clientX)).catch(() => {}); });
+        bar.addEventListener('pointercancel', () => { dragging = false; bar.classList.remove('drag'); });
         bar.addEventListener('keydown', e => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') heroPlayer.getCurrentTime().then(t => heroPlayer.setCurrentTime(clamp(t + (e.key === 'ArrowRight' ? 5 : -5), 0, dur))); });
         // pause the film (and its sound) once you scroll into the page, resume when you come back
-        new IntersectionObserver(es => { const v = es[0].intersectionRatio; if (v < 0.35) heroPlayer.pause(); else if (!paused || v > 0.9) heroPlayer.play().catch(() => {}); }, { threshold: [0, 0.35, 0.9] }).observe(heroEl);
+        new IntersectionObserver(es => { const v = es[0].intersectionRatio; if (v < 0.35) heroPlayer.pause(); else if (!paused || v > 0.9) playSafe(); }, { threshold: [0, 0.35, 0.9] }).observe(heroEl);
       }
       // titles + controls fade away after ~2.25s without mouse movement, and return on any movement
       let idleT;
@@ -614,16 +625,17 @@
         ${v.once ? `<button type="button" class="replay" aria-label="Replay">${'<span>' + svg(ICON.replay) + 'Replay</span>'}</button>` : ''}</div>`
     : `<div class="it ph"><div class="ph" style="height:100%">[ ${esc(v.note || '9:16 clip to come')} ]</div></div>`;
   const galleries = [];
-  const blocksHTML = (p, pi) => p.blocks.map(b => {
+  const blocksHTML = (p, pi) => { let pgi = -1; const pgal = () => pgi >= 0 ? pgi : (pgi = galleries.push({ dir: '', photos: [], title: p.title }) - 1); return p.blocks.map(b => {
     const pa = `data-p="${pi}"`;
     switch (b.type) {
       case 'feature': return `<div class="blk feat big" ${pa}>${mkVideo(b)}</div>`;
       case 'secondary': return `<div class="blk b2x2" ${pa}>${(b.videos || []).slice(0, 4).map(v => mkVideo(v)).join('')}</div>`;
       case 'photo': {
-        if (!b.title && !b.zoom) return `<div class="blk np" ${pa} data-ar="${+b.ratio || 1.5}"><div class="it"><img src="${esc(b.image)}" alt="" loading="lazy" decoding="async"></div></div>`;
-        // a titled photo opens large, with its title, like the gallery tiles
-        const m = b.image.match(/^(.*)\/l\/([^/]+)\.webp$/), gi = galleries.push({ dir: m[1], photos: [{ file: m[2], ratio: +b.ratio || 1.5, title: b.title }], title: p.title }) - 1;
-        return `<div class="blk np" ${pa} data-ar="${+b.ratio || 1.5}"><button type="button" class="it gi" data-g="${gi}" data-i="0" aria-label="View ${esc(b.title || 'this photo')} larger"><img src="${esc(b.image)}" alt="" loading="lazy" decoding="async"></button></div>`;
+        // every photo opens large; it shares a viewer with the project's other photos, so you can swipe on through them
+        const m = b.image.match(/^(.*)\/l\/([^/]+)\.webp$/);
+        if (!m) return `<div class="blk np" ${pa} data-ar="${+b.ratio || 1.5}"><div class="it"><img src="${esc(b.image)}" alt="" loading="lazy" decoding="async"></div></div>`;
+        const gi = pgal(), j = galleries[gi].photos.push({ dir: m[1], file: m[2], ratio: +b.ratio || 1.5, title: b.title }) - 1;
+        return `<div class="blk np" ${pa} data-ar="${+b.ratio || 1.5}"><button type="button" class="it gi" data-g="${gi}" data-i="${j}" aria-label="View ${esc(b.title || 'this photo')} larger"><img src="${esc(b.image)}" alt="" loading="lazy" decoding="async"></button></div>`;
       }
       case 'textdetail': {
         // text at the top, two detail photos with a caption at the bottom — one column the height of the photos beside it
@@ -632,19 +644,23 @@
           <div class="td-d"><div class="td-pair">${(b.photos || []).map((x, j) => `<button type="button" class="gi" data-g="${gi}" data-i="${j}" aria-label="View detail ${j + 1} larger"><img src="${esc(b.dir)}/m/${esc(x.file)}.webp" alt="" loading="lazy" decoding="async"></button>`).join('')}</div>${b.caption ? `<div class="td-c">${esc(b.caption)}</div>` : ''}</div></div>`;
       }
       case 'tiled': {
-        const gi = galleries.push({ dir: b.dir, photos: b.photos || [], title: p.title }) - 1;
-        return `<div class="blk gal" ${pa} data-rows="${+b.rows || 2}" ${b.h ? `data-h="${+b.h}"` : ''}>${(b.photos || []).map((ph, j) => `<button type="button" class="it gi" data-g="${gi}" data-i="${j}" data-r="${+ph.ratio || 1.5}" aria-label="View photo ${j + 1} of ${b.photos.length} larger"><img src="${esc(b.dir)}/m/${esc(ph.file)}.webp" alt="" loading="lazy" decoding="async"></button>`).join('')}</div>`;
+        const gi = pgal(), base = galleries[gi].photos.length; galleries[gi].photos.push(...(b.photos || []).map(x => ({ ...x, dir: b.dir })));
+        return `<div class="blk gal" ${pa} data-rows="${+b.rows || 2}" ${b.h ? `data-h="${+b.h}"` : ''}>${(b.photos || []).map((ph, j) => `<button type="button" class="it gi" data-g="${gi}" data-i="${base + j}" data-r="${+ph.ratio || 1.5}" aria-label="View photo ${j + 1} of ${b.photos.length} larger"><img src="${esc(b.dir)}/m/${esc(ph.file)}.webp" alt="" loading="lazy" decoding="async"></button>`).join('')}</div>`;
       }
       case 'tiles12': return `<div class="blk t12" ${pa}>${(b.videos || []).slice(0, 12).map(v => mkVideo(v)).join('')}</div>`;
       case 'vimeo': return `<div class="blk vim" ${pa} data-ar="${+b.ratio || 16 / 9}"><div class="it vm" data-vimeo="${esc(b.vimeo)}" ${b.once ? 'data-once' : ''} tabindex="0" role="button" aria-label="Watch this film larger, with sound">
-          <img class="vm-poster" alt="" ${b.poster ? `src="${esc(b.poster)}"` : ''} decoding="async"><div class="vm-f"></div><div class="vc"><button type="button" class="snd" aria-label="Turn sound on">${svg(ICON.muted)}<span>Sound</span></button></div>
+          <img class="vm-poster" alt="" ${b.poster ? `src="${esc(b.poster)}"` : ''} decoding="async"><div class="vm-f"></div><span class="vm-hint" aria-hidden="true">${svg(ICON.play)}<span>Tap to watch</span></span><div class="vc"><button type="button" class="snd" aria-label="Turn sound on">${svg(ICON.muted)}<span>Sound</span></button></div>
           ${b.once ? `<button type="button" class="replay" aria-label="Replay"><span>${svg(ICON.replay)}Replay</span></button>` : ''}</div></div>`;
       case 'hvideo': return `<div class="blk hv" ${pa}>${mkVideo(b)}</div>`;
       case 'hphoto': return `<div class="blk hp" ${pa}><div class="it"><img src="${esc(b.image)}" alt="" loading="lazy"></div></div>`;
       case 'fphoto': return `<div class="blk fp" ${pa}><div class="it"><img src="${esc(b.image)}" alt="" loading="lazy"></div></div>`;
       case 'sphoto': return `<div class="blk sph" ${pa}>${(b.images || []).slice(0, 4).map(i => `<div class="it"><img src="${esc(i)}" alt="" loading="lazy"></div>`).join('')}</div>`;
       case 'strip': return `<div class="blk strip" ${pa} data-ar="${+b.ratio || 10}"><div class="it"><img src="${esc(b.image)}" alt="" loading="lazy" decoding="async"></div>${b.caption ? `<div class="cap">${esc(b.caption)}</div>` : ''}</div>`;
-      case 'text': case 'titletext': return `<div class="blk txt it${b.type === 'titletext' ? ' tt' : ''}" ${pa} style="background:none">${b.type === 'titletext' ? `<div class="k">${esc(b.k || p.client || S.group)}</div><h2>${esc(b.title || p.title)}</h2>` : ''}${(b.text || []).map(t => `<p>${esc(t)}</p>`).join('')}</div>`;
+      case 'text': case 'titletext': {
+        // mtext: a shorter line used on phones in place of text (title cards)
+        const ps = b.mtext ? (b.text || []).map(t => `<p class="d-only">${esc(t)}</p>`).join('') + b.mtext.map(t => `<p class="m-only">${esc(t)}</p>`).join('') : (b.text || []).map(t => `<p>${esc(t)}</p>`).join('');
+        return `<div class="blk txt it${b.type === 'titletext' ? ' tt' : ''}" ${pa} style="background:none">${b.type === 'titletext' ? `<div class="k">${esc(b.k || p.client || S.group)}</div><h2>${esc(b.title || p.title)}</h2>` : ''}${ps}${b.type === 'text' ? '<button type="button" class="wrm">Read more +</button>' : ''}</div>`;
+      }
       case 'gallery': {
         // a single preview block; the full gallery opens on click
         const gi = galleries.push({ dir: b.dir, photos: b.photos || [], title: p.title, cols: +b.cols || 0 }) - 1, ph = b.photos || [], more = Math.max(0, ph.length - 3);
@@ -657,7 +673,7 @@
       case 'grid': { const items = [...b.items]; while (items.length < 12) items.push({}); return items.map(t => `<div class="blk feat" ${pa}>${t.image ? `<div class="it"><img src="${esc(t.image)}" alt="" loading="lazy"></div>` : mkVideo(t)}</div>`).join(''); }
     }
     return '';
-  }).join('');
+  }).join(''); };
   // dividers: numbered in order, skipping any part marked noMarker; marker: replaces the title on the divider
   let sepN = 0;
   const sepHTML = p => p.sub
@@ -672,10 +688,16 @@
   // sizes: featured 9:16 fills from under the menu to above the title; secondary = 2×2 of the same width
   let H = 0, panMax = 0, gatherLen = 0, rowTop = 200; const LEAD = 0.75;
   const stage = $('#wkStage');
+  // phones: the screen height changes as the browser's address bar slides in and out while you scroll.
+  // Everything here is measured against a steady height (only re-measured when the width changes, e.g. turning
+  // the phone), so the row and its title don't jump or jitter as the bar comes and goes
+  const touchUI = matchMedia('(hover: none) and (pointer: coarse)').matches;
+  let VH = innerHeight, VW = innerWidth, blkPos = [];
   const layout = () => {
+    if (!touchUI || innerWidth !== VW || !H) VH = innerHeight; VW = innerWidth;
     const hdr = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hdr')) || 92;
     const top = hdr + 8, bottom = innerWidth < 760 ? 120 : 150;
-    H = Math.max(260, innerHeight - top - bottom);
+    H = Math.max(260, VH - top - bottom);
     const fw = Math.round(H * 9 / 16), gap = innerWidth < 760 ? 16 : (S.gap || 16);
     rowTop = top;     row.style.top = top + 'px'; row.style.gap = gap + 'px';
     $$('.sep', row).forEach(s => s.style.height = H + 'px');
@@ -703,8 +725,8 @@
       else if (b.classList.contains('fp')) b.style.width = Math.round(H * 4 / 5) + 'px';
       else if (b.classList.contains('txt')) {
         // as narrow as possible while the text still fits the height of the video beside it
-        const pad = innerWidth < 760 ? 24 : 72, tr = b.style.transform; b.style.transform = '';
-        const ps = $$('p', b); let fs = 15; ps.forEach(q => q.style.fontSize = '');
+        const cs0 = getComputedStyle(b), pad = parseFloat(cs0.paddingLeft) + parseFloat(cs0.paddingRight), tr = b.style.transform; b.style.transform = '';
+        const ps = $$('p', b); let fs = 15; ps.forEach(q => q.style.fontSize = ''); b.classList.remove('clip');
         let w, wMax = Math.min(620, innerWidth * 0.82);
         if (innerWidth < 760) {
           // phones: fill the screen width; the opening block must sit fully on screen beside its divider
@@ -713,11 +735,13 @@
         } else w = Math.max(260, Math.min(360, innerWidth * 0.24));
         b.style.width = (w + pad) + 'px';
         while (b.scrollHeight > H + 2 && w < wMax) { w += 20; b.style.width = (w + pad) + 'px'; }
-        while (b.scrollHeight > H + 2 && fs > 12) { fs -= 0.5; ps.forEach(q => q.style.fontSize = fs + 'px'); }
-        if (S.midText && b.classList.contains('tt') && innerWidth >= 760) {
+        // phones: every block keeps the same size of type; a long one is cut short with a Read more instead
+        if (innerWidth < 760 && !b.classList.contains('tt')) { if (b.scrollHeight > H + 2) b.classList.add('clip'); }
+        else while (b.scrollHeight > H + 2 && fs > 12) { fs -= 0.5; ps.forEach(q => q.style.fontSize = fs + 'px'); }
+        if (S.midText && b.classList.contains('tt')) {
           // title cards: trim to the width the words actually take, so the gap after them matches the gap before
           const range = document.createRange(), x0 = b.getBoundingClientRect().left; let right = 0;
-          [...b.children].forEach(c => { range.selectNodeContents(c); [...range.getClientRects()].forEach(r => { right = Math.max(right, r.right); }); });
+          [...b.children].filter(c => c.offsetParent).forEach(c => { range.selectNodeContents(c); [...range.getClientRects()].forEach(r => { right = Math.max(right, r.right); }); });
           if (right > x0) b.style.width = Math.ceil(right - x0) + 'px';
         }
         b.style.transform = tr;
@@ -725,17 +749,19 @@
       else if (b.classList.contains('tdx')) {
         const tr = b.style.transform; b.style.transform = '';
         const ps = $$('p', b), gap = 10; let fs = 15; ps.forEach(q => q.style.fontSize = '');
-        let w = innerWidth < 760 ? innerWidth - 48 : Math.max(380, Math.min(480, innerWidth * .3)), wMax = innerWidth < 760 ? w : Math.min(680, innerWidth * .5);
+        let w = innerWidth < 760 ? innerWidth - 2 * (parseFloat(getComputedStyle(row).paddingLeft) || 24) : Math.max(380, Math.min(480, innerWidth * .3)), wMax = innerWidth < 760 ? w : Math.min(680, innerWidth * .5);
         const fits = () => { b.style.width = w + 'px'; const sq = (w - gap) / 2; $$('.gi', b).forEach(g => { g.style.width = g.style.height = sq + 'px'; }); return $('.td-t', b).scrollHeight + sq + 40 + 36 <= H; };
         while (!fits() && w < wMax) w += 20;
-        while (!fits() && fs > 12) { fs -= 0.5; ps.forEach(q => q.style.fontSize = fs + 'px'); }
+        // phones: same size of type as the other blocks; the detail photos shrink to make room instead
+        if (innerWidth < 760) { let sq = (w - gap) / 2; while ($('.td-t', b).scrollHeight + sq + 40 + 36 > H && sq > 90) { sq -= 6; $$('.gi', b).forEach(g => { g.style.width = g.style.height = sq + 'px'; }); } }
+        else while (!fits() && fs > 12) { fs -= 0.5; ps.forEach(q => q.style.fontSize = fs + 'px'); }
         b.style.transform = tr;
       }
       else if (b.classList.contains('galh')) b.style.width = Math.round(H * (innerWidth < 760 ? .62 : .9)) + 'px';
     });
     $$('.blk.feat .it, .blk.vim .it, .blk.np .it, .blk.hv .it, .blk.hp .it, .blk.fp .it', row).forEach(it => it.style.height = '100%');
     // fine art: title cards and the text-with-details column sit with the same space on their left and right
-    if (S.midText && innerWidth >= 760) {
+    if (S.midText) {
       const edgeR = e => e.classList.contains('sep') ? e.offsetLeft + e.offsetWidth / 2 : e.offsetLeft + e.offsetWidth;
       const edgeL = e => e.classList.contains('sep') ? e.offsetLeft + e.offsetWidth / 2 : e.offsetLeft;
       $$('.blk.tt, .blk.tdx', row).forEach(b => { b.style.marginLeft = b.style.marginRight = ''; });
@@ -747,8 +773,11 @@
       });
     }
     panMax = Math.max(0, row.scrollWidth - innerWidth);
-    gatherLen = innerHeight * (innerWidth < 760 ? 1.6 : 1.3);
-    stage.style.height = (gatherLen - innerHeight * LEAD + panMax * 1.15 + innerHeight * 1.3) + 'px';
+    gatherLen = VH * (innerWidth < 760 ? 1.6 : 1.3);
+    stage.style.height = (gatherLen - VH * LEAD + panMax * 1.15 + VH * 1.3) + 'px';
+    blkPos = blks.map(b => [b.offsetLeft, b.offsetWidth, +b.dataset.p]);
+    // phones: the project title sits a fixed distance under the row, not against the (moving) bottom of the screen
+    if (touchUI || innerWidth < 760) Object.assign(wt.style, { top: (top + H + 22) + 'px', bottom: 'auto' }); else wt.style.top = wt.style.bottom = '';
     frame();
   };
 
@@ -784,34 +813,43 @@
     if (i === curP || !projects[i]) return; curP = i;
     swap(wtG, projects[i].client || S.group); swap(wtN, projects[i].title || S.title);
   };
-  let inStage = false;
+  let inStage = false, lastK = -1, lastX = null, lastVC = 0, vcT;
   function frame() {
     heroFx();
     const r = stage.getBoundingClientRect(), scrolled = -r.top;
-    const g = reduce ? 1 : clamp((scrolled + innerHeight * LEAD) / gatherLen, 0, 1);
-    const e = 1 - Math.pow(1 - g, 3), k = 1 - e;
-    const pan = reduce ? 0 : clamp((scrolled - gatherLen + innerHeight * LEAD) / (panMax * 1.15 || 1), 0, 1);
+    const g = reduce ? 1 : clamp((scrolled + VH * LEAD) / gatherLen, 0, 1);
+    const e = 1 - Math.pow(1 - g, 3), k = Math.round((1 - e) * 2000) / 2000;
+    const pan = reduce ? 0 : clamp((scrolled - gatherLen + VH * LEAD) / (panMax * 1.15 || 1), 0, 1);
     const sx = Math.max(innerWidth, 640) * 0.4;
-    items.forEach((el, i) => {
+    // only touch the styles that actually changed (less work per frame = smoother on phones)
+    if (k !== lastK && !(k < 0.001 && lastK < 0.001 && lastK >= 0)) items.forEach((el, i) => {
       const sd = seeds[i];
-      el.style.transform = k < 0.001 ? '' : `translate(${(sd.x * sx * k).toFixed(1)}px, ${(sd.y * innerHeight * k).toFixed(1)}px) rotate(${(sd.r * k).toFixed(2)}deg) scale(${(1 - sd.s * k).toFixed(3)})`;
+      el.style.transform = k < 0.001 ? '' : `translate(${(sd.x * sx * k).toFixed(1)}px, ${(sd.y * VH * k).toFixed(1)}px) rotate(${(sd.r * k).toFixed(2)}deg) scale(${(1 - sd.s * k).toFixed(3)})`;
     });
-    row.style.transform = `translateX(${(-pan * panMax).toFixed(1)}px)`;
-    inStage = r.top < innerHeight * 0.5 && r.bottom > innerHeight * 0.7;
-    wt.style.opacity = inStage ? 1 : 0;
-    // title = the project taking up most of the screen
+    lastK = k;
+    const x = Math.round(-pan * panMax * 2) / 2;
+    if (x !== lastX) { row.style.transform = `translate3d(${x}px,0,0)`; lastX = x; }
+    inStage = r.top < VH * 0.5 && r.bottom > VH * 0.7;
+    const op = inStage ? '1' : '0'; if (wt.style.opacity !== op) wt.style.opacity = op;
+    // title = the project taking up most of the screen (worked out from the stored block positions, no measuring)
     const cover = projects.map(() => 0);
-    blks.forEach(b => { const br = b.getBoundingClientRect(); cover[+b.dataset.p] += Math.max(0, Math.min(br.right, innerWidth) - Math.max(br.left, 0)); });
+    blkPos.forEach(([l, w, pi]) => { const L = l + x; cover[pi] += Math.max(0, Math.min(L + w, innerWidth) - Math.max(L, 0)); });
     setProject(cover.indexOf(Math.max(...cover)));
-    videoCheck();
+    // which clips should be playing: checked a few times a second while scrolling, and once more when it stops
+    const now = performance.now();
+    if (now - lastVC > 120) { lastVC = now; videoCheck(); }
+    clearTimeout(vcT); vcT = setTimeout(videoCheck, 160);
   }
+  let fq = 0; const frameSoon = () => { if (!fq) fq = requestAnimationFrame(() => { fq = 0; frame(); }); };
 
   /* ---------- Clip playback: loops play while on screen; "once" clips play with sound when they arrive ---------- */
   const vids = $$('.it.vid', row);
   vids.forEach(it => {
     const v = $('video', it), snd = $('.snd', it), rep = $('.replay', it);
     it._state = 'idle';
-    const setSnd = on => { v.muted = !on; if (snd) { snd.innerHTML = svg(on ? ICON.sound : ICON.muted) + `<span>${on ? 'Sound on' : 'Sound'}</span>`; snd.setAttribute('aria-label', on ? 'Mute' : 'Turn sound on'); } };
+    const sndIcon = () => { if (!snd) return; const on = !v.muted && v.volume > 0; snd.innerHTML = svg(on ? ICON.sound : ICON.muted) + `<span>${on ? 'Sound on' : 'Sound'}</span>`; snd.setAttribute('aria-label', on ? 'Mute' : 'Turn sound on'); };
+    const setSnd = on => { v.muted = !on; sndIcon(); };
+    v.addEventListener('volumechange', sndIcon);   // the button follows the clip's real state
     it._setSnd = setSnd;
     if (snd) snd.addEventListener('click', e => { e.stopPropagation(); setSnd(v.muted); if (v.paused) v.play().catch(() => {}); });
     v.addEventListener('ended', () => {
@@ -849,7 +887,7 @@
         } else if (it._state === 'playing' && vis < 0.2) { v.pause(); it._state = 'paused'; }
         else if (it._state === 'paused' && vis > 0.6 && !otherPlaying(it)) { v.play().catch(() => {}); it._state = 'playing'; }
       } else {
-        if (vis > 0.1 && v.paused) v.play().catch(() => {});
+        if (vis > 0.1 && v.paused && !it._tryP) { it._tryP = true; v.play().catch(() => { if (!v.muted) { it._setSnd(false); v.play().catch(() => {}); } }).finally(() => { it._tryP = false; }); }
         else if (vis <= 0.1 && !v.paused) v.pause();
       }
     });
@@ -898,6 +936,9 @@
         if (ar && Math.abs(ar - +blk.dataset.ar) > 0.01) { blk.dataset.ar = ar; layout(); }
       }).catch(() => {});
       p.on('play', () => it.classList.add('on'));
+      // phones may start a film silently even when sound was asked for: the button shows what is really happening
+      const sync = () => vimMuted(p).then(([m, v]) => { const on = !m && v > 0; if (on === !it._muted) return; it._muted = !on; snd.innerHTML = svg(on ? ICON.sound : ICON.muted) + `<span>${on ? 'Sound on' : 'Sound'}</span>`; snd.setAttribute('aria-label', on ? 'Mute' : 'Turn sound on'); }).catch(() => {});
+      const snd = $('.snd', it); p.on('volumechange', sync); p.on('play', sync);
       p.on('ended', () => { if (it.hasAttribute('data-once')) { it.classList.add('ended'); it._state = 'done'; } });
       it._playing = false;
     }
@@ -931,7 +972,7 @@
   const vlb = document.createElement('div');
   vlb.className = 'lb vlb'; vlb.setAttribute('role', 'dialog'); vlb.setAttribute('aria-modal', 'true'); vlb.setAttribute('aria-label', 'Film');
   vlb.innerHTML = `<button type="button" class="lb-x" aria-label="Close">${svg('M6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12 19 6.4 17.6 5 12 10.6z')}</button>
-    <div class="lb-box vlb-box"><div class="vlb-f"></div>
+    <div class="lb-box vlb-box"><div class="vlb-f"></div><div class="vlb-tap" aria-hidden="true"></div>
       <div class="pc vlb-pc"><button type="button" class="v-play" aria-label="Pause">${svg(ICON.pause)}</button>
         <div class="bar v-bar" role="slider" aria-label="Seek" tabindex="0"><i></i><b></b><s></s></div>
         <span class="tm v-tm">0:00 / 0:00</span>
@@ -941,7 +982,11 @@
   let vP = null, vDur = 0, vDrag = false, vMuted = false, vIdle, vFocus = null;
   const vShow = t => { const q = vDur ? t / vDur : 0; vFill.style.width = vKnob.style.left = (q * 100) + '%'; vTm.textContent = `${fmt(t)} / ${fmt(vDur)}`; vBar.setAttribute('aria-valuenow', Math.round(q * 100)); };
   const vWake = () => { vlb.classList.remove('idle'); clearTimeout(vIdle); vIdle = setTimeout(() => { if (!vDrag) vlb.classList.add('idle'); }, 3000); };
+  // phones: the film itself takes no taps, so a layer over it does — a tap brings the controls back, another hides them
+  let vWasIdle = false;
+  vlb.addEventListener('pointerdown', () => { vWasIdle = vlb.classList.contains('idle'); }, { capture: true, passive: true });
   ['mousemove', 'pointerdown', 'touchstart', 'keydown'].forEach(ev => vlb.addEventListener(ev, vWake, { passive: true }));
+  $('.vlb-tap', vlb).addEventListener('click', e => { e.stopPropagation(); if (vWasIdle) return; vP && vP.getPaused().then(pz => { if (!pz) { clearTimeout(vIdle); vlb.classList.add('idle'); } }).catch(() => {}); });
   const vSize = ar => {   // as large as the screen allows, in the film's own shape
     const w = Math.min(innerWidth * 0.9, innerHeight * 0.82 * ar); vF.style.width = w + 'px'; vF.style.height = (w / ar) + 'px';
   };
@@ -962,6 +1007,8 @@
     vP.on('play', () => { $('path', vPlay).setAttribute('d', ICON.pause); vPlay.setAttribute('aria-label', 'Pause'); });
     vP.on('pause', () => { $('path', vPlay).setAttribute('d', ICON.play); vPlay.setAttribute('aria-label', 'Play'); vlb.classList.remove('idle'); });
     vP.on('ended', () => vlb.classList.remove('idle'));
+    const vSync = () => vP && vimMuted(vP).then(([m, v]) => { vMuted = m || v === 0; $('path', vMute).setAttribute('d', vMuted ? ICON.muted : ICON.sound); vMute.setAttribute('aria-label', vMuted ? 'Turn sound on' : 'Mute'); }).catch(() => {});
+    vP.on('volumechange', vSync); vP.on('play', vSync);
     from.then(t => { if (t > 1) vP.setCurrentTime(t).catch(() => {}); vP.play().catch(() => { vMuted = true; vP.setMuted(true); $('path', vMute).setAttribute('d', ICON.muted); vP.play().catch(() => {}); }); });
     document.body.classList.add('lb-open'); vlb.classList.add('open'); vWake(); $('.lb-x', vlb).focus();
   };
@@ -981,6 +1028,7 @@
   vBar.addEventListener('pointerdown', e => { vDrag = true; vBar.classList.add('drag'); vBar.setPointerCapture(e.pointerId); vSeek(e.clientX); });
   vBar.addEventListener('pointermove', e => { if (vDrag) vSeek(e.clientX); });
   vBar.addEventListener('pointerup', e => { if (!vDrag) return; vDrag = false; vBar.classList.remove('drag'); if (vP) vP.setCurrentTime(vSeek(e.clientX)).catch(() => {}); vWake(); });
+  vBar.addEventListener('pointercancel', () => { vDrag = false; vBar.classList.remove('drag'); vWake(); });
   vBar.addEventListener('keydown', e => { if (vP && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) vP.getCurrentTime().then(t => vP.setCurrentTime(clamp(t + (e.key === 'ArrowRight' ? 5 : -5), 0, vDur))); });
   $('.lb-x', vlb).onclick = closeVim;
   vlb.addEventListener('click', e => { if (e.target === vlb || e.target === vBox) closeVim(); });
@@ -1009,11 +1057,14 @@
   lv.addEventListener('pause', () => $('path', lPlay).setAttribute('d', ICON.play));
   lv.addEventListener('ended', () => { lv.currentTime = 0; lv.play(); });
   lPlay.onclick = () => lv.paused ? lv.play() : lv.pause();
-  lMute.onclick = () => { lv.muted = !lv.muted; $('path', lMute).setAttribute('d', lv.muted ? ICON.muted : ICON.sound); lMute.setAttribute('aria-label', lv.muted ? 'Turn sound on' : 'Mute'); };
+  const lIcon = () => { const m = lv.muted || lv.volume === 0; $('path', lMute).setAttribute('d', m ? ICON.muted : ICON.sound); lMute.setAttribute('aria-label', m ? 'Turn sound on' : 'Mute'); };
+  lv.addEventListener('volumechange', lIcon);
+  lMute.onclick = () => { lv.muted = !lv.muted; if (!lv.muted) lv.volume = 1; lIcon(); };
   const lSeek = x => { const r = lBar.getBoundingClientRect(); const t = clamp((x - r.left) / r.width, 0, 1) * (lv.duration || 0); lv.currentTime = t; lShow(); };
   lBar.addEventListener('pointerdown', e => { lDrag = true; lBar.classList.add('drag'); lBar.setPointerCapture(e.pointerId); lSeek(e.clientX); });
   lBar.addEventListener('pointermove', e => { if (lDrag) lSeek(e.clientX); });
   lBar.addEventListener('pointerup', () => { lDrag = false; lBar.classList.remove('drag'); });
+  lBar.addEventListener('pointercancel', () => { lDrag = false; lBar.classList.remove('drag'); });
   const openLB = it => {
     const src = it.dataset.src; if (!src) return;
     lastFocus = document.activeElement;
@@ -1040,6 +1091,23 @@
     it.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLB(it); } });
   });
 
+  /* ---------- Phones: a text block cut short opens in full, over the page ---------- */
+  const txo = document.createElement('div');
+  txo.className = 'txo'; txo.setAttribute('role', 'dialog'); txo.setAttribute('aria-modal', 'true'); txo.setAttribute('aria-label', 'Text');
+  txo.innerHTML = `<button type="button" class="lb-x" aria-label="Close">${svg('M6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12 19 6.4 17.6 5 12 10.6z')}</button><div class="txo-in"><div class="k"></div><h2></h2><div class="txo-t"></div></div>`;
+  document.body.appendChild(txo);
+  let txFocus = null;
+  const closeTx = () => { if (!txo.classList.contains('open')) return; txo.classList.remove('open'); document.body.classList.remove('lb-open'); txFocus?.focus?.({ preventScroll: true }); };
+  $$('.wrm', row).forEach(bt => bt.addEventListener('click', e => {
+    e.stopPropagation(); txFocus = bt;
+    const pr = projects[+bt.closest('.blk').dataset.p] || {};
+    $('.k', txo).textContent = pr.client || S.group; $('h2', txo).textContent = pr.title || S.title;
+    $('.txo-t', txo).innerHTML = $$('p', bt.closest('.blk')).map(q => `<p>${esc(q.textContent)}</p>`).join('');
+    $('.txo-in', txo).scrollTop = 0; document.body.classList.add('lb-open'); txo.classList.add('open'); $('.lb-x', txo).focus({ preventScroll: true });
+  }));
+  $('.lb-x', txo).onclick = closeTx;
+  addEventListener('keydown', e => { if (e.key === 'Escape') closeTx(); });
+
   /* ---------- Gallery: the preview opens a full-screen grid of every photo; click one to see it large ---------- */
   if (galleries.length) {
     const X = svg('M6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12 19 6.4 17.6 5 12 10.6z');
@@ -1055,7 +1123,7 @@
     document.body.append(pg, pb);
     const pImg = $('img', pb), pN = $('.plb-n', pb), pT = $('.plb-t', pb), rowsEl = $('.pg-rows', pg);
     let G = null, at = 0, gFocus = null;
-    const big = i => `${G.dir}/l/${G.photos[i].file}.webp`;
+    const big = i => `${G.photos[i].dir || G.dir}/l/${G.photos[i].file}.webp`;
     const showP = i => {
       const n = G.photos.length; at = (i + n) % n;
       pb.classList.add('swap'); const src = big(at), im = new Image(); im.src = src;
@@ -1069,7 +1137,7 @@
       G = galleries[gi]; gFocus = document.activeElement;
       $('h2', pg).textContent = G.title;
       // justified rows: each photo grows in proportion to its width, so every row lines up at both edges
-      rowsEl.innerHTML = G.photos.map((ph, i) => `<button type="button" class="pg-it" data-i="${i}" aria-label="Photo ${i + 1} of ${G.photos.length}"><img src="${G.dir}/m/${ph.file}.webp" alt="" loading="lazy" decoding="async"></button>`).join('');
+      rowsEl.innerHTML = G.photos.map((ph, i) => `<button type="button" class="pg-it" data-i="${i}" aria-label="Photo ${i + 1} of ${G.photos.length}"><img src="${ph.dir || G.dir}/m/${ph.file}.webp" alt="" loading="lazy" decoding="async"></button>`).join('');
       $('.pg-body', pg).scrollTop = 0; justify();
       document.body.classList.add('lb-open'); pg.classList.add('open'); $('.pg-x', pg).focus();
     };
@@ -1111,10 +1179,12 @@
     $$('.gh', row).forEach(t => t.addEventListener('click', () => openGrid(+t.dataset.g)));
   }
 
-  addEventListener('scroll', frame, { passive: true });
-  let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(layout, 100); });
+  addEventListener('scroll', frameSoon, { passive: true });
+  // phones: a change of height alone is just the address bar moving — nothing needs laying out again
+  let rt; addEventListener('resize', () => { if (touchUI && innerWidth === VW) return frameSoon(); clearTimeout(rt); rt = setTimeout(layout, 100); });
   setProject(0);
   layout();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(layout);   // measure again once the type has loaded
 })();
 
 /* ---------- Email links: still open the mail app, and also copy the address, with a small "Copied" note ---------- */

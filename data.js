@@ -437,7 +437,7 @@ const OTHER_WORK = {
       {
         client: "Exhibition", title: "Europa", sub: true, marker: "Europa · Exhibition",
         blocks: [
-          { type: "titletext", k: "Exhibition installation", title: "THUD —\nLondon", text: ["BA (Hons) Photography\nThe Truman Brewery, Brick Lane · 2017"] },
+          { type: "titletext", k: "Exhibition installation", title: "THUD —\nLondon", text: ["BA (Hons) Photography\nThe Truman Brewery, Brick Lane · 2017"], mtext: ["BA (Hons) Photography · 2017"] },
           { type: "photo", image: "images/fine-art/l/thud-1062.webp", ratio: 0.667 },
           { type: "textdetail", caption: "Cascade — Artwork detail", dir: "images/fine-art", photos: [{ file: "europa-cascade", ratio: 1.056 }, { file: "europa-cascade-2", ratio: 1.046 }], text: [
             "Following the work’s debut in the Arts University Bournemouth graduate exhibition in 2017, selected pieces featured in several smaller exhibitions across the city, including ‘The Raw Project’ (2017) and ‘Contained Exhibition’ (2018), before ending up in the collective exhibition ‘THUD’ (2017), held at The Truman Brewery on Brick Lane, London.",

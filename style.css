@@ -567,3 +567,39 @@ footer{padding-top:100px}
 .dvd.open::before{background:linear-gradient(to bottom,rgba(0,0,0,.6),rgba(0,0,0,.38) 190px,rgba(0,0,0,0) 330px)}
 @media (max-width:700px){.dvd .detail{top:84px;bottom:auto;padding:0 0 16px}}
 
+/* ---- round 64: phones ---- */
+.bar{touch-action:none}
+.m-only{display:none}
+.blk.txt .wrm{display:none}
+.vm-hint{display:none}
+.vlb-tap{display:none}
+.txo{position:fixed;inset:0;z-index:85;background:var(--ink);opacity:0;visibility:hidden;transition:opacity .4s,visibility .4s}
+.txo.open{opacity:1;visibility:visible}
+.txo-in{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:96px 28px 60px}
+.txo .k{font-size:var(--caps);letter-spacing:.22em;text-transform:uppercase;color:var(--mid)}
+.txo h2{margin:10px 0 26px;font-family:var(--serif);font-weight:400;text-transform:uppercase;font-size:40px;line-height:1}
+.txo p{margin:0 0 18px;font-size:15px;line-height:1.7;color:#d6d3cc}
+.txo .lb-x{z-index:2}
+@media (max-width:760px){
+  .d-only{display:none}.m-only{display:block}
+  /* text blocks: more room between the words and the pictures beside them */
+  .blk.txt{padding:0 24px}
+  .wk-row.mid .blk.txt.tt{padding:0}
+  .blk.tdx{margin:0 26px}
+  /* a long block is cut short, fading out above a Read more */
+  .blk.txt.clip{overflow:hidden}
+  .blk.txt.clip::after{content:'';position:absolute;left:0;right:0;bottom:0;height:110px;background:linear-gradient(rgba(13,15,14,0),var(--ink) 62%);pointer-events:none;z-index:1}
+  .blk.txt.clip .wrm{display:inline-block;position:absolute;left:24px;bottom:4px;z-index:2;font-size:var(--caps);letter-spacing:.16em;text-transform:uppercase;color:var(--paper);background:none;border:0;border-bottom:1px solid rgba(255,255,255,.5);padding:8px 0 3px;font-family:inherit}
+  /* exhibition titles: larger, and the same on every card */
+  .blk.txt.tt h2{font-size:52px}
+  /* titles above the film fade together, slowly, with a little blur */
+  .wk-hero .title .g,.wk-hero .title h1{transition:opacity 1.4s ease,filter 1.4s ease;will-change:opacity,filter}
+  .wk-hero.idle .title .g,.wk-hero.idle .title h1{opacity:0;filter:blur(6px)}
+}
+/* touch screens: a hint that a film opens full screen; taps on a full-screen film reach our controls */
+@media (hover:none){
+  .vm-hint{display:flex;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2;align-items:center;gap:8px;height:36px;padding:0 14px 0 10px;border-radius:999px;background:rgba(0,0,0,.45);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.35);color:#fff;font-size:10px;letter-spacing:.16em;text-transform:uppercase;pointer-events:none}
+  .vm-hint svg{width:14px;height:14px;fill:#fff}
+  .vlb-tap{display:block;position:absolute;left:0;right:0;top:0;bottom:0;z-index:1}
+  .vlb .vlb-pc{z-index:2}
+}
