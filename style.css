@@ -514,3 +514,5 @@ body.lb-open{overflow:hidden}
 .plb-t[hidden],.plb-n[hidden]{display:none}
 .plb.one .plb-nav{display:none}
 .wk-row.mid .blk.txt.tt{padding-left:0}
+/* title cards break only where the words are set to break, whatever the screen or font */
+.blk.txt.tt h2{white-space:pre}

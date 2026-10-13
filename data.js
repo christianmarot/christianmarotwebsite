@@ -413,7 +413,7 @@ const OTHER_WORK = {
       {
         client: "Exhibition", title: "Europa", sub: true, marker: "Europa · Exhibition",
         blocks: [
-          { type: "titletext", k: "Exhibition installation", title: "THUD — London", text: ["BA (Hons) Photography\nThe Truman Brewery, Brick Lane · 2017"] },
+          { type: "titletext", k: "Exhibition installation", title: "THUD —\nLondon", text: ["BA (Hons) Photography\nThe Truman Brewery, Brick Lane · 2017"] },
           { type: "photo", image: "images/fine-art/l/thud-1062.webp", ratio: 0.667 },
           { type: "textdetail", caption: "Cascade — Artwork detail", dir: "images/fine-art", photos: [{ file: "europa-cascade", ratio: 1.056 }, { file: "europa-cascade-2", ratio: 1.046 }], text: [
             "Following the work’s debut in the Arts University Bournemouth graduate exhibition in 2017, selected pieces featured in several smaller exhibitions across the city, including ‘The Raw Project’ (2017) and ‘Contained Exhibition’ (2018), before ending up in the collective exhibition ‘THUD’ (2017), held at The Truman Brewery on Brick Lane, London.",
@@ -427,7 +427,7 @@ const OTHER_WORK = {
               { file: "thud-5962", ratio: 1.333 },
               { file: "thud-5972", ratio: 1.333 }
           ] },
-          { type: "titletext", k: "Solo exhibition", title: "Europa — Thailand", text: ["Iniala Gallery, Phuket"] },
+          { type: "titletext", k: "Solo exhibition", title: "Europa —\nThailand", text: ["Iniala Gallery, Phuket"] },
           { type: "gallery", join: true, label: "Europa — Thailand", preview: ["thai-0292", "thai-0616", "thai-0601"], dir: "images/fine-art", photos: [
               { file: "thai-0292", ratio: 1.502 },
               { file: "thai-0302", ratio: 1.502 },
@@ -491,7 +491,7 @@ const OTHER_WORK = {
       {
         client: "Exhibition", title: "Kerrejja Causi", sub: true, marker: "Kerrejja Causi · Exhibition",
         blocks: [
-          { type: "titletext", k: "Solo exhibition", title: "Kerrejja Causi — Valletta", text: ["9 – 19 May 2019"] },
+          { type: "titletext", k: "Solo exhibition", title: "Kerrejja\nCausi —\nValletta", text: ["9 – 19 May 2019"] },
           { type: "photo", image: "images/fine-art/l/kcx-2352.webp", ratio: 0.667 },
           { type: "text", text: [
             "In Malta’s quaint capital Valletta, and nestled within the same grand arches as the National Library, Christian Marot’s second international solo exhibition ‘Kerrejja Causi’ took place for 10 days between 9th – 19th May 2019.",
