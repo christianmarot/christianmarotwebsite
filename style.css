@@ -527,8 +527,6 @@ body.lb-open{overflow:hidden}
 .doc .card .desc.full{overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch}
 .doc .card .desc.full p{overflow:visible;flex-shrink:0;-webkit-line-clamp:unset}
 .doc .card .desc .rm{flex-shrink:0}
-/* projects: a soft, feathered blur behind the open project's text so it reads over any frame */
-.dvd .detail::before{content:"";position:absolute;inset:-60px -160px -60px -80px;z-index:-1;pointer-events:none;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);background:rgba(0,0,0,.1);-webkit-mask-image:linear-gradient(to right,transparent,#000 80px,#000 calc(100% - 160px),transparent),linear-gradient(to bottom,transparent,#000 60px,#000 calc(100% - 60px),transparent);mask-image:linear-gradient(to right,transparent,#000 80px,#000 calc(100% - 160px),transparent),linear-gradient(to bottom,transparent,#000 60px,#000 calc(100% - 60px),transparent);-webkit-mask-composite:source-in;mask-composite:intersect}
 @media (max-width:900px){.bio .photo figcaption{text-align:center}}
 /* home page: tighter spacing between sections (about a quarter less) */
 .sec{padding-block:96px}
@@ -563,3 +561,8 @@ footer{padding-top:100px}
 .dvd .bg{filter:none}
 .stack:has(.dvd:hover) .dvd:not(:hover):not(.open) .bg,.stack:has(.dvd:focus-visible) .dvd:not(:focus-visible):not(.open) .bg{filter:grayscale(.65) brightness(.6)}
 @media (hover:none){.stack .dvd .bg{filter:none!important}}
+
+/* projects: the description sits just under the title when a project opens (no blur panel) */
+.dvd .detail{top:96px;bottom:auto}
+.dvd.open::before{background:linear-gradient(to bottom,rgba(0,0,0,.6),rgba(0,0,0,.38) 190px,rgba(0,0,0,0) 330px)}
+@media (max-width:700px){.dvd .detail{top:84px;bottom:auto;padding:0 0 16px}}
