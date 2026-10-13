@@ -391,31 +391,31 @@ const OTHER_WORK = {
       {
         client: "Project", title: "Europa",
         blocks: [
-          { type: "photo", image: "images/fine-art/l/europa-tray-frame.webp", ratio: 1.223 },
+          { type: "photo", image: "images/fine-art/l/europa-tray-frame.webp", ratio: 1.223, title: "Tray Frame" },
           { type: "text", text: [
             "Using an array of camera-less photographic techniques, the ongoing series ‘Europa’ explores unfamiliar and otherworldly landscapes that could perhaps be mistaken for the icy surface of Jupiter’s smallest Galilean moon. Whilst the images resemble these barren lunar landscapes, in reality they have been created in a darkroom using large format film, a selection of minerals and compounds found throughout the solar system, and the intervention of light. The use of such minerals and compounds – namely salt, water and ice – means that the process is indexically bound to Europa itself, whose icy surface encases an ocean of salty water that lies below. The works intend to provoke a dialogue and encourage audiences to question the process and reality of what they are looking at."
           ] },
           { type: "tiled", rows: 1, h: 0.82, dir: "images/fine-art", photos: [
-              { file: "europa-neg-11", ratio: 0.782 },
-              { file: "europa-thud-2", ratio: 0.805 },
-              { file: "europa-thud-1", ratio: 0.813 },
-              { file: "europa-thud-3", ratio: 0.805 },
-              { file: "europa-neg-7-10x8", ratio: 0.787 },
-              { file: "europa-neg-1", ratio: 0.804 },
-              { file: "europa-neg-8-5x4", ratio: 0.803 },
-              { file: "europa-untitled-13", ratio: 0.793 },
-              { file: "europa-thud-4", ratio: 0.806 },
-              { file: "europa-neg-8-10x8", ratio: 0.798 },
-              { file: "europa-neg-3", ratio: 0.800 }
+              { file: "europa-neg-11", ratio: 0.782, title: "Neg 11" },
+              { file: "europa-thud-2", ratio: 0.805, title: "THUD 2" },
+              { file: "europa-thud-1", ratio: 0.813, title: "THUD 1" },
+              { file: "europa-thud-3", ratio: 0.805, title: "THUD 3" },
+              { file: "europa-neg-7-10x8", ratio: 0.787, title: "Neg 7" },
+              { file: "europa-neg-1", ratio: 0.804, title: "Neg 1" },
+              { file: "europa-neg-8-5x4", ratio: 0.803, title: "Neg 8 (5 × 4)" },
+              { file: "europa-untitled-13", ratio: 0.793, title: "Untitled 13" },
+              { file: "europa-thud-4", ratio: 0.806, title: "THUD 4" },
+              { file: "europa-neg-8-10x8", ratio: 0.798, title: "Neg 8 (10 × 8)" },
+              { file: "europa-neg-3", ratio: 0.800, title: "Neg 3" }
           ] }
         ]
       },
       {
         client: "Exhibition", title: "Europa", sub: true, marker: "Europa · Exhibition",
         blocks: [
-          { type: "titletext", k: "Exhibition installation", title: "THUD — London", text: ["BA (Hons) Photography · The Truman Brewery, Brick Lane · 2017"] },
+          { type: "titletext", k: "Exhibition installation", title: "THUD — London", text: ["BA (Hons) Photography\nThe Truman Brewery, Brick Lane · 2017"] },
           { type: "photo", image: "images/fine-art/l/thud-1062.webp", ratio: 0.667 },
-          { type: "text", text: [
+          { type: "textdetail", caption: "Cascade — Artwork detail", dir: "images/fine-art", photos: [{ file: "europa-cascade", ratio: 1.056 }, { file: "europa-cascade-2", ratio: 1.046 }], text: [
             "Following the work’s debut in the Arts University Bournemouth graduate exhibition in 2017, selected pieces featured in several smaller exhibitions across the city, including ‘The Raw Project’ (2017) and ‘Contained Exhibition’ (2018), before ending up in the collective exhibition ‘THUD’ (2017), held at The Truman Brewery on Brick Lane, London.",
             "After a successful two years of shows across the UK, I was offered the opportunity to exhibit the entire series in my debut solo exhibition at the Iniala Gallery in Phuket, Thailand, where the show ran for a month."
           ] },
@@ -475,12 +475,11 @@ const OTHER_WORK = {
             "Given Malta’s turbulent history, it is a miracle that Kerrejja Causi has remained unscathed. Over the 400 years it has been standing, it has certainly seen a lot. From the grand 16th century palazzo it once was, to the separate apartments or ‘Kerrejja’ it has become, there is an overwhelming sense of history. The building even featured in Alan Parker’s ‘Midnight Express’ in 1978.",
             "With tenants disappearing over the decades and with little work done to maintain it, the building became a living museum, frozen in time, haunted by neglect and full of memories and treasures."
           ] },
-          { type: "tiled", rows: 1, dir: "images/fine-art", photos: [
-              { file: "kc-529", ratio: 1.225 },
+          { type: "photo", image: "images/fine-art/l/kc-529.webp", ratio: 1.225 },
+          { type: "tiled", rows: 2, dir: "images/fine-art", photos: [
               { file: "kc-170010-c", ratio: 1.211 },
               { file: "kc-532", ratio: 1.227 },
               { file: "kc-170010-a", ratio: 1.212 },
-              { file: "kc-150005", ratio: 1.278 },
               { file: "kc-531", ratio: 1.227 },
               { file: "kc-170010-b", ratio: 1.212 },
               { file: "kc-530", ratio: 1.225 },
@@ -528,7 +527,7 @@ const OTHER_WORK = {
               { file: "mnn-350004", ratio: 1.226 },
               { file: "mnn-350005", ratio: 1.226 },
               { file: "mnn-350002", ratio: 1.226 },
-              { file: "mnn-350003", ratio: 1.226 }
+              { file: "mnn-0008", ratio: 0.816 }
           ] }
         ]
       },

@@ -454,7 +454,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261013i';
+    const FMV = '20261013j';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();
@@ -577,7 +577,18 @@
     switch (b.type) {
       case 'feature': return `<div class="blk feat big" ${pa}>${mkVideo(b)}</div>`;
       case 'secondary': return `<div class="blk b2x2" ${pa}>${(b.videos || []).slice(0, 4).map(v => mkVideo(v)).join('')}</div>`;
-      case 'photo': return `<div class="blk np" ${pa} data-ar="${+b.ratio || 1.5}"><div class="it"><img src="${esc(b.image)}" alt="" loading="lazy" decoding="async"></div></div>`;
+      case 'photo': {
+        if (!b.title) return `<div class="blk np" ${pa} data-ar="${+b.ratio || 1.5}"><div class="it"><img src="${esc(b.image)}" alt="" loading="lazy" decoding="async"></div></div>`;
+        // a titled photo opens large, with its title, like the gallery tiles
+        const m = b.image.match(/^(.*)\/l\/([^/]+)\.webp$/), gi = galleries.push({ dir: m[1], photos: [{ file: m[2], ratio: +b.ratio || 1.5, title: b.title }], title: p.title }) - 1;
+        return `<div class="blk np" ${pa} data-ar="${+b.ratio || 1.5}"><button type="button" class="it gi" data-g="${gi}" data-i="0" aria-label="View ${esc(b.title)} larger"><img src="${esc(b.image)}" alt="" loading="lazy" decoding="async"></button></div>`;
+      }
+      case 'textdetail': {
+        // text at the top, two detail photos with a caption at the bottom — one column the height of the photos beside it
+        const gi = galleries.push({ dir: b.dir, photos: (b.photos || []).map(x => ({ ...x, title: x.title || b.caption })), title: p.title }) - 1;
+        return `<div class="blk tdx it" ${pa}><div class="td-t">${(b.text || []).map(t => `<p>${esc(t)}</p>`).join('')}</div>
+          <div class="td-d"><div class="td-pair">${(b.photos || []).map((x, j) => `<button type="button" class="gi" data-g="${gi}" data-i="${j}" aria-label="View detail ${j + 1} larger"><img src="${esc(b.dir)}/m/${esc(x.file)}.webp" alt="" loading="lazy" decoding="async"></button>`).join('')}</div>${b.caption ? `<div class="td-c">${esc(b.caption)}</div>` : ''}</div></div>`;
+      }
       case 'tiled': {
         const gi = galleries.push({ dir: b.dir, photos: b.photos || [], title: p.title }) - 1;
         return `<div class="blk gal" ${pa} data-rows="${+b.rows || 2}" ${b.h ? `data-h="${+b.h}"` : ''}>${(b.photos || []).map((ph, j) => `<button type="button" class="it gi" data-g="${gi}" data-i="${j}" data-r="${+ph.ratio || 1.5}" aria-label="View photo ${j + 1} of ${b.photos.length} larger"><img src="${esc(b.dir)}/m/${esc(ph.file)}.webp" alt="" loading="lazy" decoding="async"></button>`).join('')}</div>`;
@@ -667,6 +678,15 @@
           [...b.children].forEach(c => { range.selectNodeContents(c); [...range.getClientRects()].forEach(r => { right = Math.max(right, r.right); }); });
           if (right > x0) b.style.width = Math.ceil(right - x0) + 'px';
         }
+        b.style.transform = tr;
+      }
+      else if (b.classList.contains('tdx')) {
+        const tr = b.style.transform; b.style.transform = '';
+        const ps = $$('p', b), gap = 10; let fs = 15; ps.forEach(q => q.style.fontSize = '');
+        let w = innerWidth < 760 ? innerWidth - 48 : Math.max(380, Math.min(480, innerWidth * .3)), wMax = innerWidth < 760 ? w : Math.min(680, innerWidth * .5);
+        const fits = () => { b.style.width = w + 'px'; const sq = (w - gap) / 2; $$('.gi', b).forEach(g => { g.style.width = g.style.height = sq + 'px'; }); return $('.td-t', b).scrollHeight + sq + 40 + 28 <= H; };
+        while (!fits() && w < wMax) w += 20;
+        while (!fits() && fs > 12) { fs -= 0.5; ps.forEach(q => q.style.fontSize = fs + 'px'); }
         b.style.transform = tr;
       }
       else if (b.classList.contains('galh')) b.style.width = Math.round(H * (innerWidth < 760 ? .62 : .9)) + 'px';
@@ -970,10 +990,10 @@
     pb.className = 'plb'; pb.setAttribute('role', 'dialog'); pb.setAttribute('aria-modal', 'true'); pb.setAttribute('aria-label', 'Photo');
     pb.innerHTML = `<button type="button" class="lb-x" aria-label="Close">${X}</button>
       <button type="button" class="plb-nav prev" aria-label="Previous photo">${svg('M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z')}</button>
-      <figure class="plb-fig"><img alt=""><figcaption class="plb-n"></figcaption></figure>
+      <figure class="plb-fig"><img alt=""><figcaption><span class="plb-t"></span><span class="plb-n"></span></figcaption></figure>
       <button type="button" class="plb-nav next" aria-label="Next photo">${svg('M8.6 5.4 10 4l8 8-8 8-1.4-1.4 6.6-6.6z')}</button>`;
     document.body.append(pg, pb);
-    const pImg = $('img', pb), pN = $('.plb-n', pb), rowsEl = $('.pg-rows', pg);
+    const pImg = $('img', pb), pN = $('.plb-n', pb), pT = $('.plb-t', pb), rowsEl = $('.pg-rows', pg);
     let G = null, at = 0, gFocus = null;
     const big = i => `${G.dir}/l/${G.photos[i].file}.webp`;
     const showP = i => {
@@ -982,6 +1002,7 @@
       const go = () => { if (big(at) === src) { pImg.src = src; pb.classList.remove('swap'); } };
       im.decode ? im.decode().then(go, go) : (im.onload = go);
       pN.textContent = `${String(at + 1).padStart(2, '0')} / ${String(n).padStart(2, '0')}`;
+      pT.textContent = G.photos[at].title || ''; pT.hidden = !G.photos[at].title; pN.hidden = n < 2;
       [1, -1].forEach(d => { const x = new Image(); x.src = big((at + d + n) % n); });   // have the neighbours ready
     };
     const openGrid = gi => {
@@ -1007,7 +1028,7 @@
     addEventListener('resize', () => { if (pg.classList.contains('open')) justify(); });
     const closeGrid = () => { pg.classList.remove('open'); document.body.classList.remove('lb-open'); gFocus?.focus?.({ preventScroll: true }); };
     let direct = null;   // the tile a photo was opened from, when it wasn't opened from the full-screen grid
-    const openP = i => { pImg.removeAttribute('src'); showP(i); pb.classList.add('open'); $('.lb-x', pb).focus(); };
+    const openP = i => { pImg.removeAttribute('src'); pb.classList.toggle('one', G.photos.length < 2); showP(i); pb.classList.add('open'); $('.lb-x', pb).focus(); };
     const closeP = () => {
       pb.classList.remove('open');
       if (direct) { document.body.classList.remove('lb-open'); direct.focus({ preventScroll: true }); direct = null; }
