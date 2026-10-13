@@ -454,7 +454,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261013d';
+    const FMV = '20261013e';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();
@@ -565,7 +565,7 @@
 
   /* ---------- Build the blocks ---------- */
   const projects = S.projects || [{ client: S.group, title: S.title, blocks: [{ type: 'grid', items: S.tiles || [] }] }];
-  const row = document.createElement('div'); row.className = 'wk-row'; pin.appendChild(row);
+  const row = document.createElement('div'); row.className = 'wk-row' + (S.midText ? ' mid' : ''); pin.appendChild(row);
   const mkVideo = (v, extra = '') => v.video
     ? `<div class="it vid${extra}" data-src="${esc(v.video)}" ${v.start ? `data-start="${+v.start}"` : ''} ${v.endFrame != null ? `data-end="${+v.endFrame}"` : ''} ${v.audio ? 'data-audio' : ''} ${v.once ? 'data-once' : ''}><video muted playsinline preload="none" ${v.once ? '' : 'loop'} ${v.poster ? `poster="${esc(v.poster)}"` : ''}></video>
         ${v.audio ? `<div class="vc"><button type="button" class="snd" aria-label="Turn sound on">${svg(ICON.muted)}<span>Sound</span></button></div>` : ''}
@@ -621,7 +621,7 @@
     const hdr = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hdr')) || 92;
     const top = hdr + 8, bottom = innerWidth < 760 ? 120 : 150;
     H = Math.max(260, innerHeight - top - bottom);
-    const fw = Math.round(H * 9 / 16), gap = 16;
+    const fw = Math.round(H * 9 / 16), gap = innerWidth < 760 ? 16 : (S.gap || 16);
     rowTop = top;     row.style.top = top + 'px'; row.style.gap = gap + 'px';
     $$('.sep', row).forEach(s => s.style.height = H + 'px');
     blks.forEach((b, i) => {
@@ -633,7 +633,7 @@
       else if (b.classList.contains('gal')) {
         // tiled gallery: photos packed into rows of equal height, each row stretched to the same length
         // data-h: the rows use only that share of the height, centred (artworks sit smaller than a full-height opener)
-        const n = +b.dataset.rows || 2, gp = innerWidth < 760 ? 6 : 10, gh = H * (+b.dataset.h || 1), y0 = (H - gh) / 2, rh = (gh - gp * (n - 1)) / n;
+        const n = +b.dataset.rows || 2, gp = innerWidth < 760 ? 6 : (S.tileGap || 10), gh = H * (+b.dataset.h || 1), y0 = (H - gh) / 2, rh = (gh - gp * (n - 1)) / n;
         const tiles = $$('.gi', b), rows = Array.from({ length: n }, () => ({ w: 0, t: [] }));
         tiles.forEach(t => { const r = rows.reduce((a, c) => c.w < a.w ? c : a); r.t.push(t); r.w += (r.t.length > 1 ? gp : 0) + rh * +t.dataset.r; });
         const len = Math.max(...rows.map(r => r.w));

@@ -346,7 +346,7 @@ const OTHER_WORK = {
     ]
   },
   fineart: {
-    title: "Fine Art", group: "Exhibitions · Projects",
+    title: "Fine Art", group: "Exhibitions · Projects", midText: true, gap: 28, tileGap: 20,
     cover: "images/fine-art-frost-patterns.jpg",
     // no film here: the opening screen is a slideshow of the work, in a random order that avoids showing two
     // pictures from the same project back to back. "project" is the name shown as Featured project
@@ -400,42 +400,33 @@ const OTHER_WORK = {
               { file: "europa-thud-2", ratio: 0.805 },
               { file: "europa-thud-1", ratio: 0.813 },
               { file: "europa-thud-3", ratio: 0.805 },
+              { file: "europa-neg-7-10x8", ratio: 0.787 },
               { file: "europa-neg-1", ratio: 0.804 },
               { file: "europa-neg-8-5x4", ratio: 0.803 },
               { file: "europa-untitled-13", ratio: 0.793 },
               { file: "europa-thud-4", ratio: 0.806 },
               { file: "europa-neg-8-10x8", ratio: 0.798 },
-              { file: "europa-neg-3", ratio: 0.800 },
-              { file: "europa-orbs", ratio: 0.800 },
-              { file: "europa-neg-7-10x8", ratio: 0.787 }
+              { file: "europa-neg-3", ratio: 0.800 }
           ] }
         ]
       },
       {
         client: "Exhibition", title: "Europa", sub: true, marker: "Europa · Exhibition",
         blocks: [
-          { type: "text", text: [
-            "Using an array of camera-less photographic techniques, the ongoing series ‘Europa’ explores unfamiliar and otherworldly landscapes that could perhaps be mistaken for the icy surface of Jupiter’s smallest Galilean moon. Following the work’s debut in the Arts University Bournemouth graduate exhibition in 2017, selected pieces featured in several smaller exhibitions across the city, including ‘The Raw Project’ (2017) and ‘Contained Exhibition’ (2018), before ending up in the collective exhibition ‘THUD’ (2017), held at The Truman Brewery on Brick Lane, London.",
-            "After a successful two years of shows across the UK, I was offered the opportunity to exhibit the entire series in my debut solo exhibition at the Iniala Gallery in Phuket, Thailand, where the show ran for a month."
-          ] },
+          { type: "photo", image: "images/fine-art/l/thud-1062.webp", ratio: 0.667 },
           { type: "titletext", k: "Exhibition installation", title: "THUD | London", text: ["BA (Hons) Photography · The Truman Brewery, Brick Lane · 2017"] },
-          { type: "gallery", join: true, label: "THUD | London", preview: ["thud-6021", "thud-1062", "thud-1106"], dir: "images/fine-art", photos: [
+          { type: "gallery", join: true, label: "THUD | London", preview: ["thud-6021", "thud-1080", "thud-1106"], dir: "images/fine-art", photos: [
               { file: "thud-6021", ratio: 2.995 },
-              { file: "thud-1062", ratio: 0.667 },
-              { file: "thud-1063", ratio: 0.667 },
               { file: "thud-1080", ratio: 1.500 },
-              { file: "thud-1104", ratio: 1.500 },
               { file: "thud-1106", ratio: 1.500 },
               { file: "thud-1108", ratio: 0.667 },
               { file: "thud-5962", ratio: 1.333 },
               { file: "thud-5972", ratio: 1.333 }
           ] },
-          { type: "titletext", k: "Artwork details", title: "Cascade", text: [] },
-          { type: "tiled", rows: 1, dir: "images/fine-art", photos: [
-              { file: "europa-cascade", ratio: 1.056 },
-              { file: "europa-cascade-2", ratio: 1.046 }
+          { type: "text", text: [
+            "Following the work’s debut in the Arts University Bournemouth graduate exhibition in 2017, selected pieces featured in several smaller exhibitions across the city, including ‘The Raw Project’ (2017) and ‘Contained Exhibition’ (2018), before ending up in the collective exhibition ‘THUD’ (2017), held at The Truman Brewery on Brick Lane, London.",
+            "After a successful two years of shows across the UK, I was offered the opportunity to exhibit the entire series in my debut solo exhibition at the Iniala Gallery in Phuket, Thailand, where the show ran for a month."
           ] },
-          { type: "strip", image: "images/fine-art/l/europa-10m-roll.webp", ratio: 12.941, caption: "Europa · 10 metre roll" },
           { type: "titletext", k: "Solo exhibition", title: "Europa | Thailand", text: ["Iniala Gallery, Phuket"] },
           { type: "gallery", join: true, label: "Europa | Thailand", preview: ["thai-0292", "thai-0616", "thai-0601"], dir: "images/fine-art", photos: [
               { file: "thai-0292", ratio: 1.502 },

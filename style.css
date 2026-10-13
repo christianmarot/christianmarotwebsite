@@ -486,3 +486,6 @@ body.lb-open{overflow:hidden}
 .blk.txt.tt p{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--mid)}
 .pc[hidden]{display:none!important}
 .blk.strip .cap{white-space:nowrap}
+
+/* pages that centre their text blocks top to bottom (fine art) */
+.wk-row.mid .blk.txt{justify-content:safe center}
