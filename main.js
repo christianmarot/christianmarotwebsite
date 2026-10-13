@@ -504,7 +504,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261014l';
+    const FMV = '20261014m';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();
@@ -753,7 +753,7 @@
         const fits = () => { b.style.width = w + 'px'; const sq = (w - gap) / 2; $$('.gi', b).forEach(g => { g.style.width = g.style.height = sq + 'px'; }); return $('.td-t', b).scrollHeight + sq + 40 + 36 <= H; };
         while (!fits() && w < wMax) w += 20;
         // phones: same size of type as the other blocks; the detail photos shrink to make room instead
-        if (innerWidth < 760) { let sq = (w - gap) / 2; while ($('.td-t', b).scrollHeight + sq + 40 + 36 > H && sq > 90) { sq -= 6; $$('.gi', b).forEach(g => { g.style.width = g.style.height = sq + 'px'; }); } }
+        if (innerWidth < 760) { let sq = (w - gap) / 2; const need = () => $('.td-t', b).offsetHeight + $('.td-d', b).offsetHeight + (parseFloat(getComputedStyle(b).rowGap) || 36) + 8; while (need() > H && sq > 80) { sq -= 6; $$('.gi', b).forEach(g => { g.style.width = g.style.height = sq + 'px'; }); } }
         else while (!fits() && fs > 12) { fs -= 0.5; ps.forEach(q => q.style.fontSize = fs + 'px'); }
         b.style.transform = tr;
       }
@@ -813,18 +813,26 @@
     if (i === curP || !projects[i]) return; curP = i;
     swap(wtG, projects[i].client || S.group); swap(wtN, projects[i].title || S.title);
   };
-  let inStage = false, lastK = -1, lastX = null, lastVC = 0, vcT;
+  let inStage = false, lastK = -1, lastX = null, lastVC = 0, vcT, gS = null, pS = null, tPrev = 0;
   function frame() {
     heroFx();
     const r = stage.getBoundingClientRect(), scrolled = -r.top;
-    const g = reduce ? 1 : clamp((scrolled + VH * LEAD) / gatherLen, 0, 1);
-    const e = 1 - Math.pow(1 - g, 3), k = Math.round((1 - e) * 2000) / 2000;
-    const pan = reduce ? 0 : clamp((scrolled - gatherLen + VH * LEAD) / (panMax * 1.15 || 1), 0, 1);
+    const gT = reduce ? 1 : clamp((scrolled + VH * LEAD) / gatherLen, 0, 1);
+    const pT = reduce ? 0 : clamp((scrolled - gatherLen + VH * LEAD) / (panMax * 1.15 || 1), 0, 1);
+    // the scattered pieces (and, on phones, the sideways pan) glide towards where the scroll says they should be,
+    // rather than stepping with each scroll event — this takes out the judder as they fly in
+    const now0 = performance.now(), dt = Math.min(64, now0 - (tPrev || now0 - 16)); tPrev = now0;
+    const ease = (cur, tgt, rate) => cur == null || Math.abs(tgt - cur) < 0.0004 ? tgt : cur + (tgt - cur) * Math.min(1, dt * rate / 1000);
+    gS = ease(gS, gT, 9); pS = touchUI ? ease(pS, pT, 16) : pT;
+    if (gS !== gT || pS !== pT) frameSoon(); else tPrev = 0;
+    const g = gS, pan = pS;
+    const e = 1 - Math.pow(1 - g, 3), k = Math.round((1 - e) * 4000) / 4000;
+    row.classList.toggle('gathering', k >= 0.001);
     const sx = Math.max(innerWidth, 640) * 0.4;
     // only touch the styles that actually changed (less work per frame = smoother on phones)
     if (k !== lastK && !(k < 0.001 && lastK < 0.001 && lastK >= 0)) items.forEach((el, i) => {
       const sd = seeds[i];
-      el.style.transform = k < 0.001 ? '' : `translate(${(sd.x * sx * k).toFixed(1)}px, ${(sd.y * VH * k).toFixed(1)}px) rotate(${(sd.r * k).toFixed(2)}deg) scale(${(1 - sd.s * k).toFixed(3)})`;
+      el.style.transform = k < 0.001 ? '' : `translate3d(${(sd.x * sx * k).toFixed(2)}px, ${(sd.y * VH * k).toFixed(2)}px, 0) rotate(${(sd.r * k).toFixed(3)}deg) scale(${(1 - sd.s * k).toFixed(4)})`;
     });
     lastK = k;
     const x = Math.round(-pan * panMax * 2) / 2;
@@ -840,7 +848,7 @@
     if (now - lastVC > 120) { lastVC = now; videoCheck(); }
     clearTimeout(vcT); vcT = setTimeout(videoCheck, 160);
   }
-  let fq = 0; const frameSoon = () => { if (!fq) fq = requestAnimationFrame(() => { fq = 0; frame(); }); };
+  var fq = 0; function frameSoon() { if (!fq) fq = requestAnimationFrame(() => { fq = 0; frame(); }); }
 
   /* ---------- Clip playback: loops play while on screen; "once" clips play with sound when they arrive ---------- */
   const vids = $$('.it.vid', row);
@@ -978,6 +986,9 @@
         <span class="tm v-tm">0:00 / 0:00</span>
         <button type="button" class="v-mute" aria-label="Mute">${svg(ICON.sound)}</button></div></div>`;
   document.body.appendChild(vlb);
+  // phones: the close button sits inside the top corner of the film itself, in front of it
+  const xHome = (box, wrap) => { const x = $('.lb-x', wrap), m = matchMedia('(max-width: 760px)'); const put = () => (m.matches ? box : wrap).insertBefore(x, (m.matches ? box : wrap).firstChild); put(); m.addEventListener?.('change', put); };
+  xHome($('.vlb-box', vlb), vlb);
   const vBox = $('.vlb-box', vlb), vF = $('.vlb-f', vlb), vPlay = $('.v-play', vlb), vMute = $('.v-mute', vlb), vBar = $('.v-bar', vlb), vFill = $('b', vBar), vKnob = $('s', vBar), vTm = $('.v-tm', vlb);
   let vP = null, vDur = 0, vDrag = false, vMuted = false, vIdle, vFocus = null;
   const vShow = t => { const q = vDur ? t / vDur : 0; vFill.style.width = vKnob.style.left = (q * 100) + '%'; vTm.textContent = `${fmt(t)} / ${fmt(vDur)}`; vBar.setAttribute('aria-valuenow', Math.round(q * 100)); };
@@ -1047,7 +1058,7 @@
         <div class="bar lb-bar" role="slider" aria-label="Seek" tabindex="0"><i></i><b></b><s></s></div>
         <span class="tm lb-tm">0:00 / 0:00</span>
         <button type="button" class="lb-mute" aria-label="Mute">${svg(ICON.sound)}</button></div></div>`;
-  document.body.appendChild(lb);
+  document.body.appendChild(lb); xHome($('.lb-box', lb), lb);
   const lv = $('video', lb), lPlay = $('.lb-play', lb), lMute = $('.lb-mute', lb), lBar = $('.lb-bar', lb), lFill = $('b', lBar), lKnob = $('s', lBar), lTm = $('.lb-tm', lb);
   let resume = [], lastFocus = null, lDrag = false;
   const lShow = () => { const p = lv.duration ? lv.currentTime / lv.duration : 0; lFill.style.width = lKnob.style.left = (p * 100) + '%'; lTm.textContent = `${fmt(lv.currentTime)} / ${fmt(lv.duration)}`; };

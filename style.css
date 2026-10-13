@@ -603,3 +603,10 @@ footer{padding-top:100px}
   .vlb-tap{display:block;position:absolute;left:0;right:0;top:0;bottom:0;z-index:1}
   .vlb .vlb-pc{z-index:2}
 }
+/* ---- round 65 ---- */
+.td-pair{justify-content:center}
+.wk-row.gathering .it{will-change:transform}
+@media (max-width:760px){
+  .lb-box>.lb-x{top:10px;right:10px;width:40px;height:40px;z-index:5;background:rgba(0,0,0,.4);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+  .lb-box>.lb-x svg{width:18px;height:18px}
+}
