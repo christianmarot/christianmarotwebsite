@@ -65,7 +65,7 @@ const DOCUMENTARIES = [
   {
     title: "Day of the Camel", for: "The Edge", role: "Cinematographer", date: "Coming Soon",
     image: "images/day-of-the-camel.jpg",
-    description: "Day of the Camel is a feature documentary about the deep and enduring bond between humans and camels around the world. Over five months of filming, the crew followed stories from Kenya to Mongolia and from Saudi Arabia to India. The film moves between quiet, intimate moments and the raw energy of camel races and festivals, set against some of the most dramatic and varied landscapes on earth. These range from 40°C heat in Kenya to −28°C in the Mongolian winter, where the two-humped Bactrian camel survives by growing a thick, shaggy coat. My role on the project was almost exclusively shooting on long lens (CN20), cross-shooting every scene, picking up moments of emotion and connection, and covering some high-octane races and camel events. Aside from the CN20, the entire project was shot on anamorphics, including the aerials. Other kit included RED Raptors, DJI RS4 gimbal, DJI 4D, Inspire 3 and a Mavic 4 Pro."
+    description: "Day of the Camel is a feature documentary about the deep and enduring bond between humans and camels around the world. Over five months of filming, the crew followed stories from Kenya to Mongolia and from Saudi Arabia to India. The film moves between quiet, intimate moments and the raw energy of camel races and festivals, set against some of the most dramatic and varied landscapes on earth. These range from 40°C heat in Kenya to −28°C in the Mongolian winter, where the two-humped Bactrian camel survives by growing a thick, shaggy coat."
   },
   {
     title: "The Earthshot Prize", for: "BBC", role: "1st AC", date: "2021",
@@ -452,7 +452,7 @@ const OTHER_WORK = {
               { file: "thud-5972", ratio: 1.333 }
           ] },
           { type: "titletext", k: "Solo exhibition", title: "Europa —\nThailand", text: ["Iniala Gallery, Phuket"] },
-          { type: "gallery", join: true, label: "Europa — Thailand", preview: ["thai-0292", "thai-0615", "thai-0606"], dir: "images/fine-art", photos: [
+          { type: "gallery", join: true, label: "Europa — Thailand", preview: ["thai-0292", "thai-0615", "thai-0602"], dir: "images/fine-art", photos: [
               { file: "thai-0292", ratio: 1.502 },
               { file: "thai-0308", ratio: 0.666 },
               { file: "thai-0606", ratio: 1.502 },
