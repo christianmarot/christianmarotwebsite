@@ -432,19 +432,47 @@
     DIARY.forEach(r => (PLACES[r.dest] || []).forEach(p => set.add(p[1])));
     const nC = set.size || +fmC.textContent;
     fmS.textContent = nShoots; fmC.textContent = nC;
-    fmC.style.minWidth = String(nC).length + 'ch';
     if (!reduce) {
-      fmC.textContent = 1;
-      // reels up from 1, one number at a time: quick at first, easing off as it nears the total
+      // an odometer: each digit is a reel that spins up to the total, with motion blur while it moves,
+      // a little mechanical overshoot as it lands, then a warm flash
+      const digits = String(nC).length;
+      fmC.textContent = ''; fmC.classList.add('reel-n'); fmC.setAttribute('aria-label', nC); fmC.setAttribute('role', 'img');
+      const strips = Array.from({ length: digits }, () => {
+        const c = document.createElement('span'); c.className = 'rc'; c.setAttribute('aria-hidden', 'true');
+        const st = document.createElement('span'); st.className = 'rs';
+        st.innerHTML = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map(d => `<i>${d}</i>`).join('');
+        c.appendChild(st); fmC.appendChild(c); return st;
+      });
+      // where each reel sits for a running value v (odometer carry: a column only turns while the one to its right goes 9 → 0)
+      const place = v => strips.map((_, i) => {
+        const p = Math.pow(10, digits - 1 - i), lo = (v / p) % 10;
+        if (p === 1) return lo;
+        const below = (v % p) / p * 10, carry = Math.max(0, below - 9);   // 0 → 1 while the reel to the right rolls over
+        return (Math.floor(v / p) % 10) + carry;
+      });
+      const draw = (pos, vel) => strips.forEach((st, i) => {
+        const y = pos[i] % 10, sp = Math.abs(vel[i]);                  // reels per second
+        const a = Math.min(.22, sp * .018);                           // length of the blur trail, in em
+        st.style.transformOrigin = `50% ${(y + .475).toFixed(3)}em`;            // stretch about the digit in view
+        st.style.transform = `translateY(${-y}em) scaleY(${1 + Math.min(.16, sp * .011)})`;
+        st.style.filter = sp > .4 ? `blur(${Math.min(1.4, sp * .05).toFixed(2)}px)` : '';
+        // the streak: a run of faint copies trailing behind the direction of travel, fading out
+        st.style.textShadow = a > .01 ? [1, 2, 3, 4, 5, 6].map(k => `0 ${(a * k / 6 * Math.sign(vel[i] || 1)).toFixed(3)}em ${(a * 6).toFixed(2)}px rgba(240,195,90,${(.32 * (1 - k / 7)).toFixed(2)})`).join(', ') : '';
+      });
+      draw(place(0), place(0).map(() => 0));
+      // fast spin that brakes hard, then a small mechanical overshoot of the last reel (about a third of a digit) and back
+      const value = t => nC * (1 - Math.pow(1 - t, 4)) + .32 * Math.sin(Math.PI * Math.min(1, Math.max(0, (t - .74) / .26)));
       const run = () => {
-        let v = 1; fmC.textContent = v; fmC.classList.add('counting');
-        const step = () => {
-          if (v >= nC) { fmC.classList.remove('counting'); return; }
-          v++; fmC.textContent = v;
-          const f = v / nC;                       // 0 → 1 through the count
-          setTimeout(step, 40 + 380 * Math.pow(f, 4));
+        fmC.classList.add('counting'); fmC.classList.remove('landed');
+        const dur = 2100, t0 = performance.now(); let lastPos = place(0), lastT = t0;
+        const frame = now => {
+          const t = Math.min(1, (now - t0) / dur), v = value(t), pos = place(Math.max(0, v));
+          const dt = Math.max(1, now - lastT) / 1000, vel = pos.map((p, i) => { let d = p - lastPos[i]; if (d < -5) d += 10; if (d > 5) d -= 10; return d / dt; });
+          draw(pos, vel); lastPos = pos; lastT = now;
+          if (t < 1) requestAnimationFrame(frame);
+          else { draw(place(nC), place(nC).map(() => 0)); fmC.classList.remove('counting'); fmC.classList.add('landed'); }
         };
-        setTimeout(step, 60);
+        requestAnimationFrame(frame);
       };
       const co = new IntersectionObserver(es => { if (es[0].isIntersecting) { co.disconnect(); setTimeout(run, 250); } }, { threshold: .6 });
       co.observe(fmC.closest('h2'));
@@ -454,7 +482,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261013y';
+    const FMV = '20261013z';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();

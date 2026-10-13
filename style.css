@@ -552,3 +552,11 @@ footer{padding-top:100px}
 /* "Copied" note shown when an email link is clicked */
 .copied-tip{position:fixed;z-index:200;transform:translate(-50%,-100%) translateY(6px);padding:7px 12px;border-radius:999px;background:rgba(238,235,228,.95);color:#0b0d0c;font-size:11px;letter-spacing:.16em;text-transform:uppercase;pointer-events:none;opacity:0;transition:opacity .25s,transform .35s cubic-bezier(.2,.7,.2,1)}
 .copied-tip.on{opacity:1;transform:translate(-50%,-100%)}
+
+/* Field Map: the countries number as an odometer */
+.fm-n.reel-n{display:inline-flex;vertical-align:top;height:.95em;min-width:0}
+.fm-n .rc{display:inline-block;height:.95em;overflow:hidden;padding:0 .06em;margin:0 -.06em;-webkit-mask-image:linear-gradient(to bottom,transparent,#000 14%,#000 86%,transparent);mask-image:linear-gradient(to bottom,transparent,#000 14%,#000 86%,transparent)}
+.fm-n .rs{display:block;transform-origin:50% 0;will-change:transform,filter}
+.fm-n .rs i{display:block;height:.95em;line-height:.95em;font-style:inherit;text-align:center}
+.fm-n.landed{animation:fmLand .9s cubic-bezier(.2,.7,.2,1)}
+@keyframes fmLand{0%{text-shadow:0 0 0 rgba(240,195,90,0)}25%{text-shadow:0 0 28px rgba(240,195,90,.75),0 0 4px rgba(255,230,170,.6)}100%{text-shadow:0 0 0 rgba(240,195,90,0)}}
