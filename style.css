@@ -614,3 +614,32 @@ footer{padding-top:100px}
 .idblock{transition:opacity .6s ease}
 .idblock.wait{opacity:0;animation:idshow .6s 3s forwards}
 @keyframes idshow{to{opacity:1}}
+/* ---- round 68 ---- */
+/* worked-for logos: no links, shown bright */
+.logos .lg{display:flex;align-items:center;justify-content:center;min-height:44px}
+.logos img{opacity:.88}
+@media (max-width:700px){.logos .lg{height:56px;width:33.33%;padding:0 8px}}
+/* phones: the full-screen gallery never dims the other photos (a tap would leave them grey) */
+@media (hover:none){.pg-rows:has(.pg-it:hover) .pg-it:not(:hover) img{filter:none}}
+/* other-work pages on a phone turned sideways only (upright is untouched): slimmer header, the film shown
+   whole, and the project title kept on screen */
+@media (orientation:landscape) and (max-height:520px) and (hover:none){
+  .wkp{--hdr:54px}
+  .wkp .wk-hero .vbg{background:#000}
+  .wkp .wk-hero .vbg iframe{width:min(100vw,177.78svh)!important;height:min(56.25vw,100svh)!important;min-width:0!important;min-height:0!important}
+  .wkp .wk-hero .title{bottom:18px}
+  .wkp .wk-hero .title h1{font-size:44px}
+  .wkp .wk-hero .pc{bottom:16px}
+  .wkp .wk-title .g{font-size:9.5px}
+  .wkp .wk-title .n{margin-top:3px;font-size:28px}
+}
+/* other-work pages: a quick way back to the home page */
+.hdr-r{justify-self:end;display:flex;align-items:center;gap:32px}
+.back-site{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 14px;border-radius:999px;border:1px solid rgba(255,255,255,.6);font-size:var(--caps);letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;transition:background .3s}
+.back-site:hover{background:rgba(255,255,255,.12)}
+@media (max-width:760px){.back-site{height:32px;padding:0 12px;font-size:10px;letter-spacing:.14em}}
+/* films in the row: the player overlaps its frame a hair, so no sliver of the holding image shows at an edge */
+.it.vm{overflow:hidden}
+.vm-f iframe{inset:-2px;width:calc(100% + 4px);height:calc(100% + 4px)}
+@media (max-width:1100px){.hdr-r .socials{display:none}}
+.logos img{filter:brightness(1.5)}

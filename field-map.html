@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="icon" href="images/favicon.png">
 <title>Field Map — Christian Marot, Cinematographer</title>
-<meta name="description" content="Field Map: every shoot on Christian Marot's credits board, travelled from London, through the clouds and down to the field. Wildlife and natural history cinematography across 22 countries.">
+<meta name="description" content="Field Map: every shoot on Christian Marot's credits board, travelled from London, through the clouds and down to the field. Wildlife and natural history cinematography across 21 countries.">
 <link rel="canonical" href="https://www.christianmarot.com/field-map.html">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Christian Marot">
@@ -238,7 +238,17 @@ a{color:inherit}
 }
 .listbtn{display:none}
 @media (max-width:900px){.listbtn{display:inline-flex}}
-@media (prefers-reduced-motion:reduce){.hint i{animation:none}.ov{transition:none}}
+/* the scroll prompts: easy to see, so nobody tries to zoom the globe before the explore view */
+.hint{font-size:12px;letter-spacing:.18em;color:var(--paper);height:44px;padding:0 16px;border-radius:999px;border:1px solid rgba(238,235,228,.22);background:rgba(7,8,8,.35);gap:8px}
+.hint b{font-weight:500}
+.chev{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;animation:chev 1.6s ease-in-out infinite}
+@keyframes chev{0%,100%{transform:translateY(-2px);opacity:.55}50%{transform:translateY(3px);opacity:1}}
+.intro.nudged .hint{border-color:var(--flap);color:var(--flap);animation:nudge .45s ease-in-out 3}
+@keyframes nudge{50%{transform:translateY(4px)}}
+.nudge{left:50%;bottom:calc(clamp(22px,4vh,40px) + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:999px;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--paper);background:rgba(7,8,8,.55);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(238,235,228,.25);pointer-events:none;white-space:nowrap}
+.nudge.off{transform:translate(-50%,12px)}
+.nudge.flash{border-color:var(--flap);color:var(--flap)}
+@media (prefers-reduced-motion:reduce){.chev{animation:none}.ov{transition:none}}
 /* filters stay on one line: a little more room for them, and on phones they scroll sideways */
 .xp-top{max-width:min(700px,calc(100vw - 2*var(--gut) - 340px))}
 .chips{flex-wrap:nowrap;gap:6px}
@@ -273,10 +283,11 @@ a{color:inherit}
 
       <div class="ov intro" id="intro">
         <div class="eyebrow">Credits board · <span id="nRange">Mar 2021 – Oct 2026</span></div>
-        <h1><span id="nShoots">39</span> shoots,<br><em><span id="nCountries">22</span> countries</em>,<br>one small planet.</h1>
+        <h1><span id="nShoots">39</span> shoots,<br><em><span id="nCountries">21</span> countries</em>,<br>one small planet.</h1>
         <p>Scroll to visualise five years of shoots out of London, then drop through the clouds and explore.</p>
-        <div class="cta"><button class="btn" type="button" data-go="3">Skip animation &amp; explore</button><span class="hint"><i></i>Scroll</span></div>
+        <div class="cta"><button class="btn" type="button" data-go="3">Skip animation &amp; explore</button><span class="hint"><b>Scroll down to begin</b><svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 5.5l5 5 5-5"/></svg></span></div>
       </div>
+      <div class="ov nudge off" id="nudge" aria-hidden="true"><span id="nudgeT">Keep scrolling</span><svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 5.5l5 5 5-5"/></svg></div>
 
       <div class="ov timeline off" id="timeline" role="slider" tabindex="0" aria-label="Timeline: drag to move through the shoots" aria-valuemin="1" aria-valuemax="39" aria-valuenow="1"><div class="ln"></div></div>
       <div class="ov rpctl off" id="rpCtl" role="group" aria-label="Journey replay">
@@ -339,12 +350,12 @@ a{color:inherit}
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
-<script src="data.js?v=20261014n"></script>
-<script src="fieldmap/geo.js?v=20261014n"></script>
-<script src="fieldmap/geo50.js?v=20261014n"></script>
-<script src="fieldmap/earth.js?v=20261014n"></script>
-<script src="fieldmap/sky.js?v=20261014n"></script>
-<script src="fieldmap/map.js?v=20261014n"></script>
+<script src="data.js?v=20261015a"></script>
+<script src="fieldmap/geo.js?v=20261015a"></script>
+<script src="fieldmap/geo50.js?v=20261015a"></script>
+<script src="fieldmap/earth.js?v=20261015a"></script>
+<script src="fieldmap/sky.js?v=20261015a"></script>
+<script src="fieldmap/map.js?v=20261015a"></script>
 
 </body>
 </html>

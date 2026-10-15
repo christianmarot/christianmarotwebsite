@@ -194,7 +194,8 @@
   addEventListener('keydown', e => { if (e.key === 'Escape' && replay.on) endReplay(); });
 
   /* ================= HUD ================= */
-  const ov = { intro: $('#intro'), tl: $('#timeline'), card: $('#card'), stats: $('#stats'), dive: $('#dive'), xp: $('#xpTop'), idx: $('#index'), zoom: $('#zoom') };
+  let autoOpened = false, xSince = 0;
+  const ov = { nudge: $('#nudge'), intro: $('#intro'), tl: $('#timeline'), card: $('#card'), stats: $('#stats'), dive: $('#dive'), xp: $('#xpTop'), idx: $('#index'), zoom: $('#zoom') };
   const show = (el, on) => el.classList.toggle('off', !on);
   // timeline ticks
   { const tl = ov.tl; let lastY = '';
@@ -341,7 +342,15 @@
   const ptrs = new Map();
   const pinAt = (x, y) => { let best = null, bd = 22 * 22; screenPins.forEach(sp => { if (!sp.on) return; const d = (sp.x - x) ** 2 + (sp.y - y) ** 2; if (d < bd) { bd = d; best = sp.p; } }); return best; };
   let screenPins = [];
+  let nudgeUntil = 0, introNudgeT = 0;
+  const nudge = () => {
+    if (exploring) return;
+    if (ov.intro && !ov.intro.classList.contains('off')) { ov.intro.classList.remove('nudged'); void ov.intro.offsetWidth; ov.intro.classList.add('nudged'); clearTimeout(introNudgeT); introNudgeT = setTimeout(() => ov.intro.classList.remove('nudged'), 1600); }
+    else nudgeUntil = performance.now() + 2600;
+  };
+  over.addEventListener('wheel', e => { if (!exploring && e.ctrlKey) { e.preventDefault(); nudge(); } }, { passive: false });   // a pinch on a trackpad
   over.addEventListener('pointerdown', e => {
+    if (!exploring && !blowable) nudge();
     const rect0 = over.getBoundingClientRect();
     if (blowable) beginHold(e.clientX - rect0.left, e.clientY - rect0.top);
     if (!exploring) { if (blowable) try { over.setPointerCapture(e.pointerId); } catch (_) {} return; }
@@ -488,16 +497,18 @@
   };
   const label = (x, y, text, sub, col, right) => {
     octx.save(); octx.font = '500 11px "IBM Plex Mono", monospace'; octx.textBaseline = 'middle';
-    const tw = octx.measureText(text).width, dx = right ? -16 : 16, tx = x + dx + (right ? -tw : 0);
+    let tw = octx.measureText(text).width;
+    if (sub) { octx.font = '400 10px "IBM Plex Mono", monospace'; tw = Math.max(tw, octx.measureText(sub).width); octx.font = '500 11px "IBM Plex Mono", monospace'; }   // the box fits the longer of the two lines
+    tw = Math.ceil(tw) + 2; const dx = right ? -16 : 16, tx = x + dx + (right ? -tw : 0);
     octx.strokeStyle = 'rgba(238,235,228,.35)'; octx.lineWidth = 1; octx.beginPath(); octx.moveTo(x + (right ? -6 : 6), y); octx.lineTo(x + dx * .8, y); octx.stroke();
-    octx.fillStyle = 'rgba(7,8,8,.72)'; octx.fillRect(tx - 6, y - 10, tw + 12, sub ? 34 : 20);
+    octx.fillStyle = 'rgba(7,8,8,.72)'; octx.fillRect(tx - 7, y - 11, tw + 14, sub ? 36 : 22);
     octx.fillStyle = col || '#eeebe4'; octx.fillText(text, tx, y);
     if (sub) { octx.fillStyle = '#858b84'; octx.font = '400 10px "IBM Plex Mono", monospace'; octx.fillText(sub, tx, y + 14); }
     octx.restore();
   };
   const drawPins = (now, mode, curPins) => {
     screenPins = [];
-    const showAllLabels = mode === 'x' && cam.k > 3.4;
+    const showAllLabels = mode === 'x' && cam.k > 3.4 && !mobile;   // phones: names only for the pin you tap
     pins.forEach(p => {
       if (p.appear < 0) return;
       const s = screen(p.lon, p.lat); if (s.z < .02) return;
@@ -666,6 +677,13 @@
     show(ov.intro, mode === 'a' && p < J0 * .75);
     show(ov.tl, jr); show(rpCtl, jr); show(ov.card, jr); show(ov.stats, jr || mode === 'b' || (mode === 'c' && dive < .38) || (!mobile && mode === 'a' && p > J0 * .6));
     show(ov.dive, mode === 'c' && dive > .5 && dive < .7 && !wind.broke);
+    // a steady 'keep scrolling' through the routes and the zoom in; it lights up if someone tries to grab the globe
+    const nudging = now < nudgeUntil;
+    show(ov.nudge, mode === 'b' || (mode === 'c' && dive < .34) || (nudging && mode !== 'a' && mode !== 'x' && !(mode === 'c' && dive > .5 && dive < .7)));
+    ov.nudge.classList.toggle('flash', nudging);
+    // explore: open the most recent shoot straight away, so it's clear the pins can be tapped
+    if (mode === 'x' && !jr) { if (!autoOpened && now - (xSince || (xSince = now)) > 900) { autoOpened = true; if (!openPin) { const lp = pins.find(q => q.rows.includes(ROWS[0])) || sortedPins[0]; if (lp) openPop(lp); } } }
+    else if (mode !== 'x') { xSince = 0; if (p < C1 - .03) autoOpened = false; }
     $('#diveHint').textContent = wind.mic ? 'Blow to break through, or keep scrolling' : 'Press and hold, blow into your mic, or keep scrolling';
     const xu = mode === 'x' && !jr; show(ov.xp, xu); show(ov.zoom, xu); show($('#viewsw'), xu); show(ov.idx, xu); show(playJ, xu);
     $$('.rail button').forEach((b, i) => b.classList.toggle('on', i === ({ a: 0, b: 1, c: 2, x: 3 })[mode]));

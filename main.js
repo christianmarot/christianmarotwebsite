@@ -42,6 +42,11 @@
 
   /* ---------- Homepage videos ---------- */
   $$('[data-bg]').forEach(el => { const f = iframe(VIDEOS[el.dataset.bg], true, 'Showreel (background)'); f.loading = 'eager'; f.tabIndex = -1; f.setAttribute('aria-hidden', 'true'); el.appendChild(f); });
+  // phones freeze the looping background film when you leave the page; coming back (back button, or
+  // returning to the browser) sets it playing again — or reloads it if the browser kept a frozen copy
+  const bgPlay = () => $$('[data-bg] iframe').forEach(f => { try { f.contentWindow.postMessage(JSON.stringify({ method: 'play' }), '*'); } catch (e) {} });
+  addEventListener('pageshow', e => { if (e.persisted) $$('[data-bg] iframe').forEach(f => { f.src = f.src; }); setTimeout(bgPlay, 300); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { bgPlay(); setTimeout(bgPlay, 800); } });
   const io = new IntersectionObserver(es => es.forEach(e => {
     if (!e.isIntersecting) return;
     if (e.target.hasAttribute('data-custom')) customReel(e.target);
@@ -509,7 +514,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261014n';
+    const FMV = '20261015a';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();
@@ -527,6 +532,7 @@
      ===================================================================== */
   const pin = $('#wkPin');
   if (!pin || !has('OTHER_WORK')) return;
+  document.body.classList.add('wkp');
   const key = new URLSearchParams(location.search).get('s') || 'restaurants';
   const S = OTHER_WORK[key] || OTHER_WORK.restaurants;
   document.title = `${S.title} — Christian Marot, Cinematographer`;
@@ -537,6 +543,9 @@
   const nx = keys[(ix + 1) % keys.length], pv = keys[(ix - 1 + keys.length) % keys.length];
   $('#wkNext').href = `work.html?s=${nx}`; $('#wkNext').textContent = `${OTHER_WORK[nx].title} →`;
   $('#wkPrev').href = `work.html?s=${pv}`; $('#wkPrev').textContent = `← ${OTHER_WORK[pv].title}`;
+  // only one film is ever heard at a time: whichever starts sound silences all the others
+  const voices = new Map();
+  const hush = except => voices.forEach((mute, k) => { if (k !== except) mute(); });
   const activated = () => (navigator.userActivation ? navigator.userActivation.hasBeenActive : userTouched);
   let userTouched = false; ['pointerdown', 'keydown'].forEach(ev => addEventListener(ev, () => userTouched = true, { once: true, capture: true }));
 
@@ -566,7 +575,8 @@
         const muteIcon = () => { muteI.setAttribute('d', muted ? ICON.muted : ICON.sound); muteB.setAttribute('aria-label', muted ? 'Turn sound on' : 'Mute'); };
         muteB.onclick = () => { muted = !muted; heroPlayer.setMuted(muted).catch(() => {}); if (!muted) heroPlayer.setVolume(1).catch(() => {}); muteIcon(); };
         // the sound button always shows what the film is really doing (phones can silence a film on their own)
-        const syncSnd = () => vimMuted(heroPlayer).then(([m, v]) => { muted = m || v === 0; muteIcon(); }).catch(() => {});
+        const syncSnd = () => vimMuted(heroPlayer).then(([m, v]) => { muted = m || v === 0; muteIcon(); if (!muted) heroPlayer.getPaused().then(pz => { if (!pz) hush('hero'); }).catch(() => {}); }).catch(() => {});
+        voices.set('hero', () => { if (!muted) { muted = true; heroPlayer.setMuted(true).catch(() => {}); muteIcon(); } });
         heroPlayer.on('volumechange', syncSnd); heroPlayer.on('play', syncSnd);
         const playSafe = () => heroPlayer.play().catch(() => { muted = true; muteIcon(); heroPlayer.setMuted(true).then(() => heroPlayer.play()).catch(() => {}); });
         const seekTo = x => { const r = bar.getBoundingClientRect(); const p = clamp((x - r.left) / r.width, 0, 1); show(p * dur); return p * dur; };
@@ -700,9 +710,11 @@
   let VH = innerHeight, VW = innerWidth, blkPos = [];
   const layout = () => {
     if (!touchUI || innerWidth !== VW || !H) VH = innerHeight; VW = innerWidth;
-    const hdr = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hdr')) || 92;
-    const top = hdr + 8, bottom = innerWidth < 760 ? 120 : 150;
-    H = Math.max(260, VH - top - bottom);
+    // a phone turned sideways: a much shorter screen, so slimmer margins top and bottom (upright phones are unchanged)
+    const landPhone = touchUI && innerWidth > innerHeight && innerHeight < 520;
+    const hdr = parseFloat(getComputedStyle(document.body).getPropertyValue('--hdr')) || 92;
+    const top = hdr + (landPhone ? 2 : 8), bottom = landPhone ? 66 : innerWidth < 760 ? 120 : 150;
+    H = Math.max(landPhone ? 150 : 260, VH - top - bottom);
     const fw = Math.round(H * 9 / 16), gap = innerWidth < 760 ? 16 : (S.gap || 16);
     rowTop = top;     row.style.top = top + 'px'; row.style.gap = gap + 'px';
     $$('.sep', row).forEach(s => s.style.height = H + 'px');
@@ -777,12 +789,14 @@
         b.style.marginLeft = (parseFloat(cs.marginLeft) + t - gl) + 'px'; b.style.marginRight = (parseFloat(cs.marginRight) + t - gr) + 'px';
       });
     }
-    panMax = Math.max(0, row.scrollWidth - innerWidth);
+    // the row's true length (scrollWidth would also count pieces still flying in from the side, leaving empty space at the end)
+    const lastB = row.lastElementChild, rowLen = lastB ? lastB.offsetLeft + lastB.offsetWidth + parseFloat(getComputedStyle(lastB).marginRight || 0) + (parseFloat(getComputedStyle(row).paddingRight) || 0) : row.scrollWidth;
+    panMax = Math.max(0, rowLen - innerWidth);
     gatherLen = VH * (innerWidth < 760 ? 1.6 : 1.3);
     stage.style.height = (gatherLen - VH * LEAD + panMax * 1.15 + VH * 1.3) + 'px';
     blkPos = blks.map(b => [b.offsetLeft, b.offsetWidth, +b.dataset.p]);
     // phones: the project title sits a fixed distance under the row, not against the (moving) bottom of the screen
-    if (touchUI || innerWidth < 760) Object.assign(wt.style, { top: (top + H + 22) + 'px', bottom: 'auto' }); else wt.style.top = wt.style.bottom = '';
+    if (touchUI || innerWidth < 760) Object.assign(wt.style, { top: (top + H + (landPhone ? 10 : 22)) + 'px', bottom: 'auto' }); else wt.style.top = wt.style.bottom = '';
     frame();
   };
 
@@ -863,18 +877,23 @@
     const sndIcon = () => { if (!snd) return; const on = !v.muted && v.volume > 0; snd.innerHTML = svg(on ? ICON.sound : ICON.muted) + `<span>${on ? 'Sound on' : 'Sound'}</span>`; snd.setAttribute('aria-label', on ? 'Mute' : 'Turn sound on'); };
     const setSnd = on => { v.muted = !on; sndIcon(); };
     v.addEventListener('volumechange', sndIcon);   // the button follows the clip's real state
+    const heard = () => { if (!v.muted && v.volume > 0 && !v.paused) hush(it); };
+    v.addEventListener('volumechange', heard); v.addEventListener('play', heard);
+    voices.set(it, () => { if (!v.muted) setSnd(false); });
     it._setSnd = setSnd;
     if (snd) snd.addEventListener('click', e => { e.stopPropagation(); setSnd(v.muted); if (v.paused) v.play().catch(() => {}); });
-    v.addEventListener('ended', () => {
+    const finish = () => {
       if (!it.hasAttribute('data-once')) return;
       it.classList.add('ended'); it._state = 'done';
       if (it.dataset.end) v.currentTime = +it.dataset.end;   // rest on a chosen frame behind the Replay button
-    });
+    };
+    v.addEventListener('ended', finish);
     if (rep) rep.addEventListener('click', () => { it.classList.remove('ended'); v.currentTime = 0; setSnd(true); v.play().catch(() => { setSnd(false); v.play(); }); });
     // cut: on the page the clip loops before its end card (logo / black); played large it runs in full
     if (it.dataset.cut) {
       const cut = +it.dataset.cut;
-      const watch = () => { if (v.currentTime >= cut - 0.03) v.currentTime = 0; if (!v.paused) v.requestVideoFrameCallback ? v.requestVideoFrameCallback(watch) : requestAnimationFrame(watch); };
+      // (a play-once film simply finishes there on the page, as if the file ended)
+      const watch = () => { if (v.currentTime >= cut - 0.03) { if (it.hasAttribute('data-once')) { v.pause(); finish(); return; } v.currentTime = 0; } if (!v.paused) v.requestVideoFrameCallback ? v.requestVideoFrameCallback(watch) : requestAnimationFrame(watch); };
       v.addEventListener('play', watch);
     }
   });
@@ -887,7 +906,8 @@
       const visW = Math.max(0, Math.min(r.right, innerWidth) - Math.max(r.left, 0)) / r.width;
       const visH = Math.max(0, Math.min(r.bottom, innerHeight) - Math.max(r.top, 0)) / r.height;
       const vis = visW * visH;
-      if (vis > 0.05 && !v.src) {
+      const near = r.left < innerWidth * 1.6 && r.right > -innerWidth * .6 && r.top < innerHeight * 1.4 && r.bottom > -innerHeight * .4;
+      if ((vis > 0.05 || near) && !v.src) {
         v.src = it.dataset.src; v.preload = 'auto';
         if (it.dataset.start) v.addEventListener('loadedmetadata', () => { v.currentTime = +it.dataset.start; }, { once: true });   // first play starts part-way in
       }
@@ -950,8 +970,9 @@
       }).catch(() => {});
       p.on('play', () => it.classList.add('on'));
       // phones may start a film silently even when sound was asked for: the button shows what is really happening
-      const sync = () => vimMuted(p).then(([m, v]) => { const on = !m && v > 0; if (on === !it._muted) return; it._muted = !on; snd.innerHTML = svg(on ? ICON.sound : ICON.muted) + `<span>${on ? 'Sound on' : 'Sound'}</span>`; snd.setAttribute('aria-label', on ? 'Mute' : 'Turn sound on'); }).catch(() => {});
+      const sync = () => vimMuted(p).then(([m, v]) => { const on = !m && v > 0; if (on) p.getPaused().then(pz => { if (!pz) hush(it); }).catch(() => {}); if (on === !it._muted) return; it._muted = !on; snd.innerHTML = svg(on ? ICON.sound : ICON.muted) + `<span>${on ? 'Sound on' : 'Sound'}</span>`; snd.setAttribute('aria-label', on ? 'Mute' : 'Turn sound on'); }).catch(() => {});
       const snd = $('.snd', it); p.on('volumechange', sync); p.on('play', sync);
+      voices.set(it, () => { if (!it._muted) it._setSnd(false); });
       p.on('ended', () => { if (it.hasAttribute('data-once')) { it.classList.add('ended'); it._state = 'done'; } });
       it._playing = false;
     }
@@ -959,7 +980,7 @@
     if (it.hasAttribute('data-once')) {
       // like the featured clips: plays once with sound (if the browser allows it) as it arrives, pauses when it leaves
       // (leaving includes scrolling back up to the film at the top of the page)
-      const away = vis < 0.2 || !inStage;
+      const away = vis < (it._muted ? 0.2 : 0.45) || !inStage;
       if (it._state === 'idle' && inStage && vis > 0.6 && !otherPlaying(it)) {
         it._state = 'playing'; it._setSnd(activated());
         it._p.play().catch(() => { it._setSnd(false); it._p.play().catch(() => {}); });
@@ -1025,6 +1046,7 @@
     vP.on('ended', () => vlb.classList.remove('idle'));
     const vSync = () => vP && vimMuted(vP).then(([m, v]) => { vMuted = m || v === 0; $('path', vMute).setAttribute('d', vMuted ? ICON.muted : ICON.sound); vMute.setAttribute('aria-label', vMuted ? 'Turn sound on' : 'Mute'); }).catch(() => {});
     vP.on('volumechange', vSync); vP.on('play', vSync);
+    vP.on('play', () => hush('vlb'));
     from.then(t => { if (t > 1) vP.setCurrentTime(t).catch(() => {}); vP.play().catch(() => { vMuted = true; vP.setMuted(true); $('path', vMute).setAttribute('d', ICON.muted); vP.play().catch(() => {}); }); });
     document.body.classList.add('lb-open'); vlb.classList.add('open'); vWake(); $('.lb-x', vlb).focus();
   };
@@ -1075,6 +1097,7 @@
   lPlay.onclick = () => lv.paused ? lv.play() : lv.pause();
   const lIcon = () => { const m = lv.muted || lv.volume === 0; $('path', lMute).setAttribute('d', m ? ICON.muted : ICON.sound); lMute.setAttribute('aria-label', m ? 'Turn sound on' : 'Mute'); };
   lv.addEventListener('volumechange', lIcon);
+  lv.addEventListener('play', () => hush('lb'));
   lMute.onclick = () => { lv.muted = !lv.muted; if (!lv.muted) lv.volume = 1; lIcon(); };
   const lSeek = x => { const r = lBar.getBoundingClientRect(); const t = clamp((x - r.left) / r.width, 0, 1) * (lv.duration || 0); lv.currentTime = t; lShow(); };
   lBar.addEventListener('pointerdown', e => { lDrag = true; lBar.classList.add('drag'); lBar.setPointerCapture(e.pointerId); lSeek(e.clientX); });

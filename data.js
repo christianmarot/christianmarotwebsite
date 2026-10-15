@@ -29,7 +29,7 @@ const PROJECTS = [
   {
     title: "Animal Oddballs",
     broadcaster: "National Geographic / Disney+",
-    role: "Cinematographer",
+    role: "Second Camera / Focus Puller",
     date: "Coming Soon",
     image: "images/animal-oddballs-daringly-different.jpg",
     focus: "42%",   // which part of the poster shows when the tab is closed (0% = top, 100% = bottom)
@@ -47,7 +47,7 @@ const PROJECTS = [
   {
     title: "Nightmares of Nature",
     broadcaster: "Netflix",
-    role: "1st AC",
+    role: "Focus Puller / AC",
     date: "2025",
     image: "images/nightmares-of-nature-netflix.jpg",
     focus: "20%",   // which part of the poster shows when the tab is closed (0% = top, 100% = bottom)
@@ -58,22 +58,22 @@ const PROJECTS = [
 /* ---------- DOCUMENTARY (horizontal gallery of 9:16 posters) ---------- */
 const DOCUMENTARIES = [
   {
-    title: "Human", for: "BBC", role: "1st AC / Drone Operator", date: "2025",
+    title: "Human", for: "BBC", role: "Second Camera / Drone Operator / AC", date: "2025",
     image: "images/human-bbc-ella-al-shamahi.jpg",
     description: "Paleoanthropologist Ella Al-Shamahi reveals humanity’s incredible story across 300,000 years of human evolution and how – thanks to new discoveries – we’re learning that the story is stranger and more surprising than we ever imagined. When Homo sapiens emerged in Africa we were not alone: there were at least six other human species alive at the time. Human examines how we went from being just one of many types of human to the dominant form of life on the planet."
   },
   {
-    title: "Day of the Camel", for: "The Edge", role: "Cinematographer", date: "Coming Soon",
+    title: "Day of the Camel", for: "The Edge", role: "Cinematographer (Long Lens)", date: "Coming Soon",
     image: "images/day-of-the-camel.jpg",
     description: "Day of the Camel is a feature documentary about the deep and enduring bond between humans and camels around the world. Over five months of filming, the crew followed stories from Kenya to Mongolia and from Saudi Arabia to India. The film moves between quiet, intimate moments and the raw energy of camel races and festivals, set against some of the most dramatic and varied landscapes on earth. These range from 40°C heat in Kenya to −28°C in the Mongolian winter, where the two-humped Bactrian camel survives by growing a thick, shaggy coat."
   },
   {
-    title: "The Earthshot Prize", for: "BBC", role: "1st AC", date: "2021",
+    title: "The Earthshot Prize", for: "BBC", role: "AC", date: "2021",
     image: "images/earthshot-prize-2021-bbc.jpg",
     description: "Prince William’s star-studded awards ceremony honours five environmental solutions with £1 million each to further their work helping to restore and protect our planet. The broadcast spotlighted fifteen incredible global finalists across five distinct categories — including protecting nature, cleaning our air, reviving oceans, building a waste-free world, and fixing our climate. Interspersed with these inspiring documentary-style profiles, the programme features a special address from Sir David Attenborough alongside world-class musical performances by Billie Eilish, Annie Lennox & Ellie Goulding."
   },
   {
-    title: "Dinner to Save the World", for: "PBS", role: "Camera Operator / Focus Puller", date: "2026",
+    title: "Dinner to Save the World", for: "PBS", role: "Second Camera / Focus Puller", date: "2026",
     image: "images/dinner-to-save-the-world.jpg",
     description: "Dinner to Save the World (PBS), presented by M. Sanjayan and Sam Kass, looks at how the global food industry contributes to climate change — and how changing the way we farm, process and eat food can help build a more sustainable future."
   }
@@ -197,17 +197,17 @@ const OTHER_WORK = {
           // different point (start: seconds in) to keep the same shot from playing twice at once
           { type: "tiles12", videos: [
             { video: "clips/hotels/ibh-postcard.mp4", poster: "clips/hotels/ibh-postcard.jpg" },
-            { video: "clips/hotels/ibh-womens-day.mp4", poster: "clips/hotels/ibh-womens-day.jpg", start: 15.25 },
-            { video: "clips/hotels/ibh-sounds-of-nature.mp4", poster: "clips/hotels/ibh-sounds-of-nature.jpg" },
-            { video: "clips/hotels/ibh-bbq-anaala.mp4", poster: "clips/hotels/ibh-bbq-anaala.jpg", start: 8.5 },
-            { video: "clips/hotels/ibh-water.mp4", poster: "clips/hotels/ibh-water.jpg", start: 11.25 },
-            { video: "clips/hotels/ibh-sunny.mp4", poster: "clips/hotels/ibh-sunny.jpg", start: 3.25 },
+            { video: "clips/hotels/ibh-womens-day.mp4?v=5", poster: "clips/hotels/ibh-womens-day.jpg", start: 15.25, cut: 17.802 },
+            { video: "clips/hotels/ibh-sounds-of-nature.mp4?v=5", poster: "clips/hotels/ibh-sounds-of-nature.jpg", cut: 15.675 },
+            { video: "clips/hotels/ibh-bbq-anaala.mp4?v=5", poster: "clips/hotels/ibh-bbq-anaala.jpg", start: 8.5, cut: 16.092 },
+            { video: "clips/hotels/ibh-water.mp4?v=5", poster: "clips/hotels/ibh-water.jpg", start: 11.25, cut: 12.421 },
+            { video: "clips/hotels/ibh-sunny.mp4?v=5", poster: "clips/hotels/ibh-sunny.jpg", start: 3.25, cut: 13.297 },
             { video: "clips/hotels/ibh-yoga.mp4", poster: "clips/hotels/ibh-yoga.jpg", start: 0.25 },
-            { video: "clips/hotels/ibh-experience-food.mp4", poster: "clips/hotels/ibh-experience-food.jpg", start: 1.75 },
-            { video: "clips/hotels/ibh-destination.mp4", poster: "clips/hotels/ibh-destination.jpg", start: 12.0 },
-            { video: "clips/hotels/ibh-nature-2.mp4", poster: "clips/hotels/ibh-nature-2.jpg", start: 7.75 },
-            { video: "clips/hotels/ibh-ambient.mp4", poster: "clips/hotels/ibh-ambient.jpg" },
-            { video: "clips/hotels/ibh-nature-3.mp4", poster: "clips/hotels/ibh-nature-3.jpg", start: 10.5 }
+            { video: "clips/hotels/ibh-experience-food.mp4?v=5", poster: "clips/hotels/ibh-experience-food.jpg", start: 1.75, cut: 16.217 },
+            { video: "clips/hotels/ibh-destination.mp4?v=5", poster: "clips/hotels/ibh-destination.jpg", start: 12.0, cut: 13.881 },
+            { video: "clips/hotels/ibh-nature-2.mp4?v=5", poster: "clips/hotels/ibh-nature-2.jpg", start: 7.75, cut: 14.590 },
+            { video: "clips/hotels/ibh-ambient.mp4?v=5", poster: "clips/hotels/ibh-ambient.jpg", cut: 13.005 },
+            { video: "clips/hotels/ibh-nature-3.mp4?v=5", poster: "clips/hotels/ibh-nature-3.jpg", start: 10.5, cut: 17.635 }
           ] },
           { type: "gallery", dir: "images/hotels/iniala-beach-house",
             preview: ["beach-aerial-clone", "bianca-twighlight-sky-replacement-2-copy", "bianca-exterior-to-beach-2-cast-correction"],
@@ -256,7 +256,7 @@ const OTHER_WORK = {
             "I was brought in to create a full-length promotional video for the hotel (see featured above), along with a series of reels and short moments for social media. Alongside the films, I shot a collection of high-end photography for the hotel’s website and promotional use, which has since appeared in publications including Forbes and Condé Nast. With Iniala Valletta being a design and experience-led hotel, the aim was to capture Malta as a destination, as well as the serenity of the hotel itself."
           ] },
           // endFrame: when a play-once clip finishes, it rests on the frame at this many seconds (behind the Replay button)
-          { type: "feature", video: "clips/hotels/iniala-social-malta.mp4?v=3", poster: "clips/hotels/iniala-social-malta.jpg?v=3", audio: true, once: true, endFrame: 10.885 },
+          { type: "feature", video: "clips/hotels/iniala-social-malta.mp4?v=5", poster: "clips/hotels/iniala-social-malta.jpg?v=3", audio: true, once: true, endFrame: 10.885, cut: 14.45 },
           // start: seconds into the clip where it first starts playing. Some of these share shots with each other
           // (and with the featured clip), so they're staggered so the same shot doesn't play twice at once
           { type: "secondary", videos: [
@@ -572,45 +572,45 @@ const OTHER_WORK = {
    the World, Planet Pet …) are listed here shoot by shoot — keep them split.   */
 const LAST_UPDATED = "October 2026";
 const DIARY = [
-  { dates: "Oct 2026",          project: "Day of the Camel",          dest: "Saudi Arabia",            for: "The Edge",                      role: "Cinematographer",                   status: "Coming soon" },
+  { dates: "Oct 2026",          project: "Day of the Camel",          dest: "Saudi Arabia",            for: "The Edge",                      role: "Cinematographer (Long Lens)",status: "Coming soon" },
   { dates: "Sept 2026",         project: "Planet Pet",                dest: "Switzerland",             for: "Wildstar · Nat Geo / Disney+",  role: "Focus Puller / Drone Operator",     status: "In production" },
-  { dates: "Sept 2026",         project: "Dinner to Save the World",  dest: "Dumfries, Scotland",      for: "PBS",                           role: "Camera Operator / Focus Puller",      status: "In production" },
+  { dates: "Sept 2026",         project: "Dinner to Save the World",  dest: "Dumfries, Scotland",      for: "PBS",                           role: "Second Camera / Focus Puller",      status: "In production" },
   { dates: "Aug – Sept 2026",    project: "Planet Pet",                dest: "California, USA",         for: "Wildstar · Nat Geo / Disney+",  role: "Focus Puller / Drone Operator",     status: "In production" },
   { dates: "Jul 2026",          project: "Planet Pet",                dest: "UK",                      for: "Wildstar · Nat Geo / Disney+",  role: "Focus Puller / Drone Operator",     status: "In production" },
   { dates: "Jul 2026",           project: "Jodi Arias (Miniatures)",   dest: "London, UK",              for: "Dorothy Street Pictures · Netflix", role: "Focus Puller / 1st AC",        status: "In production" },
-  { dates: "Jul 2026",            project: "Dinner to Save the World",  dest: "Norway",                  for: "PBS",                           role: "Camera Operator / Focus Puller",      status: "In production" },
-  { dates: "Jun – Jul 2026",     project: "Dinner to Save the World",  dest: "France",                  for: "PBS",                           role: "Camera Operator / Focus Puller",      status: "In production" },
-  { dates: "Jun 2026",          project: "Dinner to Save the World",  dest: "London, UK",              for: "PBS",                           role: "Camera Operator / Focus Puller",      status: "In production" },
+  { dates: "Jul 2026",            project: "Dinner to Save the World",  dest: "Norway",                  for: "PBS",                           role: "Second Camera / Focus Puller",      status: "In production" },
+  { dates: "Jun – Jul 2026",     project: "Dinner to Save the World",  dest: "France",                  for: "PBS",                           role: "Second Camera / Focus Puller",      status: "In production" },
+  { dates: "Jun 2026",          project: "Dinner to Save the World",  dest: "London, UK",              for: "PBS",                           role: "Second Camera / Focus Puller",      status: "In production" },
   { dates: "Jun 2026",            project: "Just a Fly",                dest: "London & Exeter, UK",                       for: "Razorbill Films · Short film",  role: "Focus Puller",                      status: "Coming soon" },
-  { dates: "May – Jun 2026",     project: "Day of the Camel",          dest: "Saudi Arabia",            for: "The Edge",                      role: "Cinematographer",                   status: "Coming soon" },
-  { dates: "Mar 2026",           project: "Day of the Camel",          dest: "India",                   for: "The Edge",                      role: "Cinematographer",                   status: "Coming soon" },
-  { dates: "Jan – Feb 2026",    project: "Day of the Camel",          dest: "Mongolia",                for: "The Edge",                      role: "Cinematographer",                   status: "Coming soon" },
-  { dates: "Jan 2026",          project: "Day of the Camel",          dest: "Kenya",                   for: "The Edge",                      role: "Cinematographer",                   status: "Coming soon" },
-  { dates: "Nov – Dec 2025",     project: "Day of the Camel",          dest: "Saudi Arabia",            for: "The Edge",                      role: "Cinematographer",                   status: "Coming soon" },
-  { dates: "Sept – Oct 2025",         project: "Animal Oddballs",           dest: "Seychelles",              for: "Wildstar · Nat Geo / Disney+",  role: "Cinematographer",                   status: "Coming soon" },
-  { dates: "May 2025",                project: "Home: Asia",                dest: "Wadi Rum, Jordan",        for: "BBC NHU · National Geographic", role: "Cinematographer",                   status: "Coming soon" },
+  { dates: "May – Jun 2026",     project: "Day of the Camel",          dest: "Saudi Arabia",            for: "The Edge",                      role: "Cinematographer (Long Lens)",status: "Coming soon" },
+  { dates: "Mar 2026",           project: "Day of the Camel",          dest: "India",                   for: "The Edge",                      role: "Cinematographer (Long Lens)",status: "Coming soon" },
+  { dates: "Jan – Feb 2026",    project: "Day of the Camel",          dest: "Mongolia",                for: "The Edge",                      role: "Cinematographer (Long Lens)",status: "Coming soon" },
+  { dates: "Jan 2026",          project: "Day of the Camel",          dest: "Kenya",                   for: "The Edge",                      role: "Cinematographer (Long Lens)",status: "Coming soon" },
+  { dates: "Nov – Dec 2025",     project: "Day of the Camel",          dest: "Saudi Arabia",            for: "The Edge",                      role: "Cinematographer (Long Lens)",status: "Coming soon" },
+  { dates: "Sept – Oct 2025",         project: "Animal Oddballs",           dest: "Seychelles",              for: "Wildstar · Nat Geo / Disney+",  role: "Second Camera",                   status: "Coming soon" },
+  { dates: "May 2025",                project: "Home: Asia",                dest: "Wadi Rum, Jordan",        for: "BBC NHU · National Geographic", role: "Second Camera",                   status: "Coming soon" },
   { dates: "Apr – Nov 2025",          project: "Wild London",               dest: "London, UK",              for: "Passion Planet · BBC",          role: "Cinematographer",                   status: "Released" },
   { dates: "Feb – Mar 2025",          project: "Animal Oddballs",           dest: "Madagascar",              for: "Wildstar · Nat Geo / Disney+",  role: "Focus Puller / Time-lapse / Drone", status: "Coming soon" },
   { dates: "Jan – Feb 2025",          project: "Animal Oddballs",           dest: "Rio de Janeiro, Brazil",  for: "Wildstar · Nat Geo / Disney+",  role: "Focus Puller / Second Camera",      status: "Coming soon" },
-  { dates: "Dec 2024",                project: "Nightmares of Nature",      dest: "Bristol, UK",                       for: "Plimsoll · Netflix",            role: "1st AC",                          status: "Released" },
+  { dates: "Dec 2024",                project: "Nightmares of Nature",      dest: "Bristol, UK",                       for: "Plimsoll · Netflix",            role: "Focus Puller / AC",                          status: "Released" },
   { dates: "Oct – Nov 2024",          project: "Animal Oddballs",           dest: "Kirindy, Madagascar",     for: "Wildstar · Nat Geo / Disney+",  role: "Focus Puller / Time-lapse / Drone", status: "Coming soon" },
-  { dates: "Sept – Oct 2024",         project: "Nightmares of Nature",      dest: "Costa Rica",              for: "Plimsoll · Netflix",            role: "1st AC",                          status: "Released" },
-  { dates: "Feb 2024",                project: "Sentient",                  dest: "Hallingskarvet, Norway",  for: "Wildstar · Nat Geo / Disney+",  role: "Cinematographer",                   status: "Coming soon" },
-  { dates: "Nov 2023",                project: "Human",                     dest: "New Mexico, USA & Peru",  for: "BBC",                           role: "1st AC / Drone Operator",         status: "Released" },
+  { dates: "Sept – Oct 2024",         project: "Nightmares of Nature",      dest: "Atlanta, USA",            for: "Plimsoll · Netflix",            role: "Focus Puller / AC",                          status: "Released" },
+  { dates: "Feb 2024",                project: "Sentient",                  dest: "Hallingskarvet, Norway",  for: "Wildstar · Nat Geo / Disney+",  role: "Second Camera",                   status: "Coming soon" },
+  { dates: "Nov 2023",                project: "Human",                     dest: "New Mexico, USA & Peru",  for: "BBC",                           role: "Second Camera / Drone Operator / AC",         status: "Released" },
   { dates: "Oct 2023",                project: "Sentient",                  dest: "Istanbul, Turkey",        for: "Wildstar · Nat Geo / Disney+",  role: "Second Camera / AC",                status: "Coming soon" },
   { dates: "Sept – Oct 2023",         project: "Sentient",                  dest: "Atlanta & Los Angeles, USA", for: "Wildstar · Nat Geo / Disney+", role: "Second Camera / Drone Operator", status: "Coming soon" },
-  { dates: "Aug 2023",                project: "Sentient",                  dest: "Buñol, Spain",            for: "Wildstar · Nat Geo / Disney+",  role: "Cinematographer",                   status: "Coming soon" },
+  { dates: "Aug 2023",                project: "Sentient",                  dest: "Buñol, Spain",            for: "Wildstar · Nat Geo / Disney+",  role: "Second Camera",                   status: "Coming soon" },
   { dates: "Jul 2023",                project: "Underdogs",                 dest: "Papua New Guinea",        for: "Wildstar · Nat Geo",            role: "Second Camera / AC",                status: "Released" },
-  { dates: "Jun 2023",                project: "Sentient",                  dest: "UK",                      for: "Wildstar · Nat Geo / Disney+",  role: "Cinematographer",                   status: "Coming soon" },
+  { dates: "Jun 2023",                project: "Sentient",                  dest: "UK",                      for: "Wildstar · Nat Geo / Disney+",  role: "Second Camera",                   status: "Coming soon" },
   { dates: "May 2023",                project: "Surviving Earth",           dest: "California & Utah, USA",  for: "Loud Minds · NBC / Peacock",    role: "Drone Operator / AC",               status: "Released" },
   { dates: "Apr 2023",                project: "Sentient",                  dest: "Delhi, India",            for: "Wildstar · Nat Geo / Disney+",  role: "Second Camera / AC",                status: "Coming soon" },
   { dates: "Apr 2023",                project: "Sentient",                  dest: "Chiang Mai, Thailand",    for: "Wildstar · Nat Geo / Disney+",  role: "Second Camera / AC",                status: "Coming soon" },
   { dates: "Jan – Feb 2023",          project: "Surviving Earth",           dest: "New Caledonia",           for: "Loud Minds · NBC / Peacock",    role: "Drone Operator / AC",               status: "Released" },
   { dates: "Oct 2022",                project: "Sentient",                  dest: "Kathmandu, Nepal",        for: "Wildstar · Nat Geo / Disney+",  role: "AC",                                status: "Coming soon" },
-  { dates: "Aug – Sept 2022",         project: "Sentient",                  dest: "High Andes, Peru",        for: "Wildstar · Nat Geo / Disney+",  role: "Cinematographer",                   status: "Coming soon" },
+  { dates: "Aug – Sept 2022",         project: "Sentient",                  dest: "High Andes, Peru",        for: "Wildstar · Nat Geo / Disney+",  role: "Second Camera",                   status: "Coming soon" },
   { dates: "Mar – Dec 2022",              project: "The Danube Delta",          dest: "Romania",                 for: "Razorbill Films · NHK",         role: "Shooting AP",                       status: "Released" },
   { dates: "Mar 2021 – Feb 2022",     project: "Fallow Deer",               dest: "United Kingdom",                       for: "Razorbill Films · NHK",         role: "Shooting AP",                       status: "Released" },
-  { dates: "Apr – Jul 2021",          project: "The Earthshot Prize",       dest: "London, UK",                       for: "Studio Silverback · BBC One",   role: "1st AC",                          status: "Released" }
+  { dates: "Apr – Jul 2021",          project: "The Earthshot Prize",       dest: "London, UK",                       for: "Studio Silverback · BBC One",   role: "AC",                          status: "Released" }
 ];
 
 /* ===================== FIELD MAP: WHERE EACH DESTINATION SITS =====================
@@ -636,7 +636,7 @@ const PLACES = {
   "Rio de Janeiro, Brazil":     [["Rio de Janeiro", "Brazil", -43.17, -22.91]],
   "Bristol, UK":                [["Bristol", "United Kingdom", -2.59, 51.45]],
   "Kirindy, Madagascar":        [["Kirindy", "Madagascar", 44.65, -20.07]],
-  "Costa Rica":                 [["Costa Rica", "Costa Rica", -84.0, 9.75]],
+  "Atlanta, USA":               [["Atlanta", "United States", -84.39, 33.75]],
   "Hallingskarvet, Norway":     [["Hallingskarvet", "Norway", 7.95, 60.62]],
   "New Mexico, USA & Peru":     [["New Mexico", "United States", -106.0, 34.5], ["Peru", "Peru", -75.0, -9.19]],
   "Istanbul, Turkey":           [["Istanbul", "Turkey", 28.98, 41.01]],
@@ -667,12 +667,12 @@ const CV_NOTES = {
   "Just a Fly": "Focus pulling for Ruben Woodin Dechamps on the short film ‘Just a Fly’, produced by Iian Mitchell. Just a Fly questions the sentience of flies — should they be treated any differently to any other being? Many of the interviews and scenes were shot as a fly POV. Kit included RED Raptor and specialist fisheye lenses: Century Optics (S16) 3.5mm, Laowa 8-15mm PL Fisheye & the Laowa Probe 24mm T14.",
   "Animal Oddballs — Seychelles": "Operating 2nd Unit, filming White Terns on an uninhabited island in the Seychelles for ‘Animal Oddballs’ with Ryan Reynolds. Filming the behaviour brought creative challenges, including high-speed ‘egg drops’ with a camera falling at the same pace as the eggs — a Raptor with a Probe2b, on an RS4 gimbal, on a Teris Mini Jib. The shoot also needed aerials (Inspire 3) and remote cameras (FR7s) mounted in trees to monitor nests. On the ground my unit shot polished slider shots of the nest locations and built a montage sequence using Disney’s ‘Up’ as a reference.",
   "Home: Asia": "Operating 2nd Unit alongside Pete Cayless, filming a sequence about dung beetles in Wadi Rum, Jordan for three weeks. With a combination of studio and location setups, we used RED Raptors, Phantom VEOs and a selection of specialist macro lenses and lighting to capture the story.",
-  "Wild London": "Wild London received 5-star reviews from the Guardian & Telegraph and was the BBC’s 4th most watched programme in January 2026 (6.6M), airing on BBC One on New Year’s Day 2026. The one-off show tells the stories of the wildlife that call London home. As principal camera I owned sequences such as Fallow Deer in East London, Pigeons on the Underground and Snakes along Regent’s Canal. I also helped film pieces to camera with David Attenborough, and played a part in filming the Peregrine Falcons, Hedgehogs, Field Mice, Honey Bees, Dragonflies & Beavers, as well as GVs across the city.",
+  "Wild London": "Wild London received 5-star reviews from the Guardian & Telegraph and was the BBC’s 4th most watched programme in January 2026 (6.6M), airing on BBC One on New Year’s Day 2026. The one-off show tells the stories of the wildlife that call London home. As a key cinematographer on the show, I shot sequences such as Fallow Deer in East London, Pigeons on the Underground and Snakes along Regent’s Canal. I also helped film pieces to camera with David Attenborough, and played a part in filming the Peregrine Falcons, Hedgehogs, Field Mice, Honey Bees, Dragonflies & Beavers, as well as GVs across the city.",
   "Animal Oddballs — Madagascar": "Drone operating, time-lapse and focus pulling for Simon De Glanville on the second block of the Madagascar Labord’s Chameleon sequence for Animal Oddballs. My time-lapses captured some crucial behaviour, including a male Labord’s death. Kit included DJI Inspire 3, 4-axis motion-control rig, Kessler Cine Shooter & Slider, Laowa Probe2Probe, Laowa Swords and Aputure lighting.",
   "Animal Oddballs — Rio de Janeiro, Brazil": "Focus pulling for Simon De Glanville on the second season of Underdogs with Ryan Reynolds: a macro sequence about Pumpkin Toadlets, filmed in a cloud forest above Rio de Janeiro, Brazil for four weeks. Kit included Sony Venice 2, Phantom VEO, 4-axis motion-control rig, Aputure lighting, Infini Probe, and the new Laowa Swords & Probe2Probe lenses.",
   "Nightmares of Nature — Bristol, UK": "Focus pulling for Simon De Glanville on block two of the macro Jumping Spider sequence for ‘Nightmares of Nature’ (ITV / Netflix). Kit included Sony Venice 2, Phantom VEO, 4-axis motion-control rig, Samsung Terrace, Aputure lighting, Infini Probe and Laowa Probe2Probe lenses.",
   "Animal Oddballs — Kirindy, Madagascar": "Drone operating, time-lapse and focus pulling for Simon De Glanville for the second season of Underdogs with Ryan Reynolds: a macro sequence following freshly hatched Labord’s Chameleons in Kirindy Forest Reserve, Madagascar. Kit included Sony Venice 2, Phantom VEO, DJI Inspire 3, 4-axis motion-control rig, Kessler Cine Shooter & Slider, Laowa Probe2Probe, Laowa Swords and Aputure lighting.",
-  "Nightmares of Nature — Costa Rica": "Focus pulling for Simon De Glanville on a number of Jumping Spider macro sequences set in Costa Rica. Kit included Sony Venice 2, Phantom VEO, 4-axis motion-control rig, Samsung Terrace, Aputure lighting, Infini Probe and the new Laowa Probe2Probe lenses.",
+  "Nightmares of Nature — Atlanta, USA": "Focus pulling for Simon De Glanville on a number of Jumping Spider macro sequences set in Costa Rica, filmed in Atlanta, USA. Kit included Sony Venice 2, Phantom VEO, 4-axis motion-control rig, Samsung Terrace, Aputure lighting, Infini Probe and the new Laowa Probe2Probe lenses.",
   "Sentient — Hallingskarvet, Norway": "Operating second camera alongside DOP Brendan McGinty and Director Luke Wiles, filming several snow scenes near Hallingskarvet National Park, Norway. Kit included 2x RED V Raptors, Ronin 4D, Sony FX3, Mavic 3 Cine & Canon CN20.",
   "Human": "Operating second camera and drones, and assisting DOP Tom Hayward and PD Andrew Thompson, on a new landmark presenter-led series for BBC Science on the evolution of humankind. The shoot began in New Mexico, USA, before heading south to Peru, into the Amazon rainforest and on to the Andes, to the first discovered city in the Americas. Kit included Sony Venice, FX6, A7SIII, Canon CN-E primes, TLS Morpheus zoom and my Mavic 3 Cine drone.",
   "Sentient — Istanbul, Turkey": "Operating second camera alongside DOP Brendan McGinty and Director Luke Wiles, filming whirling dervishes and several other street scenes around Istanbul, Turkey. Kit included RED V Raptor, Ronin 4D, Panasonic S1H, Angenieux EZs and various other cine primes.",
