@@ -177,7 +177,11 @@
   /* ---------- Bio: words light up as they pass; portrait drifts ---------- */
   const wordEls = [];
   $$('[data-words]').forEach(p => {
-    p.innerHTML = p.textContent.trim().split(/\s+/).map(w => `<span class="w">${esc(w)}</span>`).join(' ');
+    // each word becomes its own span; words inside <em> (show titles) stay in italics
+    p.innerHTML = [...p.childNodes].map(n => {
+      const it = n.nodeName === 'EM', tag = it ? 'em' : 'span';
+      return n.textContent.split(/(\s+)/).map(w => /^\s*$/.test(w) ? (w ? ' ' : '') : `<${tag} class="w">${esc(w)}</${tag}>`).join('');
+    }).join('').trim();
     wordEls.push(...$$('.w', p));
   });
   const photo = $('.bio .photo');
@@ -514,7 +518,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261015a';
+    const FMV = '20261016a';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();
@@ -797,6 +801,9 @@
     blkPos = blks.map(b => [b.offsetLeft, b.offsetWidth, +b.dataset.p]);
     // phones: the project title sits a fixed distance under the row, not against the (moving) bottom of the screen
     if (touchUI || innerWidth < 760) Object.assign(wt.style, { top: (top + H + (landPhone ? 10 : 22)) + 'px', bottom: 'auto' }); else wt.style.top = wt.style.bottom = '';
+    // 'Back to site' sits bottom right, level with the foot of the project title
+    // (phones: level with the small line above the title, so a long title can run underneath it)
+    if (backSite) { const wr = wt.getBoundingClientRect(); backSite.style.top = Math.round(innerWidth < 760 ? wr.top - 5 : wr.bottom - backSite.offsetHeight - 8) + 'px'; }
     frame();
   };
 
@@ -820,7 +827,7 @@
     }
     return { x: side, y: (i % 2 ? -1 : 1) * lift, r: tilt, s: 0.25 };
   });
-  const wt = $('.wk-title'), wtG = $('#wtG'), wtN = $('#wtN');
+  const wt = $('.wk-title'), wtG = $('#wtG'), wtN = $('#wtN'), backSite = $('#backSite');
   let curP = -1;
   const swap = (box, text) => {
     const old = $('span:not(.out)', box); if (old && old.textContent === text) return;
@@ -857,7 +864,7 @@
     const x = Math.round(-pan * panMax * 2) / 2;
     if (x !== lastX) { row.style.transform = `translate3d(${x}px,0,0)`; lastX = x; }
     inStage = r.top < VH * 0.5 && r.bottom > VH * 0.7;
-    const op = inStage ? '1' : '0'; if (wt.style.opacity !== op) wt.style.opacity = op;
+    const op = inStage ? '1' : '0'; if (wt.style.opacity !== op) { wt.style.opacity = op; if (backSite) backSite.classList.toggle('on', inStage); }
     // title = the project taking up most of the screen (worked out from the stored block positions, no measuring)
     const cover = projects.map(() => 0);
     blkPos.forEach(([l, w, pi]) => { const L = l + x; cover[pi] += Math.max(0, Math.min(L + w, innerWidth) - Math.max(L, 0)); });
@@ -893,10 +900,17 @@
     if (it.dataset.cut) {
       const cut = +it.dataset.cut;
       // (a play-once film simply finishes there on the page, as if the file ended)
-      const watch = () => { if (v.currentTime >= cut - 0.03) { if (it.hasAttribute('data-once')) { v.pause(); finish(); return; } v.currentTime = 0; } if (!v.paused) v.requestVideoFrameCallback ? v.requestVideoFrameCallback(watch) : requestAnimationFrame(watch); };
-      v.addEventListener('play', watch);
+      it._cutCheck = () => { if (v.currentTime >= cut - 0.04) { if (it.hasAttribute('data-once')) { v.pause(); finish(); return true; } v.currentTime = 0; } return false; };
+      // checked on every frame while it plays; phones can drop that chain (e.g. behind the full-screen viewer),
+      // so it is also checked on timeupdate and by a steady timer below, and restarted whenever play resumes
+      let chain = false;
+      const watch = () => { chain = false; if (it._cutCheck()) return; if (!v.paused && !chain) { chain = true; v.requestVideoFrameCallback ? v.requestVideoFrameCallback(watch) : requestAnimationFrame(watch); } };
+      ['play', 'playing', 'seeked'].forEach(ev => v.addEventListener(ev, () => { if (!chain) watch(); }));
+      v.addEventListener('timeupdate', () => it._cutCheck());
     }
   });
+  const cutClips = vids.filter(it => it._cutCheck);
+  if (cutClips.length) setInterval(() => cutClips.forEach(it => { if (!$('video', it).paused) it._cutCheck(); }), 90);
   // play-once films (with sound) take turns: one waits until the one playing has finished or left the screen
   const otherPlaying = it => vids.concat(vims).some(x => x !== it && x._state === 'playing' && x.hasAttribute('data-once'));
   function videoCheck() {
@@ -1057,7 +1071,7 @@
     at.then(t => { if (it._p && t) it._p.setCurrentTime(t).catch(() => {}); }).catch(() => {});
     vlb.classList.remove('open'); document.body.classList.remove('lb-open');
     setTimeout(() => { if (!lbOpenVim) { if (vP) vP.destroy().catch(() => {}); vP = null; vF.innerHTML = ''; } }, 400);
-    resume.forEach(x => $('video', x).play().catch(() => {})); resume = [];
+    resume.forEach(x => { if (x._cutCheck) x._cutCheck(); $('video', x).play().catch(() => {}); }); resume = [];
     vFocus?.focus?.({ preventScroll: true }); videoCheck();
   };
   vPlay.onclick = () => vP && vP.getPaused().then(pz => pz ? vP.play() : vP.pause());
@@ -1118,7 +1132,8 @@
     if (!lb.classList.contains('open')) return;
     lv.pause(); lb.classList.remove('open'); document.body.classList.remove('lb-open');
     setTimeout(() => { if (!lb.classList.contains('open')) lv.removeAttribute('src'); }, 400);
-    resume.forEach(x => $('video', x).play().catch(() => {})); resume = [];
+    resume.forEach(x => { if (x._cutCheck) x._cutCheck(); $('video', x).play().catch(() => {}); }); resume = [];
+    vids.forEach(x => { if (x._cutCheck) x._cutCheck(); });
     if (lastFocus) lastFocus.focus?.();
   };
   $('.lb-x', lb).onclick = closeLB;

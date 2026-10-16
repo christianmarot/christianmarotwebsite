@@ -633,13 +633,23 @@ footer{padding-top:100px}
   .wkp .wk-title .g{font-size:9.5px}
   .wkp .wk-title .n{margin-top:3px;font-size:28px}
 }
-/* other-work pages: a quick way back to the home page */
-.hdr-r{justify-self:end;display:flex;align-items:center;gap:32px}
-.back-site{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 14px;border-radius:999px;border:1px solid rgba(255,255,255,.6);font-size:var(--caps);letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;transition:background .3s}
-.back-site:hover{background:rgba(255,255,255,.12)}
-@media (max-width:760px){.back-site{height:32px;padding:0 12px;font-size:10px;letter-spacing:.14em}}
-/* films in the row: the player overlaps its frame a hair, so no sliver of the holding image shows at an edge */
-.it.vm{overflow:hidden}
-.vm-f iframe{inset:-2px;width:calc(100% + 4px);height:calc(100% + 4px)}
-@media (max-width:1100px){.hdr-r .socials{display:none}}
-.logos img{filter:brightness(1.5)}
+/* other-work pages: a quick way back to the home page, bottom right once you're in the projects */
+.back-site{position:fixed;right:var(--gut);z-index:31;display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 15px;border-radius:999px;border:1px solid rgba(238,235,228,.45);background:rgba(13,15,14,.45);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:var(--paper);font-size:var(--caps);letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .4s,background .3s,border-color .3s}
+.back-site.on{opacity:1;pointer-events:auto}
+.back-site:hover{background:rgba(238,235,228,.1);border-color:var(--paper)}
+@media (max-width:760px){.back-site{height:24px;padding:0 10px;gap:6px;font-size:9.5px;letter-spacing:.14em}}
+/* worked-for logos: the same soft brightness as the skills line above them */
+.logos img{opacity:.66}
+.logos .lg-silverback img{filter:brightness(1.6)}
+/* phones: the five biggest names form a diamond with the BBC at its heart; the rest sit below */
+@media (max-width:700px){
+  .logos .row{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 0;justify-items:center}
+  .logos .lg{width:100%}
+  .lg-netflix{grid-area:1/2}.lg-natgeo{grid-area:2/1}.lg-bbc{grid-area:2/2}.lg-appletv{grid-area:2/3}.lg-disney{grid-area:3/2}
+  .logos .lg-bbc img{max-height:38px}
+  .lg-wildstar{grid-area:4/1}.lg-nbc{grid-area:4/2}.lg-pbs{grid-area:4/3}
+  .lg-nhk{grid-area:5/1}.lg-blumhouse{grid-area:5/2}.lg-plimsoll{grid-area:5/3}.lg-silverback{grid-area:6/2}
+  .lg-wildstar,.lg-nbc,.lg-pbs{margin-top:34px}
+  .lg-wildstar img,.lg-nbc img,.lg-pbs img,.lg-nhk img,.lg-blumhouse img,.lg-plimsoll img,.lg-silverback img{max-height:22px!important;opacity:.5}
+}
+@media (max-width:700px){.logos .lg-disney img{max-height:40px}.logos .lg-netflix img,.logos .lg-natgeo img,.logos .lg-appletv img{max-height:30px}}

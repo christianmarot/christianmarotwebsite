@@ -58,9 +58,30 @@ const makeSky = (canvas, satSrc) => {
     vec2 sfc = fc - (dd > .5 ? dv/dd : vec2(0.)) * uPush*mn*.55*exp(-dd/(mn*.5));
     // local gust around the breath, plus an overall clearing that builds while someone keeps blowing
     float gust = uPush*.6*exp(-dd/(mn*.34)) + uWind*.07 + uClear*(.75 + .5*smoothstep(0., mn*.9, mn*.9-dd));
+    // ---- the cloud bank you fly through. Computed first: where it is solid white the globe behind can't be
+    //      seen, so that part is skipped (the picture is the same, the phone does far less work)
+    float da = 0.; vec3 dcc = vec3(0.);
+    if (uDive > .001) {
+      vec2 q = (sfc-uRes*.5)/mn;
+      float sc = mix(1.9, .32, uDiveZ);
+      vec3 p2 = vec3(q*sc, uDiveZ*1.6 + uTime*.015);
+      vec3 w = vec3(fbm(p2+vec3(3.1,1.7,0.),3), fbm(p2+vec3(7.3,2.9,4.),3), 0.)-.5;
+      vec3 pp = p2 + w*.32;
+      float d  = fbm(pp, 7);
+      float rr = length(q*vec2(.85,1.)) + (fbm(p2*1.3+9.,3)-.5)*.7;   // ragged, not round
+      float hole = uPart*1.5;
+      float th = mix(1.0, -.25, uDive) + smoothstep(hole, hole-.8, rr)*1.4*step(.001,uPart) + gust*1.5 + uClear*.9;
+      da = smoothstep(th, th+.22, d);
+      if (da > 0.) {
+        float dl = fbm(pp+vec3(-.05,.06,0.), 4);
+        float light = clamp(.64 + (d-dl)*6., 0., 1.);
+        dcc = mix(vec3(.62,.66,.70), vec3(1.,.995,.985), light);
+        dcc = mix(dcc, vec3(.95,.955,.95), smoothstep(.6,1.,uDive)*(1.-uPart)*.7);
+      }
+    }
     vec2 v = (fc-uGlobe.xy)/uGlobe.z; v.y = -v.y;
     float r2 = dot(v,v);
-    if (r2 < 1. && (uSat > .001 || uCloud > .001)) {
+    if (r2 < 1. && da < .998 && (uSat > .001 || uCloud > .001)) {
       float z = sqrt(1.-r2), sl = sin(uCam.y), cl = cos(uCam.y);
       float lat = asin(clamp(v.y*cl+z*sl,-1.,1.));
       float lon = uCam.x + atan(v.x, z*cl-v.y*sl);
@@ -89,11 +110,11 @@ const makeSky = (canvas, satSrc) => {
         float big = fbm(wp*.85 + drift*.5 + vec3(11.,4.,7.), 3);
         float d  = cloudD(p, 6)*.72 + big*.38 + .012;
         vec3 sun = vec3(-.035, .045, .03);
-        float dl = fbm(p+sun, 4)*.72 + big*.38 + .012;
-        float ds = fbm(p+sun*3.2, 4)*.72 + big*.38 + .012;
         float th = uCover + gust;
         float c  = smoothstep(th, th+.24, d);
+        float ds = c < 1. ? fbm(p+sun*3.2, 4)*.72 + big*.38 + .012 : 0.;   // (only needed where some ground shows)
         float shadow = smoothstep(th, th+.28, ds) * (1.-c);
+        float dl = c > 0. ? fbm(p+sun, 4)*.72 + big*.38 + .012 : d;        // (only needed where there is cloud)
         float light = clamp(.62 + (d-dl)*5.2, 0., 1.);
         float thick = smoothstep(th, th+.45, d);
         vec3 cc = mix(vec3(.56,.60,.65), vec3(1.,.995,.985), light) * mix(.92, 1.03, thick);
@@ -104,24 +125,8 @@ const makeSky = (canvas, satSrc) => {
         col = vec4(cc*ca, ca) + col*(1.-ca);
       }
     }
-    // ---- the cloud bank you fly through
-    if (uDive > .001) {
-      vec2 q = (sfc-uRes*.5)/mn;
-      float sc = mix(1.9, .32, uDiveZ);
-      vec3 p2 = vec3(q*sc, uDiveZ*1.6 + uTime*.015);
-      vec3 w = vec3(fbm(p2+vec3(3.1,1.7,0.),3), fbm(p2+vec3(7.3,2.9,4.),3), 0.)-.5;
-      vec3 pp = p2 + w*.32;
-      float d  = fbm(pp, 7);
-      float dl = fbm(pp+vec3(-.05,.06,0.), 4);
-      float rr = length(q*vec2(.85,1.)) + (fbm(p2*1.3+9.,3)-.5)*.7;   // ragged, not round
-      float hole = uPart*1.5;
-      float th = mix(1.0, -.25, uDive) + smoothstep(hole, hole-.8, rr)*1.4*step(.001,uPart) + gust*1.5 + uClear*.9;
-      float a = smoothstep(th, th+.22, d);
-      float light = clamp(.64 + (d-dl)*6., 0., 1.);
-      vec3 cc = mix(vec3(.62,.66,.70), vec3(1.,.995,.985), light);
-      cc = mix(cc, vec3(.95,.955,.95), smoothstep(.6,1.,uDive)*(1.-uPart)*.7);
-      col = vec4(cc*a, a) + col*(1.-a);
-    }
+    // ---- the cloud bank you fly through (worked out above), laid over the globe
+    col = vec4(dcc*da, da) + col*(1.-da);
     o = col;
   }`;
   const sh = (t, s) => { const x = gl.createShader(t); gl.shaderSource(x, s); gl.compileShader(x); if (!gl.getShaderParameter(x, gl.COMPILE_STATUS)) { console.warn(gl.getShaderInfoLog(x)); return null; } return x; };

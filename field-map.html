@@ -144,7 +144,7 @@ a{color:inherit}
 .chip .dot{width:7px;height:7px;border-radius:50%;background:currentColor}
 .chip .c{font-family:var(--mono);color:var(--dim)}
 .zoom{right:var(--gut);bottom:clamp(28px,7vh,80px);display:flex;flex-direction:column;gap:8px}
-.viewsw{right:calc(var(--gut) + 60px);bottom:clamp(28px,7vh,80px);display:flex;align-items:center;gap:10px;height:44px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:rgba(7,8,8,.6);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+.viewsw{display:none!important;right:calc(var(--gut) + 60px);bottom:clamp(28px,7vh,80px);display:flex;align-items:center;gap:10px;height:44px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:rgba(7,8,8,.6);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
 .viewsw span{cursor:pointer;transition:color .25s}.viewsw span.on{color:var(--paper)}
 .viewsw button{position:relative;width:40px;height:22px;border-radius:999px;border:1px solid rgba(238,235,228,.4);background:rgba(238,235,228,.06)}
 .viewsw button i{position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--paper);transition:transform .3s cubic-bezier(.3,.7,.2,1)}
@@ -238,17 +238,23 @@ a{color:inherit}
 }
 .listbtn{display:none}
 @media (max-width:900px){.listbtn{display:inline-flex}}
-/* the scroll prompts: easy to see, so nobody tries to zoom the globe before the explore view */
-.hint{font-size:12px;letter-spacing:.18em;color:var(--paper);height:44px;padding:0 16px;border-radius:999px;border:1px solid rgba(238,235,228,.22);background:rgba(7,8,8,.35);gap:8px}
-.hint b{font-weight:500}
-.chev{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;animation:chev 1.6s ease-in-out infinite}
-@keyframes chev{0%,100%{transform:translateY(-2px);opacity:.55}50%{transform:translateY(3px);opacity:1}}
-.intro.nudged .hint{border-color:var(--flap);color:var(--flap);animation:nudge .45s ease-in-out 3}
-@keyframes nudge{50%{transform:translateY(4px)}}
-.nudge{left:50%;bottom:calc(clamp(22px,4vh,40px) + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:999px;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--paper);background:rgba(7,8,8,.55);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(238,235,228,.25);pointer-events:none;white-space:nowrap}
-.nudge.off{transform:translate(-50%,12px)}
-.nudge.flash{border-color:var(--flap);color:var(--flap)}
-@media (prefers-reduced-motion:reduce){.chev{animation:none}.ov{transition:none}}
+/* the scroll prompts: the slim line symbol, in the same type as the site's buttons and small headings */
+.hint,.nudge,.draghint,.dive .dh{font-family:var(--sans);font-size:var(--caps);letter-spacing:.18em;text-transform:uppercase}
+.hint{color:var(--paper)}
+.hint i{background:linear-gradient(var(--paper),transparent)}
+.intro.nudged .hint{color:var(--flap)}
+.intro.nudged .hint i{background:linear-gradient(var(--flap),transparent)}
+.nudge{left:0;right:0;margin:0 auto;width:max-content;bottom:calc(clamp(22px,4vh,40px) + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:10px;color:var(--paper);pointer-events:none;white-space:nowrap;text-shadow:0 1px 10px rgba(0,0,0,.7)}
+.nudge i,.draghint i{display:block;width:1px;height:28px;background:linear-gradient(var(--paper),transparent);animation:drip 2.2s ease-in-out infinite}
+.nudge.flash{color:var(--flap)}.nudge.flash i{background:linear-gradient(var(--flap),transparent)}
+/* explore: a short-lived hint that the globe can be dragged */
+.draghint{left:0;right:0;top:0;bottom:0;margin:auto;width:max-content;height:max-content;display:flex;flex-direction:column;align-items:center;gap:12px;color:var(--paper);pointer-events:none;text-shadow:0 1px 12px rgba(0,0,0,.8);transition:opacity .9s ease,transform .9s ease}
+.dh-ic{display:flex;align-items:center;justify-content:center;width:84px;height:84px;border-radius:50%;background:rgba(7,8,8,.42);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid rgba(238,235,228,.28)}
+.dh-ic svg{width:54px;height:27px;overflow:visible}
+.dh-ar{fill:none;stroke:rgba(238,235,228,.55);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.dh-dot{fill:var(--paper);animation:dhswipe 1.8s cubic-bezier(.45,0,.55,1) infinite}
+@keyframes dhswipe{0%,100%{transform:translateX(-14px)}50%{transform:translateX(14px)}}
+@media (prefers-reduced-motion:reduce){.nudge i,.draghint i,.dh-dot{animation:none}.ov{transition:none}}
 /* filters stay on one line: a little more room for them, and on phones they scroll sideways */
 .xp-top{max-width:min(700px,calc(100vw - 2*var(--gut) - 340px))}
 .chips{flex-wrap:nowrap;gap:6px}
@@ -259,6 +265,18 @@ a{color:inherit}
   .chips::-webkit-scrollbar{display:none}
   .chip{height:28px;padding:0 6px;font-size:9px;letter-spacing:.03em;gap:4px}
   .chip .dot{width:5px;height:5px}
+}
+/* phones: shoots / countries / distance sit in the open space under the globe (back up top during the replay,
+   where the journey card takes the bottom); 'blow the clouds away' sits centred on the bottom line; 'play the
+   journey' joins the locations button on one line */
+@media (max-width:760px){
+  .stats{top:auto;bottom:calc(22px + env(safe-area-inset-bottom,0px))}
+  .stage.jr .stats{top:calc(142px + env(safe-area-inset-top,0px));bottom:auto}
+  .nudge{bottom:calc(98px + env(safe-area-inset-bottom,0px))}
+  .blow{left:0;right:0;margin:0 auto;width:max-content;max-width:calc(100vw - 2*var(--gut) - 120px);bottom:20px}
+  .xp-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .xp-row .playj{position:static;height:34px;padding:0 12px;font-size:10px}
+  .xp-row .playj.off{transform:none}
 }
 </style>
 
@@ -285,9 +303,10 @@ a{color:inherit}
         <div class="eyebrow">Credits board · <span id="nRange">Mar 2021 – Oct 2026</span></div>
         <h1><span id="nShoots">39</span> shoots,<br><em><span id="nCountries">21</span> countries</em>,<br>one small planet.</h1>
         <p>Scroll to visualise five years of shoots out of London, then drop through the clouds and explore.</p>
-        <div class="cta"><button class="btn" type="button" data-go="3">Skip animation &amp; explore</button><span class="hint"><b>Scroll down to begin</b><svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 5.5l5 5 5-5"/></svg></span></div>
+        <div class="cta"><button class="btn" type="button" data-go="3">Skip animation &amp; explore</button><span class="hint"><i></i>Scroll</span></div>
       </div>
-      <div class="ov nudge off" id="nudge" aria-hidden="true"><span id="nudgeT">Keep scrolling</span><svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 5.5l5 5 5-5"/></svg></div>
+      <div class="ov nudge off" id="nudge" aria-hidden="true"><i></i><span>Keep scrolling</span></div>
+      <div class="ov draghint off" id="dragHint" aria-hidden="true"><span class="dh-ic"><svg viewBox="0 0 64 32"><path class="dh-ar" d="M6 16h52M6 16l7-6M6 16l7 6M58 16l-7-6M58 16l-7 6"/><circle class="dh-dot" cx="32" cy="16" r="7"/></svg></span><span>Drag to explore</span></div>
 
       <div class="ov timeline off" id="timeline" role="slider" tabindex="0" aria-label="Timeline: drag to move through the shoots" aria-valuemin="1" aria-valuemax="39" aria-valuenow="1"><div class="ln"></div></div>
       <div class="ov rpctl off" id="rpCtl" role="group" aria-label="Journey replay">
@@ -318,7 +337,7 @@ a{color:inherit}
         <div class="eyebrow">Explore · drag the globe, tap a pin</div>
         <h2>Explore the field map</h2>
         <div class="chips" id="chips" role="group" aria-label="Filter by status"></div>
-        <div><button class="btn listbtn" type="button" id="listBtn" aria-expanded="false">All locations</button></div>
+        <div class="xp-row"><button class="btn listbtn" type="button" id="listBtn" aria-expanded="false">Locations list</button></div>
       </div>
       <div class="ov index off" id="index"><div class="hd"><span>Locations</span><span id="locCount"></span></div><ul id="locList"></ul></div>
       <div class="ov viewsw off viewtog" id="viewsw"><span id="vSatL">Satellite</span><button type="button" role="switch" aria-checked="false" aria-label="Graphic map" id="vSw"><i></i></button><span id="vLineL">Graphic</span></div>
@@ -350,12 +369,12 @@ a{color:inherit}
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
-<script src="data.js?v=20261015a"></script>
-<script src="fieldmap/geo.js?v=20261015a"></script>
-<script src="fieldmap/geo50.js?v=20261015a"></script>
-<script src="fieldmap/earth.js?v=20261015a"></script>
-<script src="fieldmap/sky.js?v=20261015a"></script>
-<script src="fieldmap/map.js?v=20261015a"></script>
+<script src="data.js?v=20261016a"></script>
+<script src="fieldmap/geo.js?v=20261016a"></script>
+<script src="fieldmap/geo50.js?v=20261016a"></script>
+<script src="fieldmap/earth.js?v=20261016a"></script>
+<script src="fieldmap/sky.js?v=20261016a"></script>
+<script src="fieldmap/map.js?v=20261016a"></script>
 
 </body>
 </html>

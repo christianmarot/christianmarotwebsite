@@ -73,7 +73,7 @@ const DOCUMENTARIES = [
     description: "Prince William’s star-studded awards ceremony honours five environmental solutions with £1 million each to further their work helping to restore and protect our planet. The broadcast spotlighted fifteen incredible global finalists across five distinct categories — including protecting nature, cleaning our air, reviving oceans, building a waste-free world, and fixing our climate. Interspersed with these inspiring documentary-style profiles, the programme features a special address from Sir David Attenborough alongside world-class musical performances by Billie Eilish, Annie Lennox & Ellie Goulding."
   },
   {
-    title: "Dinner to Save the World", for: "PBS", role: "Second Camera / Focus Puller", date: "2026",
+    title: "Dinner to Save the World", for: "PBS", role: "Second Camera / Focus Puller", date: "Coming Soon",
     image: "images/dinner-to-save-the-world.jpg",
     description: "Dinner to Save the World (PBS), presented by M. Sanjayan and Sam Kass, looks at how the global food industry contributes to climate change — and how changing the way we farm, process and eat food can help build a more sustainable future."
   }

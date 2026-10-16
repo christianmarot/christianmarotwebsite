@@ -186,6 +186,7 @@
     $('#tip').hidden = true;
   };
   playJ.addEventListener('click', startReplay);
+  if (mobile) { const xr = $('.xp-row'); if (xr) xr.appendChild(playJ); }   // phones: on one line with the locations button
   rpPlay.addEventListener('click', () => {
     if (replay.t >= N) { replay.from = { lon: cam.lon, lat: cam.lat, k: cam.k }; replay.t = 0; replay.paused = false; cardIdx = -1; } else replay.paused = !replay.paused;
     setRpBtn();
@@ -194,8 +195,8 @@
   addEventListener('keydown', e => { if (e.key === 'Escape' && replay.on) endReplay(); });
 
   /* ================= HUD ================= */
-  let autoOpened = false, xSince = 0;
-  const ov = { nudge: $('#nudge'), intro: $('#intro'), tl: $('#timeline'), card: $('#card'), stats: $('#stats'), dive: $('#dive'), xp: $('#xpTop'), idx: $('#index'), zoom: $('#zoom') };
+  let xSince = 0, hintAt = 0, hintDone = false;
+  const ov = { drag: $('#dragHint'), nudge: $('#nudge'), intro: $('#intro'), tl: $('#timeline'), card: $('#card'), stats: $('#stats'), dive: $('#dive'), xp: $('#xpTop'), idx: $('#index'), zoom: $('#zoom') };
   const show = (el, on) => el.classList.toggle('off', !on);
   // timeline ticks
   { const tl = ov.tl; let lastY = '';
@@ -258,7 +259,7 @@
   $('#chips').addEventListener('click', e => { const b = e.target.closest('.chip'); if (!b) return; filter = b.dataset.f; applyFilter(); if (openPin && !pinOn(openPin)) closePop(); });
   $('#locList').addEventListener('click', e => { const li = e.target.closest('li'); if (!li) return; const p = pinMap.get(li.dataset.k); openPop(p); if (mobile) toggleList(false); });
   const listBtn = $('#listBtn');
-  const toggleList = o => { ov.idx.classList.toggle('open', o); listBtn.setAttribute('aria-expanded', o); listBtn.textContent = o ? 'Hide locations' : 'All locations'; };
+  const toggleList = o => { ov.idx.classList.toggle('open', o); listBtn.setAttribute('aria-expanded', o); listBtn.textContent = o ? 'Hide locations' : 'Locations list'; };
   listBtn.addEventListener('click', () => toggleList(!ov.idx.classList.contains('open')));
 
   // pin popover
@@ -528,9 +529,6 @@
         label(s.x, s.y, p.name.toUpperCase(), mode === 'x' ? `${p.rows.length} SHOOT${p.rows.length > 1 ? 'S' : ''}` : null, col, right);
       }
     });
-    // home marker
-    const h = screen(home.lon, home.lat);
-    if (h.z > .05) { octx.globalAlpha = smooth(.05, .25, h.z); octx.strokeStyle = '#eeebe4'; octx.lineWidth = 1.2; octx.strokeRect(h.x - 4.5, h.y - 4.5, 9, 9); octx.globalAlpha = 1; }
   };
   const drawDive = c => {
     if (c <= 0 || c >= 1) return;
@@ -563,7 +561,7 @@
     if (!running) return;
     const dt = Math.min(.05, (now - last) / 1000); last = now;
     // keep it smooth: if frames run long while the clouds are busy, render the cloud layer at a lower resolution
-    if (sky && !STILL) { perf.ema = lerp(perf.ema, dt, .05); if (++perf.n > 90) { perf.n = 0; if (perf.ema > .026 && GLS > .55) { GLS *= .85; glc.width = Math.round(W * GLS); glc.height = Math.round(H * GLS); } else if (perf.ema < .0175 && GLS < perf.max) { GLS = Math.min(perf.max, GLS * 1.08); glc.width = Math.round(W * GLS); glc.height = Math.round(H * GLS); } } }
+    if (sky && !STILL) { perf.ema = lerp(perf.ema, dt, .08); if (++perf.n > 40) { perf.n = 0; if (perf.ema > .026 && GLS > .55) { GLS *= .85; glc.width = Math.round(W * GLS); glc.height = Math.round(H * GLS); } else if (perf.ema < .0175 && GLS < perf.max) { GLS = Math.min(perf.max, GLS * 1.08); glc.width = Math.round(W * GLS); glc.height = Math.round(H * GLS); } } }
     const p = progress;
     // ---- layout of the globe on screen for each chapter
     const base = mobile ? Math.min(W * .47, H * .3) : Math.min(W, H) * .39;
@@ -681,11 +679,18 @@
     const nudging = now < nudgeUntil;
     show(ov.nudge, mode === 'b' || (mode === 'c' && dive < .34) || (nudging && mode !== 'a' && mode !== 'x' && !(mode === 'c' && dive > .5 && dive < .7)));
     ov.nudge.classList.toggle('flash', nudging);
-    // explore: open the most recent shoot straight away, so it's clear the pins can be tapped
-    if (mode === 'x' && !jr) { if (!autoOpened && now - (xSince || (xSince = now)) > 900) { autoOpened = true; if (!openPin) { const lp = pins.find(q => q.rows.includes(ROWS[0])) || sortedPins[0]; if (lp) openPop(lp); } } }
-    else if (mode !== 'x') { xSince = 0; if (p < C1 - .03) autoOpened = false; }
+    // explore: a 'drag to explore' hint appears for a few seconds on arrival, then fades away
+    if (mode === 'x' && !jr) {
+      if (!xSince) xSince = now;
+      if (dragging && hintAt) hintDone = true;                       // they've got it
+      const want = !hintDone && now - xSince > 700 && !openPin && (!hintAt || now - hintAt < 3400);   // on screen for about three seconds
+      if (want && !hintAt) hintAt = now;
+      if (!want && hintAt) hintDone = true;
+      show(ov.drag, want);
+    } else { show(ov.drag, false); if (p < C1 - .03) { xSince = 0; hintAt = 0; hintDone = false; } }
+    stage.classList.toggle('jr', jr);
     $('#diveHint').textContent = wind.mic ? 'Blow to break through, or keep scrolling' : 'Press and hold, blow into your mic, or keep scrolling';
-    const xu = mode === 'x' && !jr; show(ov.xp, xu); show(ov.zoom, xu); show($('#viewsw'), xu); show(ov.idx, xu); show(playJ, xu);
+    const xu = mode === 'x' && !jr; show(ov.xp, xu); show(ov.zoom, xu); show(ov.idx, xu); show(playJ, xu);
     $$('.rail button').forEach((b, i) => b.classList.toggle('on', i === ({ a: 0, b: 1, c: 2, x: 3 })[mode]));
     show($('.rail'), mode !== 'x');
     show(blowBtn, blowable);
