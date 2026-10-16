@@ -518,7 +518,7 @@
   /* ---------- Field Map: load the turning globe only as its section comes near ---------- */
   const fmBox = $('#fmGlobe');
   if (fmBox) {
-    const FMV = '20261016a';
+    const FMV = '20261016b';
     const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
     const lo = new IntersectionObserver(async es => {
       if (!es[0].isIntersecting) return; lo.disconnect();
@@ -802,8 +802,8 @@
     // phones: the project title sits a fixed distance under the row, not against the (moving) bottom of the screen
     if (touchUI || innerWidth < 760) Object.assign(wt.style, { top: (top + H + (landPhone ? 10 : 22)) + 'px', bottom: 'auto' }); else wt.style.top = wt.style.bottom = '';
     // 'Back to site' sits bottom right, level with the foot of the project title
-    // (phones: level with the small line above the title, so a long title can run underneath it)
-    if (backSite) { const wr = wt.getBoundingClientRect(); backSite.style.top = Math.round(innerWidth < 760 ? wr.top - 5 : wr.bottom - backSite.offsetHeight - 8) + 'px'; }
+    // (phones: in the empty space just under the title, on the right, so it never meets a long title)
+    if (backSite) { const wr = wt.getBoundingClientRect(); backSite.style.top = Math.round(innerWidth < 760 ? Math.min(wr.bottom + 12, VH - backSite.offsetHeight - 10) : wr.bottom - backSite.offsetHeight - 8) + 'px'; }
     frame();
   };
 
