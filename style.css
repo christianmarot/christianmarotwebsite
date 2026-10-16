@@ -641,15 +641,13 @@ footer{padding-top:100px}
 /* worked-for logos: the same soft brightness as the skills line above them */
 .logos img{opacity:.66}
 .logos .lg-silverback img{filter:brightness(1.6)}
-/* phones: the five biggest names form a diamond with the BBC at its heart; the rest sit below */
+/* phones: the five biggest names form a diamond in the middle of the grid (BBC at its heart),
+   with the others around it — all the same size and brightness */
 @media (max-width:700px){
-  .logos .row{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 0;justify-items:center}
+  .logos .row{display:grid;grid-template-columns:repeat(3,1fr);gap:26px 0;justify-items:center}
   .logos .lg{width:100%}
-  .lg-netflix{grid-area:1/2}.lg-natgeo{grid-area:2/1}.lg-bbc{grid-area:2/2}.lg-appletv{grid-area:2/3}.lg-disney{grid-area:3/2}
-  .logos .lg-bbc img{max-height:38px}
-  .lg-wildstar{grid-area:4/1}.lg-nbc{grid-area:4/2}.lg-pbs{grid-area:4/3}
-  .lg-nhk{grid-area:5/1}.lg-blumhouse{grid-area:5/2}.lg-plimsoll{grid-area:5/3}.lg-silverback{grid-area:6/2}
-  .lg-wildstar,.lg-nbc,.lg-pbs{margin-top:34px}
-  .lg-wildstar img,.lg-nbc img,.lg-pbs img,.lg-nhk img,.lg-blumhouse img,.lg-plimsoll img,.lg-silverback img{max-height:22px!important;opacity:.5}
+  .lg-wildstar{grid-area:1/1}.lg-netflix{grid-area:1/2}.lg-nbc{grid-area:1/3}
+  .lg-natgeo{grid-area:2/1}.lg-bbc{grid-area:2/2}.lg-appletv{grid-area:2/3}
+  .lg-pbs{grid-area:3/1}.lg-disney{grid-area:3/2}.lg-nhk{grid-area:3/3}
+  .lg-blumhouse{grid-area:4/1}.lg-plimsoll{grid-area:4/2}.lg-silverback{grid-area:4/3}
 }
-@media (max-width:700px){.logos .lg-disney img{max-height:40px}.logos .lg-netflix img,.logos .lg-natgeo img,.logos .lg-appletv img{max-height:30px}}
